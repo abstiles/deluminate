@@ -1,0 +1,25 @@
+{
+   "background": {
+      "scripts": [ "common.js", "background.js" ]
+   },
+   "browser_action": {
+      "default_icon": "deluminate-128.png",
+      "default_popup": "popup.html",
+      "default_title": "Deluminate (Shift+F11)"
+   },
+   "content_scripts": [ {
+      "all_frames": true,
+      "css": [ "deluminate.css" ],
+      "js": [ "deluminate.js" ],
+      "matches": [ "\u003Call_urls\u003E" ],
+      "run_at": "document_start"
+   } ],
+   "description": "Invert the luminance of a website to make it easier on the eyes.",
+   "icons": {
+      "128": "deluminate-128.png"
+   },
+   "name": "Deluminate",
+   "manifest_version": 2,
+   "permissions": [ "\u003Call_urls\u003E", "tabs" ],
+   "version": "0.1.0"
+}
