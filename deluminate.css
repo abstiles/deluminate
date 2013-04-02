@@ -1,12 +1,12 @@
 html[hc="delumine"] {
   -webkit-filter: invert() hue-rotate(180deg) brightness(5%) contrast(105%);
 }
-html[hc="delumine"] img[src*="jpg"],
-html[hc="delumine"] img[src*="jpeg"],
-html[hc="delumine"] div[class*="portrait"] img,
-html[hc="delumine"] img.rg_i,
-html[hc="delumine"] embed,
-html[hc="delumine"] object,
-html[hc="delumine"] video {
+html[hc*="delumine"] img[src*="jpg"],
+html[hc*="delumine"] img[src*="jpeg"],
+html[hc*="delumine"] div[class*="portrait"] img,
+html[hc*="delumine"] img.rg_i,
+html[hc*="delumine"] embed,
+html[hc*="delumine"] object,
+html[hc*="delumine"] video {
   -webkit-filter: contrast(95%) brightness(-5%) hue-rotate(180deg) invert();
 }
