@@ -1,6 +1,8 @@
+var scheme_prefix;
+
 function onExtensionMessage(request) {
   if (request.enabled) {
-    document.documentElement.setAttribute('hc', request.scheme);
+    document.documentElement.setAttribute('hc', scheme_prefix + request.scheme);
   } else {
     document.documentElement.removeAttribute('hc');
   }
@@ -25,6 +27,11 @@ function onEvent(evt) {
 }
 
 function init() {
+  if (window == window.top) {
+    scheme_prefix = '';
+  } else {
+    scheme_prefix = 'nested_';
+  }
   chrome.extension.onRequest.addListener(onExtensionMessage);
   chrome.extension.sendRequest({'init': true}, onExtensionMessage);
   document.addEventListener('keydown', onEvent, false);
