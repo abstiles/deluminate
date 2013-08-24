@@ -10,7 +10,8 @@ html[hc*="delumine-smart"] [style*=".jpeg"], html[hc*="delumine"] [style*=".JPEG
 html[hc*="delumine-smart"] embed,
 html[hc*="delumine-smart"] object,
 html[hc*="delumine-smart"] video,
-html[hc*="delumine-noimg"] img {
+html[hc*="delumine-noimg"] img,
+html[hc*="delumine-noimg"] [style*="url"] {
   -webkit-filter: contrast(95%) brightness(95%) hue-rotate(180deg) invert();
 }
 
