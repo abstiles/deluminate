@@ -1,11 +1,16 @@
-html[hc="delumine"] {
+html[hc="delumine-all"],
+html[hc="delumine-noimg"],
+html[hc="delumine-smart"] {
   -webkit-filter: invert() hue-rotate(180deg) brightness(105%) contrast(105%);
 }
-html[hc*="delumine"] img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]),
-html[hc*="delumine"] [style*=".jpg"], html[hc*="delumine"] [style*=".JPG"],
-html[hc*="delumine"] [style*=".jpeg"], html[hc*="delumine"] [style*=".JPEG"],
-html[hc*="delumine"] embed,
-html[hc*="delumine"] object,
-html[hc*="delumine"] video {
+
+html[hc*="delumine-smart"] img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]),
+html[hc*="delumine-smart"] [style*=".jpg"], html[hc*="delumine"] [style*=".JPG"],
+html[hc*="delumine-smart"] [style*=".jpeg"], html[hc*="delumine"] [style*=".JPEG"],
+html[hc*="delumine-smart"] embed,
+html[hc*="delumine-smart"] object,
+html[hc*="delumine-smart"] video,
+html[hc*="delumine-noimg"] img {
   -webkit-filter: contrast(95%) brightness(95%) hue-rotate(180deg) invert();
 }
+
