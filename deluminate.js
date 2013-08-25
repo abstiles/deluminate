@@ -2,7 +2,7 @@ var scheme_prefix;
 
 function onExtensionMessage(request) {
   if (request.enabled) {
-    document.documentElement.setAttribute('hc', scheme_prefix + request.scheme);
+    document.documentElement.setAttribute('hc', scheme_prefix + request.scheme + ' ' + request.modifiers);
   } else {
     document.documentElement.removeAttribute('hc');
   }
