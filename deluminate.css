@@ -1,8 +1,8 @@
-html[hc*="delumine"] {
+html[hc^="delumine"] {
   -webkit-filter: invert() hue-rotate(180deg) brightness(105%) contrast(105%);
 }
 
-html[hc*="delumine"][hc*="low-contrast"] {
+html[hc^="delumine"][hc*="low-contrast"] {
   -webkit-filter: invert() hue-rotate(180deg) brightness(105%) contrast(85%);
 }
 
