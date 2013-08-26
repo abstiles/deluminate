@@ -6,14 +6,15 @@ html[hc^="delumine"][hc*="low-contrast"] {
   -webkit-filter: invert() hue-rotate(180deg) brightness(105%) contrast(85%);
 }
 
-html[hc*="delumine-smart"] img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]),
-html[hc*="delumine-smart"] [style*=".jpg"], html[hc*="delumine"] [style*=".JPG"],
-html[hc*="delumine-smart"] [style*=".jpeg"], html[hc*="delumine"] [style*=".JPEG"],
-html[hc*="delumine-smart"] embed,
-html[hc*="delumine-smart"] object,
-html[hc*="delumine-smart"] video,
-html[hc*="delumine-noimg"] img,
-html[hc*="delumine-noimg"] [style*="url"] {
+html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]),
+html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) [style*=".jpg"],
+html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) [style*=".JPG"],
+html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) [style*=".jpeg"],
+html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) [style*=".JPEG"],
+html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) embed,
+html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) object,
+html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) video,
+html[hc*="delumine-noimg"]:not(*:-webkit-full-screen-ancestor) img,
+html[hc*="delumine-noimg"]:not(*:-webkit-full-screen-ancestor) [style*="url"] {
   -webkit-filter: contrast(95%) brightness(95%) hue-rotate(180deg) invert();
 }
-
