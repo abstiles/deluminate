@@ -1,11 +1,40 @@
-html[hc="delumine"] {
+/* Invert the luminance iff any of the "delumine" styles are selected. */
+html[hc^="delumine"] {
   -webkit-filter: invert() hue-rotate(180deg) brightness(105%) contrast(105%);
 }
-html[hc*="delumine"] img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]),
-html[hc*="delumine"] [style*=".jpg"], html[hc*="delumine"] [style*=".JPG"],
-html[hc*="delumine"] [style*=".jpeg"], html[hc*="delumine"] [style*=".JPEG"],
-html[hc*="delumine"] embed,
-html[hc*="delumine"] object,
-html[hc*="delumine"] video {
+
+/* Override the above with a low-contrast version if selected. */
+html[hc^="delumine"][hc*="low-contrast"] {
+  -webkit-filter: invert() hue-rotate(180deg) brightness(105%) contrast(85%);
+}
+
+/* Uninvert select items within the document.
+ * Note: Chrome clears -webkit-filter on all full-screen ancestor tags, killing
+ * the top-level delumination filter. This is usually desirable (e.g., for
+ * Youtube videos), so instead of fighting it, just avoid trying to "uninvert"
+ * images in this scenario.
+ *
+ * For the -noimg variant, uninvert all images. */
+html[hc*="delumine-noimg"]:not(*:-webkit-full-screen-ancestor) img,
+/* Check for "url" in the style attribute, which is usually a fancy way to specify an image */
+html[hc*="delumine-noimg"]:not(*:-webkit-full-screen-ancestor) [style*="url"]:empty,
+html[hc*="delumine-noimg"]:not(*:-webkit-full-screen-ancestor) [style*="url"][class*="videowall-still"], /* Kind of a hack for YouTube. */
+html[hc*="delumine-noimg"]:not(*:-webkit-full-screen-ancestor) embed:empty,
+html[hc*="delumine-noimg"]:not(*:-webkit-full-screen-ancestor) object:empty,
+html[hc*="delumine-noimg"]:not(*:-webkit-full-screen-ancestor) video,
+/* The "smart" filter leaves PNG and GIF format images alone, since they usually are identifiable even when inverted. */
+html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]),
+html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) [style*=".jpg"]:empty,
+html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) [style*=".JPG"]:empty,
+html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) [style*=".jpeg"]:empty,
+html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) [style*=".JPEG"]:empty,
+html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) [style*=".jpg"][class*="videowall-still"], /* More YouTube hack. */
+html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) [style*=".JPG"][class*="videowall-still"],
+html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) [style*=".jpeg"][class*="videowall-still"],
+html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) [style*=".JPEG"][class*="videowall-still"],
+/* It's usually not desireable to invert these tags. */
+html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) embed:empty,
+html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) object:empty,
+html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) video {
   -webkit-filter: contrast(95%) brightness(95%) hue-rotate(180deg) invert();
 }

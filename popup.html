@@ -67,17 +67,31 @@ input[type="radio"] {
 
 <button id="toggle"></button>
 
+<label>
+  <input type="checkbox" id="toggle_contrast">
+  Enable Low Contrast
+</label>
 <div id="subcontrols">
 
   <fieldset>
     <legend id="scheme_title"></legend>
+	<h3>Normal</h3>
     <label>
       <input type="radio" name="scheme" value="normal">
-      Normal
+      Not Inverted
+    </label>
+	<h3>Invert Luminance</h3>
+    <label>
+      <input type="radio" name="scheme" value="delumine-smart">
+      Smart Invert Images
     </label>
     <label>
-      <input type="radio" name="scheme" value="delumine">
-      Inverted Luminance
+      <input type="radio" name="scheme" value="delumine-all">
+      Invert All Images
+    </label>
+    <label>
+      <input type="radio" name="scheme" value="delumine-noimg">
+      Keep Images Normal
     </label>
   </fieldset>
 
