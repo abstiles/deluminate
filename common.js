@@ -1,5 +1,4 @@
-var DEFAULT_SCHEME = 3;
-var MAX_SCHEME = 4;
+var DEFAULT_SCHEME = "deluminate-smart";
 
 function $(id) {
   return document.getElementById(id);
@@ -90,6 +89,24 @@ function siteFromUrl(url) {
   var a = document.createElement('a');
   a.href = url;
   return a.hostname;
+}
+
+function getModifiers() {
+  var modifiers = '';
+  if (isLowContrast()) {
+    modifiers = 'low-contrast';
+  }
+  return modifiers;
+}
+
+function isLowContrast() {
+  var result = localStorage['low_contrast'];
+
+  if (result === 'true' || result === 'false') {
+    return (result === 'true');
+  }
+  localStorage['low_contrast'] = 'false';
+  return false;
 }
 
 function isDisallowedUrl(url) {

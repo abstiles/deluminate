@@ -31,9 +31,10 @@ function updateTabs() {
           continue;
         }
         var msg = {
-    	  'enabled': getEnabled(),
-          'scheme': getSiteScheme(siteFromUrl(url))
-  	};
+          'enabled': getEnabled(),
+          'scheme': getSiteScheme(siteFromUrl(url)),
+          'modifiers': getModifiers()
+        };
         chrome.tabs.sendRequest(tabs[j].id, msg);
       }
     }
@@ -77,9 +78,10 @@ function init() {
             scheme = getSiteScheme(siteFromUrl(sender.tab.url));
           }
           var msg = {
-    	    'enabled': getEnabled(),
-            'scheme': scheme
-  	  };
+            'enabled': getEnabled(),
+            'scheme': scheme,
+            'modifiers': getModifiers()
+          };
 	  sendResponse(msg);
         }
       });

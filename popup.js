@@ -32,10 +32,11 @@ function update() {
   } else {
     setRadio('scheme', getDefaultScheme());
   }
+  $('toggle_contrast').checked = isLowContrast();
   if (getEnabled()) {
     document.documentElement.setAttribute(
         'hc',
-        site ? getSiteScheme(site) : getDefaultScheme());
+        site ? getSiteScheme(site) + ' ' + getModifiers() : getDefaultScheme());
   } else {
     document.documentElement.setAttribute('hc', 'normal');
   }
@@ -92,6 +93,10 @@ function init() {
   addRadioListeners('keyaction');
   addRadioListeners('apply');
   addRadioListeners('scheme');
+  $('toggle_contrast').addEventListener('change', function(evt) {
+    localStorage['low_contrast'] = evt.target.checked;
+    update();
+  }, false);
   $('toggle').addEventListener('click', onToggle, false);
   $('make_default').addEventListener('click', onMakeDefault, false);
   $('forget').addEventListener('click', onForget, false);
