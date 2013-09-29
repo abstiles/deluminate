@@ -1,4 +1,4 @@
-var DEFAULT_SCHEME = "deluminate-smart";
+var DEFAULT_SCHEME = "delumine-smart";
 
 function $(id) {
   return document.getElementById(id);
