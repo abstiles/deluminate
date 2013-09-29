@@ -49,9 +49,9 @@ function toggleEnabled() {
 function toggleSite(url) {
   var site = siteFromUrl(url);
   var scheme = getSiteScheme(site);
-  if (scheme > 0) {
-    scheme = 0;
-  } else if (getDefaultScheme() > 0) {
+  if (scheme != "normal") {
+    scheme = "normal";
+  } else if (getDefaultScheme() != "normal") {
     scheme = getDefaultScheme();
   } else {
     scheme = DEFAULT_SCHEME;
