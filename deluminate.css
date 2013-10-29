@@ -13,28 +13,67 @@ html[hc^="delumine"][hc*="low-contrast"] {
  * the top-level delumination filter. This is usually desirable (e.g., for
  * Youtube videos), so instead of fighting it, just avoid trying to "uninvert"
  * images in this scenario.
- *
- * For the -noimg variant, uninvert all images. */
-html[hc*="delumine-noimg"]:not(*:-webkit-full-screen-ancestor) img,
+ */
+
+/* For the -noimg variant, uninvert all images. */
+html[hc*="delumine-noimg"]:not(*:-webkit-full-screen-ancestor) :-webkit-any(
+img,
 /* Check for "url" in the style attribute, which is usually a fancy way to specify an image */
-html[hc*="delumine-noimg"]:not(*:-webkit-full-screen-ancestor) [style*="url"]:empty,
-html[hc*="delumine-noimg"]:not(*:-webkit-full-screen-ancestor) [style*="url"][class*="videowall-still"], /* Kind of a hack for YouTube. */
-html[hc*="delumine-noimg"]:not(*:-webkit-full-screen-ancestor) embed:empty,
-html[hc*="delumine-noimg"]:not(*:-webkit-full-screen-ancestor) object:empty,
-html[hc*="delumine-noimg"]:not(*:-webkit-full-screen-ancestor) video,
-/* The "smart" filter leaves PNG and GIF format images alone, since they usually are identifiable even when inverted. */
-html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]),
-html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) [style*=".jpg"]:empty,
-html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) [style*=".JPG"]:empty,
-html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) [style*=".jpeg"]:empty,
-html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) [style*=".JPEG"]:empty,
-html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) [style*=".jpg"][class*="videowall-still"], /* More YouTube hack. */
-html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) [style*=".JPG"][class*="videowall-still"],
-html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) [style*=".jpeg"][class*="videowall-still"],
-html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) [style*=".JPEG"][class*="videowall-still"],
-/* It's usually not desireable to invert these tags. */
-html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) embed:empty,
-html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) object:empty,
-html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) video {
+[style*="url"],
+embed,
+object,
+video) {
   -webkit-filter: contrast(95%) brightness(95%) hue-rotate(180deg) invert();
+}
+/* Avoid performing the uninversion process on anything that is a descendant of
+ * something uninverted. */
+html[hc*="delumine-noimg"]:not(*:-webkit-full-screen-ancestor) :-webkit-any(
+img,
+[style*="url"],
+embed,
+object,
+video) :-webkit-any(
+img,
+[style*="url"],
+embed,
+object,
+video) {
+  -webkit-filter: none;
+}
+
+/* The "smart" filter is more selective about what to uninvert. */
+html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) :-webkit-any(
+	/* Leave PNG and GIF format images inverted, since they usually are
+	 * identifiable even when inverted. */
+	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]),
+	[style*=".jpg"],
+	[style*=".JPG"],
+	[style*=".jpeg"],
+	[style*=".JPEG"],
+	/* It's usually not desireable to invert these tags. */
+	embed,
+	object,
+	video) {
+  -webkit-filter: contrast(95%) brightness(95%) hue-rotate(180deg) invert();
+}
+/* Avoid performing the uninversion process on anything that is a descendant of
+ * something uninverted. */
+html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) :-webkit-any(
+	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]),
+	[style*=".jpg"],
+	[style*=".JPG"],
+	[style*=".jpeg"],
+	[style*=".JPEG"],
+	embed,
+	object,
+	video) :-webkit-any(
+	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]),
+	[style*=".jpg"],
+	[style*=".JPG"],
+	[style*=".jpeg"],
+	[style*=".JPEG"],
+	embed,
+	object,
+	video) {
+  -webkit-filter: none;
 }
