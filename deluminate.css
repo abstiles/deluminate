@@ -20,6 +20,7 @@ html[hc*="delumine-noimg"]:not(*:-webkit-full-screen-ancestor) :-webkit-any(
 img,
 /* Check for "url" in the style attribute, which is usually a fancy way to specify an image */
 [style*="url"],
+canvas,
 embed,
 object,
 video) {
@@ -30,11 +31,13 @@ video) {
 html[hc*="delumine-noimg"]:not(*:-webkit-full-screen-ancestor) :-webkit-any(
 img,
 [style*="url"],
+canvas,
 embed,
 object,
 video) :-webkit-any(
 img,
 [style*="url"],
+canvas,
 embed,
 object,
 video) {
@@ -51,6 +54,7 @@ html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) :-webkit-any(
 	[style*=".jpeg"],
 	[style*=".JPEG"],
 	/* It's usually not desireable to invert these tags. */
+	canvas,
 	embed,
 	object,
 	video) {
@@ -64,6 +68,7 @@ html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) :-webkit-any(
 	[style*=".JPG"],
 	[style*=".jpeg"],
 	[style*=".JPEG"],
+	canvas,
 	embed,
 	object,
 	video) :-webkit-any(
@@ -72,6 +77,7 @@ html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) :-webkit-any(
 	[style*=".JPG"],
 	[style*=".jpeg"],
 	[style*=".JPEG"],
+	canvas,
 	embed,
 	object,
 	video) {
