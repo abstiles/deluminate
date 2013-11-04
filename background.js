@@ -35,7 +35,7 @@ function updateTabs() {
           'scheme': getSiteScheme(siteFromUrl(url)),
           'modifiers': getModifiers()
         };
-        chrome.tabs.sendRequest(tabs[j].id, msg);
+        chrome.tabs.sendMessage(tabs[j].id, msg);
       }
     }
   });
@@ -64,7 +64,7 @@ function init() {
   injectContentScripts();
   updateTabs();
 
-  chrome.extension.onRequest.addListener(
+  chrome.runtime.onMessage.addListener(
       function(request, sender, sendResponse) {
         if (request['toggle_global']) {
           toggleEnabled();

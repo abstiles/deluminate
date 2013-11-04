@@ -11,14 +11,14 @@ function onExtensionMessage(request) {
 function onEvent(evt) {
   if (evt.keyCode == 122 /* F11 */ &&
       evt.shiftKey) {
-    chrome.extension.sendRequest({'toggle_global': true});
+    chrome.runtime.sendMessage({'toggle_global': true});
     evt.stopPropagation();
     evt.preventDefault();
     return false;
   }
   if (evt.keyCode == 123 /* F12 */ &&
       evt.shiftKey) {
-    chrome.extension.sendRequest({'toggle_site': true});
+    chrome.runtime.sendMessage({'toggle_site': true});
     evt.stopPropagation();
     evt.preventDefault();
     return false;
@@ -32,8 +32,8 @@ function init() {
   } else {
     scheme_prefix = 'nested_';
   }
-  chrome.extension.onRequest.addListener(onExtensionMessage);
-  chrome.extension.sendRequest({'init': true}, onExtensionMessage);
+  chrome.runtime.onMessage.addListener(onExtensionMessage);
+  chrome.runtime.sendMessage({'init': true}, onExtensionMessage);
   document.addEventListener('keydown', onEvent, false);
 }
 
