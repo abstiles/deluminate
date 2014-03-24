@@ -33,6 +33,7 @@ function update() {
     setRadio('scheme', getDefaultScheme());
   }
   $('toggle_contrast').checked = isLowContrast();
+  $('toggle_flat').checked = isFlat();
   if (getEnabled()) {
     document.documentElement.setAttribute(
         'hc',
@@ -95,6 +96,10 @@ function init() {
   addRadioListeners('scheme');
   $('toggle_contrast').addEventListener('change', function(evt) {
     localStorage['low_contrast'] = evt.target.checked;
+    update();
+  }, false);
+  $('toggle_flat').addEventListener('change', function(evt) {
+    localStorage['flat'] = evt.target.checked;
     update();
   }, false);
   $('toggle').addEventListener('click', onToggle, false);

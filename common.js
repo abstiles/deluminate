@@ -92,9 +92,12 @@ function siteFromUrl(url) {
 }
 
 function getModifiers() {
-  var modifiers = '';
+  var modifiers = [];
   if (isLowContrast()) {
-    modifiers = 'low-contrast';
+    modifiers.push('low-contrast');
+  }
+  if (isFlat()) {
+    modifiers.push('flat');
   }
   return modifiers;
 }
@@ -106,6 +109,16 @@ function isLowContrast() {
     return (result === 'true');
   }
   localStorage['low_contrast'] = 'false';
+  return false;
+}
+
+function isFlat() {
+  var result = localStorage['flat'];
+
+  if (result === 'true' || result === 'false') {
+    return (result === 'true');
+  }
+  localStorage['flat'] = 'false';
   return false;
 }
 
