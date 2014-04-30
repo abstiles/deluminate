@@ -96,6 +96,9 @@ function getModifiers() {
   if (isLowContrast()) {
     modifiers = 'low-contrast';
   }
+  if (window.devicePixelRatio > 1) {
+    modifiers += ' hidpi';
+  }
   return modifiers;
 }
 
