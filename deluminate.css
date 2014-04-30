@@ -13,6 +13,11 @@ html[hc^="noinvert-low-contrast"] {
   -webkit-filter: contrast(85%);
 }
 
+/* Workaround for blurriness on high dpi displays. See Chromium issue 156019. */
+html[hc*="hidpi"] {
+  -webkit-backface-visibility: hidden;
+}
+
 /* Uninvert select items within the document.
  * Note: Chrome clears -webkit-filter on all full-screen ancestor tags, killing
  * the top-level delumination filter. This is usually desirable (e.g., for
