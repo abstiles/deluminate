@@ -110,5 +110,14 @@ function isLowContrast() {
 }
 
 function isDisallowedUrl(url) {
-  return url.indexOf('chrome') == 0 || url.indexOf('about') == 0;
+  if (url.indexOf('about') == 0) {
+    return true;
+  } else if (url.indexOf('chrome') == 0) {
+    // Special case the "newtab" page, which this extension affects.
+    if (siteFromUrl(url) == 'newtab')
+      return false;
+    else
+      return true;
+  }
+  return false;
 }
