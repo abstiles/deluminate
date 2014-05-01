@@ -1,7 +1,7 @@
 var scheme_prefix;
 
 function onExtensionMessage(request) {
-  if (request.enabled) {
+  if (request.enabled && request.scheme != 'normal') {
     document.documentElement.setAttribute('hc', scheme_prefix + request.scheme + ' ' + request.modifiers);
   } else {
     document.documentElement.removeAttribute('hc');
