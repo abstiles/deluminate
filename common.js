@@ -4,17 +4,31 @@ function $(id) {
   return document.getElementById(id);
 }
 
-function getEnabled() {
-  var result = localStorage['enabled'];
+function getStoredBool(key, default_val) {
+  default_val = typeof default_val !== 'undefined' ? default_val : 'false';
+
+  var result = localStorage[key];
   if (result === 'true' || result === 'false') {
     return (result === 'true');
   }
-  localStorage['enabled'] = 'true';
-  return true;
+  localStorage[key] = defaul_val;
+  return (default_val.toString() === 'true');
+}
+
+function getEnabled() {
+  return getStoredBool('enabled', true);
 }
 
 function setEnabled(enabled) {
   localStorage['enabled'] = enabled;
+}
+
+function getLowContrast() {
+  return getStoredBool('low_contrast');
+}
+
+function setLowContrast(low_contrast) {
+  localStorage['low_contrast'] = low_contrast;
 }
 
 function getKeyAction() {
@@ -93,23 +107,13 @@ function siteFromUrl(url) {
 
 function getModifiers() {
   var modifiers = '';
-  if (isLowContrast()) {
+  if (getLowContrast()) {
     modifiers = 'low-contrast';
   }
   if (window.devicePixelRatio > 1) {
     modifiers += ' hidpi';
   }
   return modifiers;
-}
-
-function isLowContrast() {
-  var result = localStorage['low_contrast'];
-
-  if (result === 'true' || result === 'false') {
-    return (result === 'true');
-  }
-  localStorage['low_contrast'] = 'false';
-  return false;
 }
 
 function isDisallowedUrl(url) {

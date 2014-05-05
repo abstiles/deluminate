@@ -32,7 +32,7 @@ function update() {
   } else {
     setRadio('scheme', getDefaultScheme());
   }
-  $('toggle_contrast').checked = isLowContrast();
+  $('toggle_contrast').checked = getLowContrast();
   if (getEnabled()) {
     document.documentElement.setAttribute(
         'hc',
@@ -72,6 +72,11 @@ function onRadioChange(name, value) {
   update();
 }
 
+function onLowContrast(evt) {
+  setLowContrast(evt.target.checked);
+  update();
+}
+
 function onMakeDefault() {
   setDefaultScheme(getSiteScheme(site));
   update();
@@ -93,10 +98,7 @@ function init() {
   addRadioListeners('keyaction');
   addRadioListeners('apply');
   addRadioListeners('scheme');
-  $('toggle_contrast').addEventListener('change', function(evt) {
-    localStorage['low_contrast'] = evt.target.checked;
-    update();
-  }, false);
+  $('toggle_contrast').addEventListener('change', onLowContrast, false);
   $('toggle').addEventListener('click', onToggle, false);
   $('make_default').addEventListener('click', onMakeDefault, false);
   $('forget').addEventListener('click', onForget, false);
