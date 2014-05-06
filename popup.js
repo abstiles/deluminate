@@ -28,19 +28,28 @@ function update() {
   setRadio('keyaction', getKeyAction());
   if (site) {
     setRadio('scheme', getSiteScheme(site));
-    $('make_default').disabled = (getSiteScheme(site) == getDefaultScheme());
+    $('toggle_contrast').checked = (getSiteModifiers(site).indexOf('low-contrast') > -1);
+    $('make_default').disabled = !(changedFromDefault());
   } else {
     setRadio('scheme', getDefaultScheme());
+    $('toggle_contrast').checked = getLowContrast();
   }
-  $('toggle_contrast').checked = getLowContrast();
   if (getEnabled()) {
     document.documentElement.setAttribute(
         'hc',
-        site ? getSiteScheme(site) + ' ' + getModifiers() : getDefaultScheme());
+        site ? getSiteScheme(site) + ' ' + getCurrentModifiers(site)
+             : getDefaultScheme() + ' ' + getDefaultModifiers());
   } else {
     document.documentElement.setAttribute('hc', 'normal');
   }
   chrome.extension.getBackgroundPage().updateTabs();
+}
+
+function changedFromDefault() {
+  var siteModList = getSiteModifiers(site);
+  var defaultModList = getDefaultModifiers();
+  return (getSiteScheme(site) != getDefaultScheme() ||
+          siteModList != defaultModList);
 }
 
 function onToggle() {
@@ -73,12 +82,21 @@ function onRadioChange(name, value) {
 }
 
 function onLowContrast(evt) {
-  setLowContrast(evt.target.checked);
+  if (site) {
+    if (evt.target.checked) {
+      addSiteModifier(site, 'low-contrast');
+    } else {
+      delSiteModifier(site, 'low-contrast');
+    }
+  } else {
+    setLowContrast(evt.target.checked);
+  }
   update();
 }
 
 function onMakeDefault() {
   setDefaultScheme(getSiteScheme(site));
+  setDefaultModifiers(getSiteModifiers(site));
   update();
 }
 

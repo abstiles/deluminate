@@ -1,4 +1,5 @@
 var DEFAULT_SCHEME = "delumine-smart";
+var DEFAULT_MODS = [];
 
 function $(id) {
   return document.getElementById(id);
@@ -105,15 +106,99 @@ function siteFromUrl(url) {
   return a.hostname;
 }
 
-function getModifiers() {
-  var modifiers = '';
-  if (getLowContrast()) {
-    modifiers = 'low-contrast';
+function getSiteModifiers(site) {
+  var modifiers = getDefaultModifiers();
+  try {
+    var siteModifiers = JSON.parse(localStorage['sitemodifiers']);
+    if (site in siteModifiers) {
+      var modifierList = [];
+      for (var mod in siteModifiers[site]) {
+        modifierList.push(mod);
+      }
+      modifiers = modifierList.join(' ');
+    } else {
+      modifiers = getDefaultModifiers();
+    }
+  } catch (e) {
+    modifiers = getDefaultModifiers();
   }
+  return modifiers;
+}
+
+function getDefaultModifiers() {
+  var modifiers = [];
+  if (getLowContrast()) {
+    modifiers.push('low-contrast');
+  }
+  return modifiers.join(' ');
+}
+
+function getCurrentModifiers(site) {
+  var modifiers = getSiteModifiers(site);
   if (window.devicePixelRatio > 1) {
     modifiers += ' hidpi';
   }
   return modifiers;
+}
+
+function setDefaultModifiers(modifiers) {
+  var low_contrast = (modifiers.indexOf('low-contrast') > -1).toString();
+  localStorage['low_contrast'] = low_contrast;
+}
+
+function addSiteModifier(site, modifier) {
+  var siteModifiers = {};
+  try {
+    siteModifiers = JSON.parse(localStorage['sitemodifiers']);
+    siteModifiers['www.example.com'] = getDefaultModifiers();
+  } catch (e) {
+    siteModifiers = {};
+  }
+  try {
+    siteModifiers[site][modifier] = true;
+  } catch (e) {
+    siteModifiers[site] = {};
+    // Get a list of non-empty modifiers
+    defaultModifiers = getDefaultModifiers().split(' ').filter(
+      function(x) { return x.length > 0; }
+    );
+    for (var i = 0; i < defaultModifiers.length; i++) {
+      siteModifiers[site][defaultModifiers[i]] = true;
+    }
+    siteModifiers[site][modifier] = true;
+  }
+  localStorage['sitemodifiers'] = JSON.stringify(siteModifiers);
+}
+
+function delSiteModifier(site, modifier) {
+  var siteModifiers = {};
+  try {
+    siteModifiers = JSON.parse(localStorage['sitemodifiers']);
+    siteModifiers['www.example.com'] = getDefaultModifiers();
+  } catch (e) {
+    siteModifiers = {};
+  }
+  try {
+    delete siteModifiers[site][modifier];
+  } catch (e) {
+    siteModifiers[site] = {};
+    // Get a list of non-empty modifiers
+    defaultModifiers = getDefaultModifiers().split(' ').filter(
+      function(x) { x }
+    );
+    for (var i = 0; i < defaultModifiers.length; i++) {
+      siteModifiers[site][defaultModifiers[i]] = true;
+    }
+    delete siteModifiers[site][modifier];
+  }
+  localStorage['sitemodifiers'] = JSON.stringify(siteModifiers);
+}
+
+function changedFromDefault() {
+  var siteModList = getSiteModifiers(site);
+  var defaultModList = getDefaultModifiers();
+  return (getSiteScheme(site) != getDefaultScheme() ||
+          siteModList != defaultModList);
 }
 
 function isDisallowedUrl(url) {
