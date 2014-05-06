@@ -38,6 +38,11 @@ inverted or not based on the following criteria:
  * Other images (in particular JPEGs) are typically photos that are often
    unrecognizable when inverted, so avoid inverting these.
 
+### Low Contrast Only ###
+**[NEW]** This mode does not invert the luminance of the site. It only lowers
+the contrast. Useful for sites that are mostly dark but have large, bright
+sections that are distracting.
+
 Installation
 ------------
 
