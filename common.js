@@ -32,6 +32,14 @@ function setLowContrast(low_contrast) {
   localStorage['low_contrast'] = low_contrast;
 }
 
+function getForceText() {
+  return getStoredBool('force_text');
+}
+
+function setForceText(force_text) {
+  localStorage['force_text'] = force_text;
+}
+
 function getKeyAction() {
   var keyAction = localStorage['keyaction'];
   if (keyAction == 'global' || keyAction == 'site') {
