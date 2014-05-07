@@ -29,10 +29,12 @@ function update() {
   if (site) {
     setRadio('scheme', getSiteScheme(site));
     $('toggle_contrast').checked = (getSiteModifiers(site).indexOf('low-contrast') > -1);
+    $('force_textfield').checked = (getSiteModifiers(site).indexOf('force_text') > -1);
     $('make_default').disabled = !(changedFromDefault());
   } else {
     setRadio('scheme', getDefaultScheme());
     $('toggle_contrast').checked = getLowContrast();
+    $('force_textfield').checked = getForceText();
   }
   if (getEnabled()) {
     document.documentElement.setAttribute(
@@ -94,6 +96,19 @@ function onLowContrast(evt) {
   update();
 }
 
+function onForceText(evt) {
+  if (site) {
+    if (evt.target.checked) {
+      addSiteModifier(site, 'force_text');
+    } else {
+      delSiteModifier(site, 'force_text');
+    }
+  } else {
+    setForceText(evt.target.checked);
+  }
+  update();
+}
+
 function onMakeDefault() {
   setDefaultScheme(getSiteScheme(site));
   setDefaultModifiers(getSiteModifiers(site));
@@ -117,6 +132,7 @@ function init() {
   addRadioListeners('apply');
   addRadioListeners('scheme');
   $('toggle_contrast').addEventListener('change', onLowContrast, false);
+  $('force_textfield').addEventListener('change', onForceText, false);
   $('toggle').addEventListener('click', onToggle, false);
   $('make_default').addEventListener('click', onMakeDefault, false);
   $('forget').addEventListener('click', onForget, false);

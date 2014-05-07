@@ -93,3 +93,30 @@ html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) :-webkit-any(
 	video) {
   -webkit-filter: none;
 }
+
+/* Force text to plain black text on white (which, when inverted, is the
+ * preferable white text on black. */
+html[hc*="delumine"][hc*="force_text"] input[type="text"] {
+  background-image: none !important;
+  background-color: white !important;
+  color: black !important;
+}
+
+/* ...unless it's uninverted because of a background image. Then set it
+ * directly to white text on black. */
+html[hc*="delumine-smart"][hc*="force_text"] input[type="text"]:-webkit-any(
+	[style*=".jpg"],
+	[style*=".JPG"],
+	[style*=".jpeg"],
+	[style*=".JPEG"]) {
+  background-image: none !important;
+  background-color: black !important;
+  color: white !important;
+}
+
+html[hc*="delumine-noimg"][hc*="force_text"] input[style*="url"]:-webkit-any(
+  [type="text"], [dir]) {
+  background-image: none !important;
+  background-color: black !important;
+  color: white !important;
+}
