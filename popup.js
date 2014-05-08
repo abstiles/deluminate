@@ -39,7 +39,7 @@ function update() {
   if (getEnabled()) {
     document.documentElement.setAttribute(
         'hc',
-        site ? getSiteScheme(site) + ' ' + getCurrentModifiers(site)
+        site ? getSiteScheme(site) + ' ' + getSiteModifiers(site)
              : getDefaultScheme() + ' ' + getDefaultModifiers());
   } else {
     document.documentElement.setAttribute('hc', 'normal');

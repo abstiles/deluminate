@@ -141,14 +141,6 @@ function getDefaultModifiers() {
   return modifiers.join(' ');
 }
 
-function getCurrentModifiers(site) {
-  var modifiers = getSiteModifiers(site);
-  if (window.devicePixelRatio > 1) {
-    modifiers += ' hidpi';
-  }
-  return modifiers;
-}
-
 function setDefaultModifiers(modifiers) {
   var low_contrast = (modifiers.indexOf('low-contrast') > -1).toString();
   localStorage['low_contrast'] = low_contrast;
