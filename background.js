@@ -77,7 +77,7 @@ function init() {
           var modifiers = getDefaultModifiers();
           if (sender.tab) {
             scheme = getSiteScheme(siteFromUrl(sender.tab.url));
-            modifiers = getSiteModifiers(siteFromUrl(sender.tab.url))
+            modifiers = getSiteModifiers(siteFromUrl(sender.tab.url));
           }
           var msg = {
             'enabled': getEnabled(),
