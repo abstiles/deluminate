@@ -127,6 +127,20 @@ function addRadioListeners(name) {
   }
 }
 
+// Open all links in new tabs.
+function onLinkClick() {
+  var links = document.getElementsByTagName("a");
+  for (var i = 0; i < links.length; i++) {
+      (function () {
+          var ln = links[i];
+          var location = ln.href;
+          ln.onclick = function () {
+              chrome.tabs.create({active: true, url: location});
+          };
+      })();
+  }
+}
+
 function init() {
   addRadioListeners('keyaction');
   addRadioListeners('apply');
@@ -167,3 +181,4 @@ function init() {
 }
 
 window.addEventListener('load', init, false);
+document.addEventListener('DOMContentLoaded', onLinkClick);
