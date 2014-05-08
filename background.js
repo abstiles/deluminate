@@ -33,7 +33,7 @@ function updateTabs() {
         var msg = {
           'enabled': getEnabled(),
           'scheme': getSiteScheme(siteFromUrl(url)),
-          'modifiers': getCurrentModifiers(siteFromUrl(url))
+          'modifiers': getSiteModifiers(siteFromUrl(url))
         };
         chrome.tabs.sendMessage(tabs[j].id, msg);
       }
@@ -77,7 +77,7 @@ function init() {
           var modifiers = getDefaultModifiers();
           if (sender.tab) {
             scheme = getSiteScheme(siteFromUrl(sender.tab.url));
-            modifiers = getCurrentModifiers(siteFromUrl(sender.tab.url))
+            modifiers = getSiteModifiers(siteFromUrl(sender.tab.url))
           }
           var msg = {
             'enabled': getEnabled(),

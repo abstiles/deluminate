@@ -2,7 +2,11 @@ var scheme_prefix;
 
 function onExtensionMessage(request) {
   if (request.enabled && request.scheme != 'normal') {
-    document.documentElement.setAttribute('hc', scheme_prefix + request.scheme + ' ' + request.modifiers);
+    hc = scheme_prefix + request.scheme + ' ' + request.modifiers;
+    if (window.devicePixelRatio > 1) {
+      hc += ' hidpi';
+    }
+    document.documentElement.setAttribute('hc', hc);
   } else {
     document.documentElement.removeAttribute('hc');
   }
@@ -32,6 +36,7 @@ function init() {
   } else {
     scheme_prefix = 'nested_';
   }
+
   chrome.runtime.onMessage.addListener(onExtensionMessage);
   chrome.runtime.sendMessage({'init': true}, onExtensionMessage);
   document.addEventListener('keydown', onEvent, false);
