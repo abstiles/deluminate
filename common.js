@@ -1,20 +1,43 @@
 var DEFAULT_SCHEME = "delumine-smart";
+var DEFAULT_MODS = [];
 
 function $(id) {
   return document.getElementById(id);
 }
 
-function getEnabled() {
-  var result = localStorage['enabled'];
+function getStoredBool(key, default_val) {
+  default_val = typeof default_val !== 'undefined' ? default_val : 'false';
+
+  var result = localStorage[key];
   if (result === 'true' || result === 'false') {
     return (result === 'true');
   }
-  localStorage['enabled'] = 'true';
-  return true;
+  localStorage[key] = defaul_val;
+  return (default_val.toString() === 'true');
+}
+
+function getEnabled() {
+  return getStoredBool('enabled', true);
 }
 
 function setEnabled(enabled) {
   localStorage['enabled'] = enabled;
+}
+
+function getLowContrast() {
+  return getStoredBool('low_contrast');
+}
+
+function setLowContrast(low_contrast) {
+  localStorage['low_contrast'] = low_contrast;
+}
+
+function getForceText() {
+  return getStoredBool('force_text');
+}
+
+function setForceText(force_text) {
+  localStorage['force_text'] = force_text;
 }
 
 function getKeyAction() {
@@ -91,24 +114,102 @@ function siteFromUrl(url) {
   return a.hostname;
 }
 
-function getModifiers() {
-  var modifiers = '';
-  if (isLowContrast()) {
-    modifiers = 'low-contrast';
+function getSiteModifiers(site) {
+  var modifiers = getDefaultModifiers();
+  try {
+    var siteModifiers = JSON.parse(localStorage['sitemodifiers']);
+    if (site in siteModifiers) {
+      var modifierList = [];
+      for (var mod in siteModifiers[site]) {
+        modifierList.push(mod);
+      }
+      modifiers = modifierList.join(' ');
+    } else {
+      modifiers = getDefaultModifiers();
+    }
+  } catch (e) {
+    modifiers = getDefaultModifiers();
   }
   return modifiers;
 }
 
-function isLowContrast() {
-  var result = localStorage['low_contrast'];
-
-  if (result === 'true' || result === 'false') {
-    return (result === 'true');
+function getDefaultModifiers() {
+  var modifiers = [];
+  if (getLowContrast()) {
+    modifiers.push('low-contrast');
   }
-  localStorage['low_contrast'] = 'false';
-  return false;
+  return modifiers.join(' ');
+}
+
+function setDefaultModifiers(modifiers) {
+  var low_contrast = (modifiers.indexOf('low-contrast') > -1).toString();
+  localStorage['low_contrast'] = low_contrast;
+}
+
+function addSiteModifier(site, modifier) {
+  var siteModifiers = {};
+  try {
+    siteModifiers = JSON.parse(localStorage['sitemodifiers']);
+    siteModifiers['www.example.com'] = getDefaultModifiers();
+  } catch (e) {
+    siteModifiers = {};
+  }
+  try {
+    siteModifiers[site][modifier] = true;
+  } catch (e) {
+    siteModifiers[site] = {};
+    // Get a list of non-empty modifiers
+    defaultModifiers = getDefaultModifiers().split(' ').filter(
+      function(x) { return x.length > 0; }
+    );
+    for (var i = 0; i < defaultModifiers.length; i++) {
+      siteModifiers[site][defaultModifiers[i]] = true;
+    }
+    siteModifiers[site][modifier] = true;
+  }
+  localStorage['sitemodifiers'] = JSON.stringify(siteModifiers);
+}
+
+function delSiteModifier(site, modifier) {
+  var siteModifiers = {};
+  try {
+    siteModifiers = JSON.parse(localStorage['sitemodifiers']);
+    siteModifiers['www.example.com'] = getDefaultModifiers();
+  } catch (e) {
+    siteModifiers = {};
+  }
+  try {
+    delete siteModifiers[site][modifier];
+  } catch (e) {
+    siteModifiers[site] = {};
+    // Get a list of non-empty modifiers
+    defaultModifiers = getDefaultModifiers().split(' ').filter(
+      function(x) { x }
+    );
+    for (var i = 0; i < defaultModifiers.length; i++) {
+      siteModifiers[site][defaultModifiers[i]] = true;
+    }
+    delete siteModifiers[site][modifier];
+  }
+  localStorage['sitemodifiers'] = JSON.stringify(siteModifiers);
+}
+
+function changedFromDefault() {
+  var siteModList = getSiteModifiers(site);
+  var defaultModList = getDefaultModifiers();
+  return (getSiteScheme(site) != getDefaultScheme() ||
+          siteModList != defaultModList);
 }
 
 function isDisallowedUrl(url) {
-  return url.indexOf('chrome') == 0 || url.indexOf('about') == 0;
+  if (url.indexOf('about') == 0) {
+    return true;
+  } else if (url.indexOf('chrome') == 0) {
+    // Special case the "newtab" page, which this extension affects.
+    if (siteFromUrl(url) == 'newtab')
+      return false;
+    else
+      return true;
+  }
+  return false;
 }

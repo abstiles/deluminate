@@ -1,5 +1,7 @@
 <!doctype html>
-<html>
+<!-- Hardcode hidpi workaround here, since the dynamic strategy used on tabs
+     runs into problems here. -->
+<html style="-webkit-backface-visibility: hidden;">
 <head>
 <title>Deluminate Pop-up</title>
 <link rel="stylesheet" type="text/css" href="deluminate.css" />
@@ -41,6 +43,9 @@ h2 {
   font-size: 12pt;
   text-align: center;
 }
+h3 {
+  margin-bottom: 0.25em;
+}
 label {
   display: block;
 }
@@ -57,6 +62,13 @@ legend {
 input[type="radio"] {
   margin-left: 1em;
 }
+a#issues {
+  font-size: 8pt;
+  text-align: center;
+  display: block;
+  margin-top: 0.5em;
+  margin-bottom: -1.0em;
+}
 </style>
 <script type="text/javascript" src="common.js"></script>
 <script type="text/javascript" src="popup.js"></script>
@@ -67,20 +79,20 @@ input[type="radio"] {
 
 <button id="toggle"></button>
 
-<label>
-  <input type="checkbox" id="toggle_contrast">
-  Enable Low Contrast
-</label>
 <div id="subcontrols">
 
   <fieldset>
     <legend id="scheme_title"></legend>
-	<h3>Normal</h3>
+    <h3>Not Inverted</h3>
     <label>
       <input type="radio" name="scheme" value="normal">
-      Not Inverted
+      Normal
     </label>
-	<h3>Invert Luminance</h3>
+    <label>
+      <input type="radio" name="scheme" value="noinvert-low-contrast">
+      Reduce Contrast Only
+    </label>
+    <h3>Invert Luminance</h3>
     <label>
       <input type="radio" name="scheme" value="delumine-smart">
       Smart Invert Images
@@ -93,6 +105,15 @@ input[type="radio"] {
       <input type="radio" name="scheme" value="delumine-noimg">
       Keep Images Normal
     </label>
+    <h3>Inversion Options</h3>
+    <label>
+      <input type="checkbox" id="toggle_contrast">
+      Enable Low Contrast
+    </label>
+    <label>
+      <input type="checkbox" id="force_textfield">
+      Aggressively Invert Text Input
+    </label>
   </fieldset>
 
   <button id="make_default">Set as default scheme</button>
@@ -100,6 +121,10 @@ input[type="radio"] {
   <button id="forget">Forget site customizations</button>
 
 </div>
+
+<a href="https://github.com/abstiles/deluminate/issues/new" id="issues">
+  Something wrong? Let me know!
+</a>
 
 </body>
 </html>
