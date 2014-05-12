@@ -18,7 +18,7 @@
    "icons": {
       "128": "deluminate-128.png"
    },
-   "name": "Deluminate-dev",
+   "name": "Deluminate",
    "manifest_version": 2,
    "permissions": [ "\u003Call_urls\u003E", "tabs" ],
    "version": "0.4.0"
