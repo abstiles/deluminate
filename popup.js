@@ -28,19 +28,30 @@ function update() {
   setRadio('keyaction', getKeyAction());
   if (site) {
     setRadio('scheme', getSiteScheme(site));
-    $('make_default').disabled = (getSiteScheme(site) == getDefaultScheme());
+    $('toggle_contrast').checked = (getSiteModifiers(site).indexOf('low-contrast') > -1);
+    $('force_textfield').checked = (getSiteModifiers(site).indexOf('force_text') > -1);
+    $('make_default').disabled = !(changedFromDefault());
   } else {
     setRadio('scheme', getDefaultScheme());
+    $('toggle_contrast').checked = getLowContrast();
+    $('force_textfield').checked = getForceText();
   }
-  $('toggle_contrast').checked = isLowContrast();
   if (getEnabled()) {
     document.documentElement.setAttribute(
         'hc',
-        site ? getSiteScheme(site) + ' ' + getModifiers() : getDefaultScheme());
+        site ? getSiteScheme(site) + ' ' + getSiteModifiers(site)
+             : getDefaultScheme() + ' ' + getDefaultModifiers());
   } else {
     document.documentElement.setAttribute('hc', 'normal');
   }
   chrome.extension.getBackgroundPage().updateTabs();
+}
+
+function changedFromDefault() {
+  var siteModList = getSiteModifiers(site);
+  var defaultModList = getDefaultModifiers();
+  return (getSiteScheme(site) != getDefaultScheme() ||
+          siteModList != defaultModList);
 }
 
 function onToggle() {
@@ -72,8 +83,35 @@ function onRadioChange(name, value) {
   update();
 }
 
+function onLowContrast(evt) {
+  if (site) {
+    if (evt.target.checked) {
+      addSiteModifier(site, 'low-contrast');
+    } else {
+      delSiteModifier(site, 'low-contrast');
+    }
+  } else {
+    setLowContrast(evt.target.checked);
+  }
+  update();
+}
+
+function onForceText(evt) {
+  if (site) {
+    if (evt.target.checked) {
+      addSiteModifier(site, 'force_text');
+    } else {
+      delSiteModifier(site, 'force_text');
+    }
+  } else {
+    setForceText(evt.target.checked);
+  }
+  update();
+}
+
 function onMakeDefault() {
   setDefaultScheme(getSiteScheme(site));
+  setDefaultModifiers(getSiteModifiers(site));
   update();
 }
 
@@ -89,14 +127,26 @@ function addRadioListeners(name) {
   }
 }
 
+// Open all links in new tabs.
+function onLinkClick() {
+  var links = document.getElementsByTagName("a");
+  for (var i = 0; i < links.length; i++) {
+      (function () {
+          var ln = links[i];
+          var location = ln.href;
+          ln.onclick = function () {
+              chrome.tabs.create({active: true, url: location});
+          };
+      })();
+  }
+}
+
 function init() {
   addRadioListeners('keyaction');
   addRadioListeners('apply');
   addRadioListeners('scheme');
-  $('toggle_contrast').addEventListener('change', function(evt) {
-    localStorage['low_contrast'] = evt.target.checked;
-    update();
-  }, false);
+  $('toggle_contrast').addEventListener('change', onLowContrast, false);
+  $('force_textfield').addEventListener('change', onForceText, false);
   $('toggle').addEventListener('click', onToggle, false);
   $('make_default').addEventListener('click', onMakeDefault, false);
   $('forget').addEventListener('click', onForget, false);
@@ -131,3 +181,4 @@ function init() {
 }
 
 window.addEventListener('load', init, false);
+document.addEventListener('DOMContentLoaded', onLinkClick);
