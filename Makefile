@@ -1,7 +1,7 @@
 .PHONY: clean package
 
 MANIFEST := background.js common.js deluminate-*.png deluminate.css \
-	deluminate.js manifest.json popup.html popup.js
+	deluminate.js manifest.json popup.html popup.js webstore.css
 
 package: deluminate.zip
 deluminate.zip: $(MANIFEST)
