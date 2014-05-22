@@ -1,0 +1,50 @@
+html {
+  -webkit-filter: invert() hue-rotate(180deg) brightness(105%) contrast(85%);
+}
+
+/* Uninvert select items within the document.
+ * Note: Chrome clears -webkit-filter on all full-screen ancestor tags, killing
+ * the top-level delumination filter. This is usually desirable (e.g., for
+ * Youtube videos), so instead of fighting it, just avoid trying to "uninvert"
+ * images in this scenario.
+ */
+
+/* The "smart" filter is more selective about what to uninvert. */
+html :-webkit-any(
+	/* Leave PNG and GIF format images inverted, since they usually are
+	 * identifiable even when inverted. */
+	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]),
+	[style*=".jpg"],
+	[style*=".JPG"],
+	[style*=".jpeg"],
+	[style*=".JPEG"],
+	/* It's usually not desireable to invert these tags. */
+	canvas,
+	embed,
+	object,
+	video) {
+  -webkit-filter: contrast(95%) brightness(95%) hue-rotate(180deg) invert();
+}
+/* Avoid performing the uninversion process on anything that is a descendant of
+ * something uninverted. */
+html :-webkit-any(
+	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]),
+	[style*=".jpg"],
+	[style*=".JPG"],
+	[style*=".jpeg"],
+	[style*=".JPEG"],
+	canvas,
+	embed,
+	object,
+	video) :-webkit-any(
+	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]),
+	[style*=".jpg"],
+	[style*=".JPG"],
+	[style*=".jpeg"],
+	[style*=".JPEG"],
+	canvas,
+	embed,
+	object,
+	video) {
+  -webkit-filter: none;
+}
