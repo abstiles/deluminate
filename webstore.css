@@ -1,5 +1,6 @@
 html {
   -webkit-filter: invert() hue-rotate(180deg) brightness(105%) contrast(85%);
+  -webkit-backface-visibility: hidden;
 }
 
 /* Uninvert select items within the document.
