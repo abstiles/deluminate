@@ -12,7 +12,7 @@ function getStoredBool(key, default_val) {
   if (result === 'true' || result === 'false') {
     return (result === 'true');
   }
-  localStorage[key] = defaul_val;
+  localStorage[key] = default_val;
   return (default_val.toString() === 'true');
 }
 
