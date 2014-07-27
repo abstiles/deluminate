@@ -26,5 +26,5 @@
    "name": "Deluminate",
    "manifest_version": 2,
    "permissions": [ "\u003Call_urls\u003E", "tabs" ],
-   "version": "0.4.1"
+   "version": "0.4.2"
 }
