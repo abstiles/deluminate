@@ -11,12 +11,7 @@
       "all_frames": true,
       "css": [ "deluminate.css" ],
       "js": [ "deluminate.js" ],
-      "matches": [ "\u003Call_urls\u003E", "chrome://*/*" ],
-      "run_at": "document_start"
-   },{
-      "all_frames": true,
-      "css": [ "webstore.css" ],
-      "matches": [ "*://chrome.google.com/webstore*" ],
+      "matches": [ "\u003Call_urls\u003E" ],
       "run_at": "document_start"
    } ],
    "description": "Invert the luminance of a website to make it easier on the eyes.",
