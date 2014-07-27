@@ -13,6 +13,21 @@ html[hc^="noinvert-low-contrast"] {
   -webkit-filter: contrast(85%);
 }
 
+/* Workaround for new issue in Chrome 36 that prevents the filter from applying
+ * across the entire window when the page doesn't fill the window. Force the
+ * page to fill the window with this element that fills the screen.
+ */
+#deluminate_fullscreen_workaround {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: -1;
+  opacity: 0;
+}
+
 /* Workaround for blurriness on high dpi displays. See Chromium issue 156019. */
 html[hc*="hidpi"] {
   -webkit-backface-visibility: hidden;
