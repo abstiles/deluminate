@@ -13,6 +13,16 @@ html[hc^="noinvert-low-contrast"] {
   -webkit-filter: contrast(85%);
 }
 
+/* Lower the brightness without inverting the luminance. */
+html[hc^="noinvert-dim"] {
+  -webkit-filter: brightness(85%);
+}
+
+/* The low-contrast version of the above. */
+html[hc^="noinvert-dim"][hc*="low-contrast"] {
+  -webkit-filter: contrast(85%) brightness(85%);
+}
+
 /* Workaround for new issue in Chrome 36 that prevents the filter from applying
  * across the entire window when the page doesn't fill the window. Force the
  * page to fill the window with this element that fills the screen.
