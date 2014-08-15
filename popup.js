@@ -4,8 +4,11 @@ var key2;
 
 function setRadio(name, value) {
   var radios = document.querySelectorAll('input[name="' + name + '"]');
+  // Convention: trailing digits on scheme represent subschemes. Strip them
+  // before looking for the correct radio to enable.
+  value = value.replace(/\d+$/, '');
   for (var i = 0; i < radios.length; i++) {
-    radios[i].checked = (radios[i].value == value);
+    radios[i].checked = (radios[i].value.lastIndexOf(value, 0) === 0);
     radios[i].disabled = !getEnabled();
   }
 }
@@ -109,6 +112,17 @@ function onForceText(evt) {
   update();
 }
 
+function onDimLevel(evt) {
+  dimLevel = "noinvert-dim" + evt.target.value;
+  $('dim_radio').value = dimLevel
+  if (site) {
+    setSiteScheme(site, dimLevel);
+  } else {
+    setDefaultScheme(dimLevel);
+  }
+  update();
+}
+
 function onMakeDefault() {
   setDefaultScheme(getSiteScheme(site));
   setDefaultModifiers(getSiteModifiers(site));
@@ -147,6 +161,7 @@ function init() {
   addRadioListeners('scheme');
   $('toggle_contrast').addEventListener('change', onLowContrast, false);
   $('force_textfield').addEventListener('change', onForceText, false);
+  $('dim_amount').addEventListener('input', onDimLevel, false);
   $('toggle').addEventListener('click', onToggle, false);
   $('make_default').addEventListener('click', onMakeDefault, false);
   $('forget').addEventListener('click', onForget, false);
@@ -171,11 +186,18 @@ function init() {
               '</b>:<br><span class="kb">(' + key2 + ')</span>';
           $('make_default').style.display = 'block';
         }
-        update();
-        return;
       }
     }
-    site = 'unknown site';
+    if (site) {
+      currentScheme = getSiteScheme(site);
+    } else {
+      currentScheme = getDefaultScheme(site);
+    }
+    if (currentScheme.lastIndexOf('noinvert-dim', 0) === 0) {
+      currentDimLevel = currentScheme.replace(/.*(\d+)$/, '$1');
+      $('dim_amount').value = currentDimLevel;
+      $('dim_radio').value = 'noinvert-dim' + currentDimLevel;
+    }
     update();
   });
 }
