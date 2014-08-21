@@ -9,10 +9,10 @@ function injectContentScripts() {
         }
         chrome.tabs.insertCSS(
             tabs[j].id,
-            {file: 'deluminate.css', allFrames: true});
+            {file: 'deluminate.css', allFrames: true, matchAboutBlank: true});
         chrome.tabs.executeScript(
             tabs[j].id,
-            {file: 'deluminate.js', allFrames: true});
+            {file: 'deluminate.js', allFrames: true, matchAboutBlank: true});
       }
     }
   });
