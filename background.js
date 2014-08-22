@@ -73,11 +73,12 @@ function init() {
           toggleSite(sender.tab ? sender.tab.url : 'www.example.com');
         }
         if (request['init']) {
+          var url = sender.tab ? sender.tab.url : request['url'];
           var scheme = getDefaultScheme();
           var modifiers = getDefaultModifiers();
-          if (sender.tab) {
-            scheme = getSiteScheme(siteFromUrl(sender.tab.url));
-            modifiers = getSiteModifiers(siteFromUrl(sender.tab.url));
+          if (url) {
+            scheme = getSiteScheme(siteFromUrl(url));
+            modifiers = getSiteModifiers(siteFromUrl(url));
           }
           var msg = {
             'enabled': getEnabled(),
