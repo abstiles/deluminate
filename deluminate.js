@@ -38,8 +38,9 @@ function onEvent(evt) {
 }
 
 function init() {
-  if (window == window.top) {
+  if (!window.top.injected) {
     scheme_prefix = '';
+    window.top.injected = true;
   } else {
     scheme_prefix = 'nested_';
   }
@@ -47,7 +48,8 @@ function init() {
   fullscreen_workaround.id = scheme_prefix + "deluminate_fullscreen_workaround";
 
   chrome.runtime.onMessage.addListener(onExtensionMessage);
-  chrome.runtime.sendMessage({'init': true}, onExtensionMessage);
+  chrome.runtime.sendMessage({'init': true, 'url': window.top.document.baseURI},
+      onExtensionMessage);
   document.addEventListener('keydown', onEvent, false);
   window.onload = function() {
     document.body.appendChild(fullscreen_workaround);
