@@ -174,6 +174,7 @@ function init() {
   }
 
   chrome.windows.getLastFocused({'populate': true}, function(window) {
+    site = '';
     for (var i = 0; i < window.tabs.length; i++) {
       var tab = window.tabs[i];
       if (tab.active) {
@@ -185,6 +186,7 @@ function init() {
           $('scheme_title').innerHTML = 'Color scheme for <b>' + site +
               '</b>:<br><span class="kb">(' + key2 + ')</span>';
           $('make_default').style.display = 'block';
+          break;
         }
       }
     }
