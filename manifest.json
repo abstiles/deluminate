@@ -21,6 +21,7 @@
    },
    "name": "Deluminate",
    "manifest_version": 2,
+   "options_page": "options.html",
    "permissions": [ "\u003Call_urls\u003E", "tabs" ],
    "version": "0.5.0"
 }

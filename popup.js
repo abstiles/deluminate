@@ -155,6 +155,10 @@ function onLinkClick() {
   }
 }
 
+function onSettings() {
+  chrome.tabs.create({active: true, url: "options.html"});
+}
+
 function init() {
   addRadioListeners('keyaction');
   addRadioListeners('apply');
@@ -164,7 +168,7 @@ function init() {
   $('dim_amount').addEventListener('input', onDimLevel, false);
   $('toggle').addEventListener('click', onToggle, false);
   $('make_default').addEventListener('click', onMakeDefault, false);
-  $('forget').addEventListener('click', onForget, false);
+  $('settings').addEventListener('click', onSettings, false);
   if (navigator.appVersion.indexOf('Mac') != -1) {
     key1 = '&#x2318;+Shift+F11';
     key2 = '&#x2318;+Shift+F12';
