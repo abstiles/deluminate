@@ -48,7 +48,7 @@ function onEvent(evt) {
 }
 
 function init() {
-  if (!window.top.injected) {
+  if (window == window.top || !window.top.injected) {
     scheme_prefix = '';
     window.top.injected = true;
   } else {
