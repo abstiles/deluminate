@@ -117,6 +117,7 @@ html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) :-webkit-any(
 	/* Leave PNG and GIF format images inverted, since they usually are
 	 * identifiable even when inverted. */
 	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]):not([src^="data:image"]),
+	[itemprop="photo"],
 	[style*=".jpg"],
 	[style*=".JPG"],
 	[style*=".jpeg"],
@@ -137,6 +138,7 @@ html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) [role="dialog"] [
  * something uninverted. */
 html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) :-webkit-any(
 	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]):not([src^="data:image"]),
+	[itemprop="photo"],
 	[style*=".jpg"],
 	[style*=".JPG"],
 	[style*=".jpeg"],
@@ -149,6 +151,7 @@ html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) :-webkit-any(
 	object,
 	video) :-webkit-any(
 	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]):not([src^="data:image"]),
+	[itemprop="photo"],
 	[style*=".jpg"],
 	[style*=".JPG"],
 	[style*=".jpeg"],
