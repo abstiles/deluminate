@@ -12,6 +12,7 @@
       "css": [ "deluminate.css" ],
       "js": [ "deluminate.js" ],
       "matches": [ "\u003Call_urls\u003E" ],
+      "match_about_blank": true,
       "run_at": "document_start"
    } ],
    "description": "Invert the luminance of a website to make it easier on the eyes.",
@@ -21,5 +22,5 @@
    "name": "Deluminate",
    "manifest_version": 2,
    "permissions": [ "\u003Call_urls\u003E", "tabs" ],
-   "version": "0.4.2"
+   "version": "0.5.0"
 }
