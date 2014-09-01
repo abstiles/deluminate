@@ -7,12 +7,18 @@ function injectContentScripts() {
         if (url.indexOf('chrome') == 0 || url.indexOf('about') == 0) {
           continue;
         }
-        chrome.tabs.insertCSS(
-            tabs[j].id,
-            {file: 'deluminate.css', allFrames: true});
-        chrome.tabs.executeScript(
-            tabs[j].id,
-            {file: 'deluminate.js', allFrames: true});
+        chrome.tabs.insertCSS(tabs[j].id, {
+          file: 'deluminate.css',
+          allFrames: true,
+          matchAboutBlank: true,
+          runAt: 'document_start'
+        });
+        chrome.tabs.executeScript(tabs[j].id, {
+          file: 'deluminate.js',
+          allFrames: true,
+          matchAboutBlank: true,
+          runAt: 'document_start'
+        });
       }
     }
   });
@@ -73,11 +79,12 @@ function init() {
           toggleSite(sender.tab ? sender.tab.url : 'www.example.com');
         }
         if (request['init']) {
+          var url = sender.tab ? sender.tab.url : request['url'];
           var scheme = getDefaultScheme();
           var modifiers = getDefaultModifiers();
-          if (sender.tab) {
-            scheme = getSiteScheme(siteFromUrl(sender.tab.url));
-            modifiers = getSiteModifiers(siteFromUrl(sender.tab.url));
+          if (url) {
+            scheme = getSiteScheme(siteFromUrl(url));
+            modifiers = getSiteModifiers(siteFromUrl(url));
           }
           var msg = {
             'enabled': getEnabled(),

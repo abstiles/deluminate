@@ -13,6 +13,41 @@ html[hc^="noinvert-low-contrast"] {
   -webkit-filter: contrast(85%);
 }
 
+/* Lower the brightness without inverting the luminance. */
+html[hc^="noinvert-dim1"] {
+  -webkit-filter: brightness(90%);
+}
+html[hc^="noinvert-dim2"] {
+  -webkit-filter: brightness(80%);
+}
+html[hc^="noinvert-dim3"] {
+  -webkit-filter: brightness(70%);
+}
+html[hc^="noinvert-dim4"] {
+  -webkit-filter: brightness(60%);
+}
+html[hc^="noinvert-dim5"] {
+  -webkit-filter: brightness(50%);
+}
+
+/* The low-contrast version of the above. */
+html[hc^="noinvert-dim1"][hc*="low-contrast"] {
+  -webkit-filter: contrast(85%) brightness(90%);
+}
+html[hc^="noinvert-dim2"][hc*="low-contrast"] {
+  -webkit-filter: contrast(85%) brightness(80%);
+}
+html[hc^="noinvert-dim3"][hc*="low-contrast"] {
+  -webkit-filter: contrast(85%) brightness(70%);
+}
+html[hc^="noinvert-dim4"][hc*="low-contrast"] {
+  -webkit-filter: contrast(85%) brightness(60%);
+}
+html[hc^="noinvert-dim5"][hc*="low-contrast"] {
+  -webkit-filter: contrast(85%) brightness(50%);
+}
+
+
 /* Workaround for new issue in Chrome 36 that prevents the filter from applying
  * across the entire window when the page doesn't fill the window. Force the
  * page to fill the window with this element that fills the screen.
@@ -40,6 +75,12 @@ html[hc*="hidpi"] {
  * images in this scenario.
  */
 
+/* Uninvert dialog boxes (except the "Compose" box in Gmail, identified by the
+ * "aria-labelledby" attribute. */
+html[hc*="delumine"]:not(*:-webkit-full-screen-ancestor) [role="dialog"]:not([aria-labelledby]) {
+  -webkit-filter: contrast(95%) brightness(95%) hue-rotate(180deg) invert();
+}
+
 /* For the -noimg variant, uninvert all images. */
 html[hc*="delumine-noimg"]:not(*:-webkit-full-screen-ancestor) :-webkit-any(
 img,
@@ -56,12 +97,14 @@ video) {
 html[hc*="delumine-noimg"]:not(*:-webkit-full-screen-ancestor) :-webkit-any(
 img,
 [style*="url"],
+[role="dialog"],
 canvas,
 embed,
 object,
 video) :-webkit-any(
 img,
 [style*="url"],
+[role="dialog"],
 canvas,
 embed,
 object,
@@ -73,35 +116,77 @@ video) {
 html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) :-webkit-any(
 	/* Leave PNG and GIF format images inverted, since they usually are
 	 * identifiable even when inverted. */
-	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]),
+	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]):not([src^="data:image"]),
+	[itemprop="photo"],
 	[style*=".jpg"],
 	[style*=".JPG"],
 	[style*=".jpeg"],
 	[style*=".JPEG"],
+	[style*=".webp"],
+	[style*=".WEBP"],
 	/* It's usually not desireable to invert these tags. */
+	canvas,
+	embed:not([type$="pdf"]),
+	object,
+	video),
+/* Handle PDF previews in Gmail by reinverting the uninverted document in the
+ * dialog. */
+html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) [role="dialog"] [role="document"] {
+  -webkit-filter: contrast(95%) brightness(95%) hue-rotate(180deg) invert();
+}
+/* Avoid performing the uninversion process on anything that is a descendant of
+ * something uninverted. */
+html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) :-webkit-any(
+	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]):not([src^="data:image"]),
+	[itemprop="photo"],
+	[style*=".jpg"],
+	[style*=".JPG"],
+	[style*=".jpeg"],
+	[style*=".JPEG"],
+	[style*=".webp"],
+	[style*=".WEBP"],
+	[role="dialog"],
+	canvas,
+	embed:not([type$="pdf"]),
+	object,
+	video) :-webkit-any(
+	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]):not([src^="data:image"]),
+	[itemprop="photo"],
+	[style*=".jpg"],
+	[style*=".JPG"],
+	[style*=".jpeg"],
+	[style*=".JPEG"],
+	[style*=".webp"],
+	[style*=".WEBP"],
+	[role="dialog"],
+	canvas,
+	embed:not([type$="pdf"]),
+	object,
+	video) {
+  -webkit-filter: none;
+}
+
+/* Reinvert all images that have been uninverted collectively by being in a dialog. */
+html[hc*="delumine-all"]:not(*:-webkit-full-screen-ancestor) [role="dialog"] :-webkit-any(
+	img,
+	[style*="url"],
 	canvas,
 	embed,
 	object,
 	video) {
   -webkit-filter: contrast(95%) brightness(95%) hue-rotate(180deg) invert();
 }
-/* Avoid performing the uninversion process on anything that is a descendant of
- * something uninverted. */
-html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) :-webkit-any(
-	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]),
-	[style*=".jpg"],
-	[style*=".JPG"],
-	[style*=".jpeg"],
-	[style*=".JPEG"],
+/* Avoid performing the reinversion process on anything that is a descendant of
+ * something reinverted. */
+html[hc*="delumine-all"]:not(*:-webkit-full-screen-ancestor) [role="dialog"] :-webkit-any(
+	img,
+	[style*="url"],
 	canvas,
 	embed,
 	object,
 	video) :-webkit-any(
-	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]),
-	[style*=".jpg"],
-	[style*=".JPG"],
-	[style*=".jpeg"],
-	[style*=".JPEG"],
+	img,
+	[style*="url"],
 	canvas,
 	embed,
 	object,
