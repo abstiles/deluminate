@@ -39,7 +39,8 @@ function updateTabs() {
         var msg = {
           'enabled': getEnabled(),
           'scheme': getSiteScheme(siteFromUrl(url)),
-          'modifiers': getSiteModifiers(siteFromUrl(url))
+          'modifiers': getSiteModifiers(siteFromUrl(url)),
+          'settings': getGlobalSettings()
         };
         chrome.tabs.sendMessage(tabs[j].id, msg);
       }
@@ -89,7 +90,8 @@ function init() {
           var msg = {
             'enabled': getEnabled(),
             'scheme': scheme,
-            'modifiers': modifiers
+            'modifiers': modifiers,
+            'settings': getGlobalSettings()
           };
           sendResponse(msg);
         }
