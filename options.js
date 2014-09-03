@@ -1,3 +1,8 @@
+function initSettings() {
+  var globalSettings = getGlobalSettings();
+  $('toggle_hidpi_workaround').checked = (globalSettings['hidpi'] !== 'disabled')
+}
+
 function onForget() {
   resetSiteSchemes();
   loadSettingsDisplay();
@@ -18,6 +23,14 @@ function onLinkClick() {
   }
 }
 
+function onHidpi(evt) {
+  if (evt.target.checked) {
+    setGlobalSetting('hidpi', 'enabled');
+  } else {
+    setGlobalSetting('hidpi', 'disabled');
+  }
+}
+
 function loadSettingsDisplay() {
   var settings = {
     'version': 1,
@@ -28,7 +41,9 @@ function loadSettingsDisplay() {
 }
 
 function init() {
+  initSettings();
   $('forget').addEventListener('click', onForget, false);
+  $('toggle_hidpi_workaround').addEventListener('change', onHidpi, false);
   loadSettingsDisplay();
 }
 
