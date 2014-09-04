@@ -114,7 +114,7 @@ function onForceText(evt) {
 
 function onDimLevel(evt) {
   dimLevel = "noinvert-dim" + evt.target.value;
-  $('dim_radio').value = dimLevel
+  $('dim_radio').value = dimLevel;
   if (site) {
     setSiteScheme(site, dimLevel);
   } else {
