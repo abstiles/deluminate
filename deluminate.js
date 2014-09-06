@@ -1,5 +1,6 @@
 var scheme_prefix;
 var fullscreen_workaround;
+var animGifHandler;
 
 function onExtensionMessage(request) {
   if (request.enabled && request.scheme != 'normal') {
@@ -15,6 +16,17 @@ function onExtensionMessage(request) {
     workaround_div = document.getElementById("deluminate_fullscreen_workaround");
     if (workaround_div != null)
       workaround_div.remove();
+  }
+  if (request.enabled && request.scheme == 'delumine-smart') {
+    Array.prototype.forEach.call(
+      document.querySelectorAll('img[src*=".gif"], img[src*=".GIF"]'),
+      detectAnimatedGif);
+    animGifHandler.observe(document.documentElement, {
+      childList: true,
+      subtree: true
+    });
+  } else {
+    animGifHandler.disconnect();
   }
 }
 
@@ -52,6 +64,90 @@ function onEvent(evt) {
     return false;
   }
   return true;
+}
+
+function containsAny(haystack, needleList) {
+  for (var i = 0; i < needleList.length; ++i) {
+    if (haystack.indexOf(needleList[i]) >= 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function isAnimatedGif(src, cb) {
+  var request = new XMLHttpRequest();
+  if (src.indexOf('data:') == 0) {
+    return;
+  }
+  request.open('GET', src, true);
+  request.responseType = 'arraybuffer';
+  request.addEventListener('load', function () {
+    var arr = new Uint8Array(request.response),
+      i, len, length = arr.length, frames = 0;
+
+    // make sure it's a gif (GIF8)
+    if (arr[0] !== 0x47 || arr[1] !== 0x49 ||
+        arr[2] !== 0x46 || arr[3] !== 0x38) {
+      cb(false);
+      return;
+    }
+
+    //ported from php http://www.php.net/manual/en/function.imagecreatefromgif.php#104473
+    //an animated gif contains multiple "frames", with each frame having a
+    //header made up of:
+    // * a static 4-byte sequence (\x00\x21\xF9\x04)
+    // * 4 variable bytes
+    // * a static 2-byte sequence (\x00\x2C) (some variants may use \x00\x21 ?)
+    // We read through the file til we reach the end of the file, or we've found
+    // at least 2 frame headers
+    for (i=0, len = length - 9; i < len; ++i) {
+      if (arr[i] === 0x00 && arr[i+1] === 0x21 &&
+          arr[i+2] === 0xF9 && arr[i+3] === 0x04 &&
+          arr[i+8] === 0x00 &&
+          (arr[i+9] === 0x2C || arr[i+9] === 0x21))
+      {
+        frames++;
+      }
+      if (frames > 1) {
+        break;
+      }
+    }
+
+    // if frame count > 1, it's animated
+    cb(frames > 1);
+  });
+  request.send();
+}
+
+function markCssImages(tag) {
+  var bgImage = window.getComputedStyle(tag)['background-image'];
+  var imageType;
+  if (containsAny(bgImage, ['data:image/png', '.png', '.PNG'])) {
+    imageType = 'png';
+  } else if (containsAny(bgImage, ['data:image/gif', '.gif', '.GIF'])) {
+    imageType = 'gif';
+  } else if (containsAny(bgImage,
+      ['data:image/jpeg', '.jpg', '.JPG', '.jpeg', '.JPEG'])) {
+    imageType = 'jpg';
+  }
+  if (imageType) {
+    tag.setAttribute('deluminate_imageType', imageType);
+  }
+}
+
+function detectAnimatedGif(tag) {
+  isAnimatedGif(tag.src, function(isAnimated) {
+    if (isAnimated) {
+      tag.setAttribute('deluminate_imageType', 'animated gif');
+    }
+  });
+}
+
+function deepImageProcessing() {
+  Array.prototype.forEach.call(
+    document.querySelectorAll('body *:not([style*="url"])'),
+    markCssImages);
 }
 
 function init() {
@@ -95,6 +191,20 @@ function init() {
   chrome.runtime.sendMessage({'init': true, 'url': window.top.document.baseURI},
       onExtensionMessage);
   document.addEventListener('keydown', onEvent, false);
+  document.addEventListener('DOMContentLoaded', deepImageProcessing);
+
+  animGifHandler = new MutationObserver(function(mutations, obs) {
+    for(var i=0; i<mutations.length; ++i) {
+      for(var j=0; j<mutations[i].addedNodes.length; ++j) {
+        var newTag = mutations[i].addedNodes[j];
+        if (newTag.querySelectorAll) {
+          Array.prototype.forEach.call(
+            newTag.querySelectorAll('img[src*=".gif"], img[src*=".GIF"]'),
+            detectAnimatedGif);
+        }
+      }
+    }
+  });
 }
 
 init();
