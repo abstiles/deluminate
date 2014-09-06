@@ -46,8 +46,12 @@ button#toggle {
 <fieldset>
   <legend id="global_settings">Global Settings</legend>
   <label>
-    <input id="toggle_hidpi_workaround" type="checkbox">
     Enable workaround for blurriness on high DPI displays.
+    <select id="hw_accel">
+      <option value="hidpi" selected>On high DPI</option>
+      <option value="enabled">Always</option>
+      <option value="disabled">Never</option>
+    </select>
   </label>
 </fieldset>
 <h3>Saved Site Customizations</h3>

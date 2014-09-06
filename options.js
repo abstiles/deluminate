@@ -1,6 +1,8 @@
 function initSettings() {
   var globalSettings = getGlobalSettings();
-  $('toggle_hidpi_workaround').checked = (globalSettings['hidpi'] !== 'disabled')
+  if (globalSettings['hw_accel']) {
+    $('hw_accel').value = globalSettings['hw_accel'];
+  }
 }
 
 function onForget() {
@@ -23,12 +25,8 @@ function onLinkClick() {
   }
 }
 
-function onHidpi(evt) {
-  if (evt.target.checked) {
-    setGlobalSetting('hidpi', 'enabled');
-  } else {
-    setGlobalSetting('hidpi', 'disabled');
-  }
+function onHwAccel(evt) {
+  setGlobalSetting('hw_accel', evt.target.value);
 }
 
 function loadSettingsDisplay() {
@@ -43,7 +41,7 @@ function loadSettingsDisplay() {
 function init() {
   initSettings();
   $('forget').addEventListener('click', onForget, false);
-  $('toggle_hidpi_workaround').addEventListener('change', onHidpi, false);
+  $('hw_accel').addEventListener('change', onHwAccel, false);
   loadSettingsDisplay();
 }
 
