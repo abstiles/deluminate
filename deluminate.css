@@ -64,7 +64,7 @@ html[hc^="noinvert-dim5"][hc*="low-contrast"] {
 }
 
 /* Workaround for blurriness on high dpi displays. See Chromium issue 156019. */
-html[hc*="hidpi"] {
+html[hc*="hw_accel"] {
   -webkit-backface-visibility: hidden;
 }
 

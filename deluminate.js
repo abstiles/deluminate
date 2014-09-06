@@ -4,8 +4,9 @@ var fullscreen_workaround;
 function onExtensionMessage(request) {
   if (request.enabled && request.scheme != 'normal') {
     hc = scheme_prefix + request.scheme + ' ' + request.modifiers;
-    if (request.settings.hidpi !== 'disabled' && window.devicePixelRatio > 1) {
-      hc += ' hidpi';
+    if (request.settings.hw_accel === 'enabled' ||
+        request.settings.hw_accel !== 'disabled' && window.devicePixelRatio > 1) {
+      hc += ' hw_accel';
     }
     document.documentElement.setAttribute('hc', hc);
     addFullscreenWorkaround();
