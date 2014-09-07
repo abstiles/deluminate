@@ -19,15 +19,21 @@ function onExtensionMessage(request) {
 }
 
 function addFullscreenWorkaround() {
+  var style;
   /* If the DOM is not loaded, wait before adding the workaround to it.
    * Otherwise add it immediately. */
   if (document.body == null) {
     document.addEventListener('DOMContentLoaded', function() {
+      style = window.getComputedStyle(document.documentElement);
+      fullscreen_workaround.style.backgroundColor = style['background-color'];
       document.body.appendChild(fullscreen_workaround);
     });
   } else if (document.body != null &&
-      document.getElementById("deluminate_fullscreen_workaround") == null)
+      document.getElementById("deluminate_fullscreen_workaround") == null) {
+    style = window.getComputedStyle(document.documentElement);
+    fullscreen_workaround.style.backgroundColor = style['background-color'];
     document.body.appendChild(fullscreen_workaround);
+  }
 }
 
 function onEvent(evt) {

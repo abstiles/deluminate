@@ -60,7 +60,6 @@ html[hc^="noinvert-dim5"][hc*="low-contrast"] {
   height: 100%;
   display: block;
   z-index: -1;
-  opacity: 0;
 }
 
 /* Workaround for blurriness on high dpi displays. See Chromium issue 156019. */
