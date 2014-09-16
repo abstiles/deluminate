@@ -117,6 +117,7 @@ html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) :-webkit-any(
 	 * identifiable even when inverted. */
 	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]):not([src^="data:image"]),
 	[itemprop="photo"],
+	[src^="data:image/jpeg"],
 	[style*=".jpg"],
 	[style*=".JPG"],
 	[style*=".jpeg"],
@@ -138,6 +139,7 @@ html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) [role="dialog"] [
 html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) :-webkit-any(
 	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]):not([src^="data:image"]),
 	[itemprop="photo"],
+	[src^="data:image/jpeg"],
 	[style*=".jpg"],
 	[style*=".JPG"],
 	[style*=".jpeg"],
@@ -151,6 +153,7 @@ html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) :-webkit-any(
 	video) :-webkit-any(
 	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]):not([src^="data:image"]),
 	[itemprop="photo"],
+	[src^="data:image/jpeg"],
 	[style*=".jpg"],
 	[style*=".JPG"],
 	[style*=".jpeg"],
@@ -204,6 +207,7 @@ html[hc*="delumine"][hc*="force_text"] input[type="text"] {
 /* ...unless it's uninverted because of a background image. Then set it
  * directly to white text on black. */
 html[hc*="delumine-smart"][hc*="force_text"] input[type="text"]:-webkit-any(
+	[src^="data:image/jpeg"],
 	[style*=".jpg"],
 	[style*=".JPG"],
 	[style*=".jpeg"],
