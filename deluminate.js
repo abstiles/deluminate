@@ -61,6 +61,29 @@ function init() {
   } else {
     scheme_prefix = 'nested_';
   }
+
+  /* Add CSS in a way that is slightly faster than injectCSS. */
+  var link = document.createElement('link');
+  link.href =  chrome.extension.getURL('deluminate.css');
+  link.rel = 'stylesheet';
+  document.documentElement.insertBefore(link, null);
+
+  /* To reduce flicker, slam a black background in place ASAP. */
+  var color = document.documentElement.style.backgroundColor;
+  if (scheme_prefix != "nested_") {
+    document.documentElement.style.backgroundColor = "#000";
+  }
+  /* Restore the original color when body elements appear. */
+  var observer = new MutationObserver(function(mutations) {
+      mutations.forEach(function(mutation) {
+          if (mutation.target.nodeName == "BODY") {
+              observer.disconnect();
+              document.documentElement.style.backgroundColor = color || "";
+          }
+      });
+  });
+  observer.observe(document, { childList: true, subtree: true });
+
   fullscreen_workaround = document.createElement('div');
   fullscreen_workaround.id = scheme_prefix + "deluminate_fullscreen_workaround";
 
