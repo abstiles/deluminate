@@ -9,7 +9,6 @@
    },
    "content_scripts": [ {
       "all_frames": true,
-      "css": [ "deluminate.css" ],
       "js": [ "deluminate.js" ],
       "matches": [ "\u003Call_urls\u003E" ],
       "match_about_blank": true,
@@ -23,5 +22,6 @@
    "manifest_version": 2,
    "options_page": "options.html",
    "permissions": [ "\u003Call_urls\u003E", "tabs" ],
+   "web_accessible_resources": [ "deluminate.css" ],
    "version": "0.5.0"
 }

@@ -7,12 +7,6 @@ function injectContentScripts() {
         if (url.indexOf('chrome') == 0 || url.indexOf('about') == 0) {
           continue;
         }
-        chrome.tabs.insertCSS(tabs[j].id, {
-          file: 'deluminate.css',
-          allFrames: true,
-          matchAboutBlank: true,
-          runAt: 'document_start'
-        });
         chrome.tabs.executeScript(tabs[j].id, {
           file: 'deluminate.js',
           allFrames: true,
