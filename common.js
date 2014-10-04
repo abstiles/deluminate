@@ -117,7 +117,7 @@ function siteFromUrl(url) {
 function getSiteModifiers(site) {
   var modifiers = getDefaultModifiers();
   try {
-    var siteModifiers = JSON.parse(localStorage['sitemodifiers']);
+    var siteModifiers = JSON.parse(localStorage['sitemodifiers'] || '{}');
     if (site in siteModifiers) {
       var modifierList = [];
       for (var mod in siteModifiers[site]) {
@@ -165,7 +165,7 @@ function setDefaultModifiers(modifiers) {
 function addSiteModifier(site, modifier) {
   var siteModifiers = {};
   try {
-    siteModifiers = JSON.parse(localStorage['sitemodifiers']);
+    siteModifiers = JSON.parse(localStorage['sitemodifiers'] || '{}');
     siteModifiers['www.example.com'] = getDefaultModifiers();
   } catch (e) {
     siteModifiers = {};
@@ -189,7 +189,7 @@ function addSiteModifier(site, modifier) {
 function delSiteModifier(site, modifier) {
   var siteModifiers = {};
   try {
-    siteModifiers = JSON.parse(localStorage['sitemodifiers']);
+    siteModifiers = JSON.parse(localStorage['sitemodifiers'] || '{}');
     siteModifiers['www.example.com'] = getDefaultModifiers();
   } catch (e) {
     siteModifiers = {};

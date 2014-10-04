@@ -33,7 +33,7 @@ function loadSettingsDisplay() {
   var settings = {
     'version': 1,
     'schemes': JSON.parse(localStorage['siteschemes']),
-    'modifiers': JSON.parse(localStorage['sitemodifiers'])
+    'modifiers': JSON.parse(localStorage['sitemodifiers'] || '{}')
   }
   $('settings').value = JSON.stringify(settings, null, 4);
 }
