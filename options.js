@@ -3,6 +3,9 @@ function initSettings() {
   if (globalSettings['hw_accel']) {
     $('hw_accel').value = globalSettings['hw_accel'];
   }
+  if (globalSettings['detect_animation']) {
+    $('detect_animation').value = globalSettings['detect_animation'];
+  }
 }
 
 function onForget() {
@@ -28,6 +31,10 @@ function onHwAccel(evt) {
   setGlobalSetting('hw_accel', evt.target.value);
 }
 
+function onDetectAnim(evt) {
+  setGlobalSetting('detect_animation', evt.target.value);
+}
+
 function loadSettingsDisplay() {
   var settings = {
     'version': 1,
@@ -41,6 +48,7 @@ function init() {
   initSettings();
   $('forget').addEventListener('click', onForget, false);
   $('hw_accel').addEventListener('change', onHwAccel, false);
+  $('detect_animation').addEventListener('change', onDetectAnim, false);
   loadSettingsDisplay();
 }
 

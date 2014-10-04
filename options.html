@@ -35,6 +35,10 @@ button#toggle {
   overflow: scroll;
   -webkit-box-sizing: border-box;
 }
+label {
+  white-space: nowrap;
+  display: block;
+}
 </style>
 <script type="text/javascript" src="common.js"></script>
 <script type="text/javascript" src="options.js"></script>
@@ -51,6 +55,14 @@ button#toggle {
       <option value="hidpi" selected>On high DPI</option>
       <option value="enabled">Always</option>
       <option value="disabled">Never</option>
+    </select>
+  </label>
+  <label>
+    Experimental detection of animated gifs in "Smart" mode. (WARNING:
+    <em>will</em> slow things down.)
+    <select id="detect_animation">
+      <option value="disabled" selected>Disabled</option>
+      <option value="enabled">Enabled</option>
     </select>
   </label>
 </fieldset>

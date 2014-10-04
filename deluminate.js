@@ -17,7 +17,8 @@ function onExtensionMessage(request) {
     if (workaround_div != null)
       workaround_div.remove();
   }
-  if (request.enabled && request.scheme == 'delumine-smart') {
+  if (request.enabled && request.settings.detect_animation === 'enabled' &&
+      request.scheme == 'delumine-smart') {
     Array.prototype.forEach.call(
       document.querySelectorAll('img[src*=".gif"], img[src*=".GIF"]'),
       detectAnimatedGif);
