@@ -8,7 +8,6 @@ function initSettings() {
 function onForget() {
   resetSiteSchemes();
   loadSettingsDisplay();
-  update();
 }
 
 // Open all links in new tabs.
