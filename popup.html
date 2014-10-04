@@ -29,6 +29,10 @@ button {
   width: 100%;
   margin: 0.75em 0 0.25em 0;
   padding: 0.5em 1.5em;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #888;
+  background-color: #EEE;
 }
 button#toggle {
   font-size: 12pt;
@@ -86,6 +90,28 @@ input[type='range']::-webkit-slider-thumb {
   height: 9pt;
   width: 9pt;
 }
+.new-ribbon {
+  font: bold 10px Sans-Serif;
+  color: #333;
+  text-align: center;
+  text-shadow: rgba(255,255,255,0.5) 0px 1px 0px;
+  -webkit-transform: rotate(45deg);
+  position: absolute;
+  right: -40px;
+  top: 6px;
+  width: 100px;
+  height: 10px;
+  line-height: 10px;
+  background-color: #6585E8;
+  background-image: -webkit-linear-gradient(top, #6585E8, #98C4FF);
+  visibility: hidden;
+}
+.new-ribbon:before {
+    content: "NEW";
+}
+.new .new-ribbon {
+    visibility: visible;
+}
 </style>
 <script type="text/javascript" src="common.js"></script>
 <script type="text/javascript" src="popup.js"></script>
@@ -140,7 +166,7 @@ input[type='range']::-webkit-slider-thumb {
 
   <button id="make_default">Set as default scheme</button>
 
-  <button id="settings">Deluminate Settings</button>
+  <button id="settings"><div class="new-ribbon"></div>Deluminate Settings</button>
 
 </div>
 
