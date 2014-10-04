@@ -82,7 +82,11 @@ function init() {
           }
       });
   });
-  observer.observe(document, { childList: true, subtree: true });
+  if (document.body && document.body.firstChild) {
+    document.documentElement.style.backgroundColor = color || "";
+  } else {
+    observer.observe(document, { childList: true, subtree: true });
+  }
 
   fullscreen_workaround = document.createElement('div');
   fullscreen_workaround.id = scheme_prefix + "deluminate_fullscreen_workaround";
