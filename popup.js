@@ -156,6 +156,7 @@ function onLinkClick() {
 }
 
 function onSettings() {
+  setSettingsViewed();
   chrome.tabs.create({active: true, url: "options.html"});
 }
 
@@ -175,6 +176,10 @@ function init() {
   } else {
     key1 = 'Shift+F11';
     key2 = 'Shift+F12';
+  }
+
+  if (!getSettingsViewed()) {
+    $('settings').className += " new";
   }
 
   chrome.windows.getLastFocused({'populate': true}, function(window) {

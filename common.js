@@ -229,3 +229,11 @@ function isDisallowedUrl(url) {
   }
   return false;
 }
+
+function getSettingsViewed() {
+  return getStoredBool('settings_viewed');
+}
+
+function setSettingsViewed() {
+  localStorage['settings_viewed'] = true;
+}
