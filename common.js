@@ -117,7 +117,7 @@ function siteFromUrl(url) {
 function getSiteModifiers(site) {
   var modifiers = getDefaultModifiers();
   try {
-    var siteModifiers = JSON.parse(localStorage['sitemodifiers']);
+    var siteModifiers = JSON.parse(localStorage['sitemodifiers'] || '{}');
     if (site in siteModifiers) {
       var modifierList = [];
       for (var mod in siteModifiers[site]) {
@@ -141,6 +141,22 @@ function getDefaultModifiers() {
   return modifiers.join(' ');
 }
 
+function getGlobalSettings() {
+  var globalSettings;
+  try {
+    globalSettings = JSON.parse(localStorage['settings']);
+  } catch(e) {
+    globalSettings = {};
+  }
+  return globalSettings;
+}
+
+function setGlobalSetting(key, value) {
+  var globalSettings = getGlobalSettings();
+  globalSettings[key] = value;
+  localStorage['settings'] = JSON.stringify(globalSettings);
+}
+
 function setDefaultModifiers(modifiers) {
   var low_contrast = (modifiers.indexOf('low-contrast') > -1).toString();
   localStorage['low_contrast'] = low_contrast;
@@ -149,7 +165,7 @@ function setDefaultModifiers(modifiers) {
 function addSiteModifier(site, modifier) {
   var siteModifiers = {};
   try {
-    siteModifiers = JSON.parse(localStorage['sitemodifiers']);
+    siteModifiers = JSON.parse(localStorage['sitemodifiers'] || '{}');
     siteModifiers['www.example.com'] = getDefaultModifiers();
   } catch (e) {
     siteModifiers = {};
@@ -173,7 +189,7 @@ function addSiteModifier(site, modifier) {
 function delSiteModifier(site, modifier) {
   var siteModifiers = {};
   try {
-    siteModifiers = JSON.parse(localStorage['sitemodifiers']);
+    siteModifiers = JSON.parse(localStorage['sitemodifiers'] || '{}');
     siteModifiers['www.example.com'] = getDefaultModifiers();
   } catch (e) {
     siteModifiers = {};
@@ -212,4 +228,12 @@ function isDisallowedUrl(url) {
       return true;
   }
   return false;
+}
+
+function getSettingsViewed() {
+  return getStoredBool('settings_viewed');
+}
+
+function setSettingsViewed() {
+  localStorage['settings_viewed'] = true;
 }

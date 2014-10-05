@@ -1,0 +1,80 @@
+<!doctype html>
+<html>
+<head>
+<title>Deluminate Options</title>
+<style type="text/css">
+body {
+  max-width: 800px;
+  padding: 0.75em;
+}
+* {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 10pt;
+  color: #FFF;
+  background-color: #000;
+}
+a {
+  color: #8BF;
+}
+a:visited {
+  color: #B8F;
+}
+h2 {
+  font-size: 12pt;
+}
+button {
+  margin: 0.75em 0 0.25em 0;
+  padding: 0.5em 1.5em;
+}
+button#toggle {
+  font-size: 12pt;
+}
+#settings {
+  width: 100%;
+  height: 50em;
+  overflow: scroll;
+  -webkit-box-sizing: border-box;
+}
+label {
+  white-space: nowrap;
+  display: block;
+}
+</style>
+<script type="text/javascript" src="common.js"></script>
+<script type="text/javascript" src="options.js"></script>
+</head>
+<body style="background-color: #000">
+
+<h2 id="title" tabIndex="0">Deluminate Options</h2>
+
+<fieldset>
+  <legend id="global_settings">Global Settings</legend>
+  <label>
+    Force hardware accelerated rendering path.
+    <select id="hw_accel">
+      <option value="hidpi" selected>On high DPI</option>
+      <option value="enabled">Always</option>
+      <option value="disabled">Never</option>
+    </select>
+  </label>
+  <label>
+    Experimental detection of animated gifs in "Smart" mode. (WARNING:
+    <em>will</em> slow things down.)
+    <select id="detect_animation">
+      <option value="disabled" selected>Disabled</option>
+      <option value="enabled">Enabled</option>
+    </select>
+  </label>
+</fieldset>
+<h3>Saved Site Customizations</h3>
+<textarea readonly id="settings"></textarea>
+
+<button id="forget">Forget site customizations</button>
+
+<hr>
+<a href="https://github.com/abstiles/deluminate/issues/new" id="issues">
+  Something wrong? Let me know!
+</a>
+
+</body>
+</html>

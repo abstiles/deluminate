@@ -3,7 +3,7 @@
 SHELL := /bin/bash
 
 MANIFEST := background.js common.js deluminate-*.png deluminate.css \
-	deluminate.js manifest.json popup.html popup.js
+	deluminate.js manifest.json options.html options.js popup.html popup.js
 BUILD_DIR := build
 
 LAST_VERSION_COMMIT := $(shell git blame manifest.json | grep \\bversion \

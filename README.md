@@ -44,8 +44,8 @@ contrast. Useful for sites that are mostly dark but have large, bright sections
 that are distracting.
 
 ### Dim ###
-**[NEW]** This mode does not invert the luminance of the site. It lowers the
-brightness only.
+This mode does not invert the luminance of the site. It lowers the brightness
+only.
 
 Installation
 ------------
