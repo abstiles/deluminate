@@ -60,11 +60,10 @@ html[hc^="noinvert-dim5"][hc*="low-contrast"] {
   height: 100%;
   display: block;
   z-index: -1;
-  opacity: 0;
 }
 
 /* Workaround for blurriness on high dpi displays. See Chromium issue 156019. */
-html[hc*="hidpi"] {
+html[hc*="hw_accel"] {
   -webkit-backface-visibility: hidden;
 }
 
@@ -86,6 +85,7 @@ html[hc*="delumine-noimg"]:not(*:-webkit-full-screen-ancestor) :-webkit-any(
 img,
 /* Check for "url" in the style attribute, which is usually a fancy way to specify an image */
 [style*="url"],
+[deluminate_imageType],
 canvas,
 embed,
 object,
@@ -97,6 +97,7 @@ video) {
 html[hc*="delumine-noimg"]:not(*:-webkit-full-screen-ancestor) :-webkit-any(
 img,
 [style*="url"],
+[deluminate_imageType],
 [role="dialog"],
 canvas,
 embed,
@@ -104,6 +105,7 @@ object,
 video) :-webkit-any(
 img,
 [style*="url"],
+[deluminate_imageType],
 [role="dialog"],
 canvas,
 embed,
@@ -118,6 +120,9 @@ html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) :-webkit-any(
 	 * identifiable even when inverted. */
 	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]):not([src^="data:image"]),
 	[itemprop="photo"],
+	[src^="data:image/jpeg"],
+	[deluminate_imageType="jpg"],
+	[deluminate_imageType="animated gif"],
 	[style*=".jpg"],
 	[style*=".JPG"],
 	[style*=".jpeg"],
@@ -139,6 +144,8 @@ html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) [role="dialog"] [
 html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) :-webkit-any(
 	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]):not([src^="data:image"]),
 	[itemprop="photo"],
+	[src^="data:image/jpeg"],
+	[deluminate_imageType="jpg"],
 	[style*=".jpg"],
 	[style*=".JPG"],
 	[style*=".jpeg"],
@@ -152,6 +159,8 @@ html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) :-webkit-any(
 	video) :-webkit-any(
 	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]):not([src^="data:image"]),
 	[itemprop="photo"],
+	[src^="data:image/jpeg"],
+	[deluminate_imageType="jpg"],
 	[style*=".jpg"],
 	[style*=".JPG"],
 	[style*=".jpeg"],
@@ -169,6 +178,7 @@ html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) :-webkit-any(
 /* Reinvert all images that have been uninverted collectively by being in a dialog. */
 html[hc*="delumine-all"]:not(*:-webkit-full-screen-ancestor) [role="dialog"] :-webkit-any(
 	img,
+	[deluminate_imageType],
 	[style*="url"],
 	canvas,
 	embed,
@@ -180,12 +190,14 @@ html[hc*="delumine-all"]:not(*:-webkit-full-screen-ancestor) [role="dialog"] :-w
  * something reinverted. */
 html[hc*="delumine-all"]:not(*:-webkit-full-screen-ancestor) [role="dialog"] :-webkit-any(
 	img,
+	[deluminate_imageType],
 	[style*="url"],
 	canvas,
 	embed,
 	object,
 	video) :-webkit-any(
 	img,
+	[deluminate_imageType],
 	[style*="url"],
 	canvas,
 	embed,
@@ -205,6 +217,8 @@ html[hc*="delumine"][hc*="force_text"] input[type="text"] {
 /* ...unless it's uninverted because of a background image. Then set it
  * directly to white text on black. */
 html[hc*="delumine-smart"][hc*="force_text"] input[type="text"]:-webkit-any(
+	[src^="data:image/jpeg"],
+	[deluminate_imageType="jpg"],
 	[style*=".jpg"],
 	[style*=".JPG"],
 	[style*=".jpeg"],

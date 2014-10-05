@@ -114,7 +114,7 @@ function onForceText(evt) {
 
 function onDimLevel(evt) {
   dimLevel = "noinvert-dim" + evt.target.value;
-  $('dim_radio').value = dimLevel
+  $('dim_radio').value = dimLevel;
   if (site) {
     setSiteScheme(site, dimLevel);
   } else {
@@ -155,6 +155,11 @@ function onLinkClick() {
   }
 }
 
+function onSettings() {
+  setSettingsViewed();
+  chrome.tabs.create({active: true, url: "options.html"});
+}
+
 function init() {
   addRadioListeners('keyaction');
   addRadioListeners('apply');
@@ -164,13 +169,17 @@ function init() {
   $('dim_amount').addEventListener('input', onDimLevel, false);
   $('toggle').addEventListener('click', onToggle, false);
   $('make_default').addEventListener('click', onMakeDefault, false);
-  $('forget').addEventListener('click', onForget, false);
+  $('settings').addEventListener('click', onSettings, false);
   if (navigator.appVersion.indexOf('Mac') != -1) {
     key1 = '&#x2318;+Shift+F11';
     key2 = '&#x2318;+Shift+F12';
   } else {
     key1 = 'Shift+F11';
     key2 = 'Shift+F12';
+  }
+
+  if (!getSettingsViewed()) {
+    $('settings').className += " new";
   }
 
   chrome.windows.getLastFocused({'populate': true}, function(window) {
