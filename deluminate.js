@@ -163,6 +163,7 @@ function init() {
   var link = document.createElement('link');
   link.href =  chrome.extension.getURL('deluminate.css');
   link.rel = 'stylesheet';
+  link.media = 'screen';
   document.documentElement.insertBefore(link, null);
 
   /* To reduce flicker, slam a black background in place ASAP. */
