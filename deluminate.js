@@ -159,12 +159,14 @@ function init() {
     scheme_prefix = 'nested_';
   }
 
-  /* Add CSS in a way that is slightly faster than injectCSS. */
-  var link = document.createElement('link');
-  link.href =  chrome.extension.getURL('deluminate.css');
-  link.rel = 'stylesheet';
-  link.media = 'screen';
-  document.documentElement.insertBefore(link, null);
+  setTimeout(function () {
+    /* Add CSS in a way that is slightly faster than injectCSS. */
+    var link = document.createElement('link');
+    link.href =  chrome.extension.getURL('deluminate.css');
+    link.rel = 'stylesheet';
+    link.media = 'screen';
+    document.documentElement.insertBefore(link, null);
+  }, 50);
 
   /* To reduce flicker, slam a black background in place ASAP. */
   var color = document.documentElement.style.backgroundColor;
