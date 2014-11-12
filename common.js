@@ -28,6 +28,23 @@ function getLowContrast() {
   return getStoredBool('low_contrast');
 }
 
+function getUdim1() {
+  return getStoredBool('udim1');
+}
+
+function getUdim2() {
+  return getStoredBool('udim2');
+}
+
+
+function setUdim1(dim1) {
+  localStorage['udim1'] = dim1;
+}
+
+function setUdim2(dim2) {
+  localStorage['udim2'] = dim2;
+}
+
 function setLowContrast(low_contrast) {
   localStorage['low_contrast'] = low_contrast;
 }

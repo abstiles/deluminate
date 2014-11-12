@@ -1,11 +1,37 @@
 /* Invert the luminance iff any of the "delumine" styles are selected. */
 html[hc^="delumine"] {
-  -webkit-filter: invert() hue-rotate(180deg) brightness(105%) contrast(105%);
+  -webkit-filter: invert() hue-rotate(180deg) brightness(95%) contrast(100%);
+}
+
+/* Override the above with a dim1 version if selected. */
+html[hc^="delumine"][hc*="udim1"] {
+  -webkit-filter: invert() hue-rotate(180deg) brightness(80%) contrast(100%);
+}
+/* Override the above with a dim2 version if selected. */
+html[hc^="delumine"][hc*="udim2"] {
+  -webkit-filter: invert() hue-rotate(180deg) brightness(70%) contrast(100%);
+}
+/* Override the above with a dim1+dim2 version if selected. */
+html[hc^="delumine"][hc*="udim1"][hc*="udim2"] {
+  -webkit-filter: invert() hue-rotate(180deg) brightness(60%) contrast(100%);
+}
+
+/* Override the above with a low-contrast+dim1 version if selected. */
+html[hc^="delumine"][hc*="low-contrast"][hc*="udim1"] {
+  -webkit-filter: invert() hue-rotate(180deg) brightness(80%) contrast(85%);
+}
+/* Override the above with a low-contrast+dim2 version if selected. */
+html[hc^="delumine"][hc*="low-contrast"][hc*="udim2"] {
+  -webkit-filter: invert() hue-rotate(180deg) brightness(70%) contrast(85%);
+}
+/* Override the above with a low-contrast+dim1+dim2 version if selected. */
+html[hc^="delumine"][hc*="low-contrast"][hc*="udim1"][hc*="udim2"] {
+  -webkit-filter: invert() hue-rotate(180deg) brightness(60%) contrast(85%);
 }
 
 /* Override the above with a low-contrast version if selected. */
 html[hc^="delumine"][hc*="low-contrast"] {
-  -webkit-filter: invert() hue-rotate(180deg) brightness(105%) contrast(85%);
+  -webkit-filter: invert() hue-rotate(180deg) brightness(90%) contrast(85%);
 }
 
 /* Lower the contrast without inverting the luminance. */
