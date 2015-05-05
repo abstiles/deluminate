@@ -138,6 +138,9 @@ function getDefaultModifiers() {
   if (getLowContrast()) {
     modifiers.push('low-contrast');
   }
+  if (getForceText()) {
+    modifiers.push('force_text');
+  }
   return modifiers.join(' ');
 }
 
@@ -159,7 +162,9 @@ function setGlobalSetting(key, value) {
 
 function setDefaultModifiers(modifiers) {
   var low_contrast = (modifiers.indexOf('low-contrast') > -1).toString();
+  var force_text = (modifiers.indexOf('force_text') > -1).toString();
   localStorage['low_contrast'] = low_contrast;
+  localStorage['force_text'] = force_text;
 }
 
 function addSiteModifier(site, modifier) {
