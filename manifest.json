@@ -7,6 +7,14 @@
       "default_popup": "popup.html",
       "default_title": "Deluminate (Shift+F11)"
    },
+   "commands" : {
+     "command_toggle_global": {
+       "description": "Toggle Deluminate on/off"
+     },
+     "command_toggle_site": {
+       "description": "Toggle inversion on a site"
+     }
+   },
    "content_scripts": [ {
       "all_frames": true,
       "js": [ "deluminate.js" ],
