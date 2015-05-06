@@ -32,6 +32,8 @@ function onExtensionMessage(request) {
 }
 
 function addFullscreenWorkaround() {
+  // Skip adding this in nested iframes
+  if (window != window.top) return;
   var style;
   /* If the DOM is not loaded, wait before adding the workaround to it.
    * Otherwise add it immediately. */
