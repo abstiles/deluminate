@@ -142,7 +142,7 @@ video) {
 }
 
 /* The "smart" filter is more selective about what to uninvert. */
-html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) :-webkit-any(
+html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) body :-webkit-any(
 	/* Leave PNG and GIF format images inverted, since they usually are
 	 * identifiable even when inverted. */
 	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]):not([src^="data:image"]),
@@ -169,7 +169,7 @@ html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) [role="dialog"] [
 }
 /* Avoid performing the uninversion process on anything that is a descendant of
  * something uninverted. */
-html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) :-webkit-any(
+html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) body :-webkit-any(
 	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]):not([src^="data:image"]),
 	[itemprop="photo"],
 	[itemprop="image"],
