@@ -47,6 +47,23 @@ that are distracting.
 This mode does not invert the luminance of the site. It lowers the brightness
 only.
 
+Additional Options
+------------------
+
+### Low Contrast ###
+
+Reduce the contrast on any page in addition to any of the above page filters.
+
+### Aggressively Invert Text Input ###
+
+Force certain text inputs to white text on black in an inversion mode.
+
+### Kill Backgrounds ###
+
+Force the main page background to black and remove any background images on the
+page.
+
+
 Installation
 ------------
 
