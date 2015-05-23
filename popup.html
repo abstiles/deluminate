@@ -1,7 +1,5 @@
 <!doctype html>
-<!-- Hardcode hidpi workaround here, since the dynamic strategy used on tabs
-     runs into problems here. -->
-<html style="-webkit-backface-visibility: hidden;">
+<html>
 <head>
 <title>Deluminate Pop-up</title>
 <link rel="stylesheet" type="text/css" href="deluminate.css" />
@@ -161,6 +159,10 @@ input[type='range']::-webkit-slider-thumb {
     <label>
       <input type="checkbox" id="force_textfield">
       Aggressively Invert Text Input
+    </label>
+    <label>
+      <input type="checkbox" id="kill_bgfield">
+      Kill Backgrounds
     </label>
   </fieldset>
 

@@ -32,6 +32,8 @@ function onExtensionMessage(request) {
 }
 
 function addFullscreenWorkaround() {
+  // Skip adding this in nested iframes
+  if (window != window.top) return;
   var style;
   /* If the DOM is not loaded, wait before adding the workaround to it.
    * Otherwise add it immediately. */
@@ -39,12 +41,24 @@ function addFullscreenWorkaround() {
     document.addEventListener('DOMContentLoaded', function() {
       style = window.getComputedStyle(document.documentElement);
       fullscreen_workaround.style.backgroundColor = style['background-color'];
+      if (document.documentElement.scrollHeight <
+          document.documentElement.clientHeight) {
+        fullscreen_workaround.setAttribute('enabled', true);
+      } else {
+        fullscreen_workaround.setAttribute('enabled', false);
+      }
       document.body.appendChild(fullscreen_workaround);
     });
   } else if (document.body != null &&
       document.getElementById("deluminate_fullscreen_workaround") == null) {
     style = window.getComputedStyle(document.documentElement);
     fullscreen_workaround.style.backgroundColor = style['background-color'];
+    if (document.documentElement.scrollHeight <
+        document.documentElement.clientHeight) {
+      fullscreen_workaround.setAttribute('enabled', true);
+    } else {
+      fullscreen_workaround.setAttribute('enabled', false);
+    }
     document.body.appendChild(fullscreen_workaround);
   }
 }
@@ -196,6 +210,14 @@ function init() {
       onExtensionMessage);
   document.addEventListener('keydown', onEvent, false);
   document.addEventListener('DOMContentLoaded', deepImageProcessing);
+  window.addEventListener('resize', function() {
+    if (document.documentElement.scrollHeight <
+        document.documentElement.clientHeight) {
+      fullscreen_workaround.setAttribute('enabled', true);
+    } else {
+      fullscreen_workaround.setAttribute('enabled', false);
+    }
+  }, false);
 
   animGifHandler = new MutationObserver(function(mutations, obs) {
     for(var i=0; i<mutations.length; ++i) {

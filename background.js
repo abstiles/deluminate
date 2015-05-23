@@ -98,6 +98,21 @@ function init() {
   if (navigator.appVersion.indexOf("Mac") != -1) {
     chrome.browserAction.setTitle({'title': 'Deluminate (Cmd+Shift+F11)'});
   }
+  chrome.commands.onCommand.addListener(function(command) {
+    switch(command) {
+      case 'command_toggle_global':
+        console.log('global toggled');
+        toggleEnabled();
+        break;
+      case 'command_toggle_site':
+        console.log('site toggled');
+        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+          console.log('site toggled: ' + tabs[0].url);
+          toggleSite(tabs[0].url);
+        });
+        break;
+    }
+  });
 };
 
 init();
