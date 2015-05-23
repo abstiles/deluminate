@@ -33,17 +33,18 @@ function update() {
     setRadio('scheme', getSiteScheme(site));
     $('toggle_contrast').checked = (getSiteModifiers(site).indexOf('low-contrast') > -1);
     $('force_textfield').checked = (getSiteModifiers(site).indexOf('force_text') > -1);
+    $('kill_bgfield').checked = (getSiteModifiers(site).indexOf('kill_background') > -1);
     $('make_default').disabled = !(changedFromDefault());
   } else {
     setRadio('scheme', getDefaultScheme());
     $('toggle_contrast').checked = getLowContrast();
     $('force_textfield').checked = getForceText();
+    $('kill_bgfield').checked = getKillBackground();
   }
   if (getEnabled()) {
     document.documentElement.setAttribute(
         'hc',
-        site ? getSiteScheme(site) + ' ' + getSiteModifiers(site)
-             : getDefaultScheme() + ' ' + getDefaultModifiers());
+        site ? getSiteScheme(site) : getDefaultScheme());
   } else {
     document.documentElement.setAttribute('hc', 'normal');
   }
@@ -112,6 +113,19 @@ function onForceText(evt) {
   update();
 }
 
+function onKillBackground(evt) {
+  if (site) {
+    if (evt.target.checked) {
+      addSiteModifier(site, 'kill_background');
+    } else {
+      delSiteModifier(site, 'kill_background');
+    }
+  } else {
+    setForceText(evt.target.checked);
+  }
+  update();
+}
+
 function onDimLevel(evt) {
   dimLevel = "noinvert-dim" + evt.target.value;
   $('dim_radio').value = dimLevel;
@@ -166,6 +180,7 @@ function init() {
   addRadioListeners('scheme');
   $('toggle_contrast').addEventListener('change', onLowContrast, false);
   $('force_textfield').addEventListener('change', onForceText, false);
+  $('kill_bgfield').addEventListener('change', onKillBackground, false);
   $('dim_amount').addEventListener('input', onDimLevel, false);
   $('toggle').addEventListener('click', onToggle, false);
   $('make_default').addEventListener('click', onMakeDefault, false);
