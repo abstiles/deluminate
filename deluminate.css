@@ -2,6 +2,27 @@
 html[hc^="delumine"] {
   -webkit-filter: invert() hue-rotate(180deg) brightness(105%) contrast(105%);
 }
+html[hc^="delumine"][hc*="kill_background"],
+html[hc^="delumine"][hc*="kill_background"] body {
+  background-image: none !important;
+  background-color: #FFF !important;
+  color: #BBB !important;
+}
+html[hc^="noinvert"][hc*="kill_background"],
+html[hc^="noinvert"][hc*="kill_background"] body {
+  background-image: none !important;
+  background-color: #000 !important;
+  color: #BBB !important;
+}
+html[hc*="kill_background"] * {
+  color: #BBB !important;
+}
+html[hc*="kill_background"] *[deluminate_imagetype]:not(img):not(a) {
+  background-image: none !important;
+  background-color: none !important;
+  color: #BBB !important;
+  text-indent: 0 !important;
+}
 
 /* Override the above with a low-contrast version if selected. */
 html[hc^="delumine"][hc*="low-contrast"] {
@@ -61,6 +82,12 @@ html[hc^="noinvert-dim5"][hc*="low-contrast"] {
   display: block;
   z-index: -1;
 }
+#deluminate_fullscreen_workaround[enabled="true"] {
+  visibility: visible;
+}
+#deluminate_fullscreen_workaround[enabled="false"] {
+  visibility: hidden;
+}
 
 /* Workaround for blurriness on high dpi displays. See Chromium issue 156019. */
 html[hc*="hw_accel"] {
@@ -115,11 +142,12 @@ video) {
 }
 
 /* The "smart" filter is more selective about what to uninvert. */
-html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) :-webkit-any(
+html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) body :-webkit-any(
 	/* Leave PNG and GIF format images inverted, since they usually are
 	 * identifiable even when inverted. */
 	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]):not([src^="data:image"]),
 	[itemprop="photo"],
+	[itemprop="image"],
 	[src^="data:image/jpeg"],
 	[deluminate_imageType="jpg"],
 	[deluminate_imageType="animated gif"],
@@ -141,9 +169,10 @@ html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) [role="dialog"] [
 }
 /* Avoid performing the uninversion process on anything that is a descendant of
  * something uninverted. */
-html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) :-webkit-any(
+html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) body :-webkit-any(
 	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]):not([src^="data:image"]),
 	[itemprop="photo"],
+	[itemprop="image"],
 	[src^="data:image/jpeg"],
 	[deluminate_imageType="jpg"],
 	[style*=".jpg"],
@@ -159,6 +188,7 @@ html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) :-webkit-any(
 	video) :-webkit-any(
 	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]):not([src^="data:image"]),
 	[itemprop="photo"],
+	[itemprop="image"],
 	[src^="data:image/jpeg"],
 	[deluminate_imageType="jpg"],
 	[style*=".jpg"],
@@ -233,4 +263,11 @@ html[hc*="delumine-noimg"][hc*="force_text"] input[style*="url"]:-webkit-any(
   background-image: none !important;
   background-color: black !important;
   color: white !important;
+}
+
+/* Crude workaround for my inability to inject deluminate into preview iframes
+ * on the new tab page. */
+html[hc*="delumine-noimg"] iframe[src^="chrome-search://most-visited/thumbnail"],
+html[hc*="delumine-smart"] iframe[src^="chrome-search://most-visited/thumbnail"] {
+  -webkit-filter: contrast(95%) brightness(95%) hue-rotate(180deg) invert();
 }
