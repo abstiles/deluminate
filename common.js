@@ -40,6 +40,14 @@ function setForceText(force_text) {
   localStorage['force_text'] = force_text;
 }
 
+function getKillBackground() {
+  return getStoredBool('kill_background');
+}
+
+function setKillBackground(kill_background) {
+  localStorage['kill_background'] = kill_background;
+}
+
 function getKeyAction() {
   var keyAction = localStorage['keyaction'];
   if (keyAction == 'global' || keyAction == 'site') {
@@ -163,8 +171,10 @@ function setGlobalSetting(key, value) {
 function setDefaultModifiers(modifiers) {
   var low_contrast = (modifiers.indexOf('low-contrast') > -1).toString();
   var force_text = (modifiers.indexOf('force_text') > -1).toString();
+  var kill_background = (modifiers.indexOf('kill_background') > -1).toString();
   localStorage['low_contrast'] = low_contrast;
   localStorage['force_text'] = force_text;
+  localStorage['kill_background'] = kill_background;
 }
 
 function addSiteModifier(site, modifier) {

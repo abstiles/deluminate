@@ -2,6 +2,27 @@
 html[hc^="delumine"] {
   -webkit-filter: invert() hue-rotate(180deg) brightness(105%) contrast(105%);
 }
+html[hc^="delumine"][hc*="kill_background"],
+html[hc^="delumine"][hc*="kill_background"] body {
+  background-image: none !important;
+  background-color: #FFF !important;
+  color: #BBB !important;
+}
+html[hc^="noinvert"][hc*="kill_background"],
+html[hc^="noinvert"][hc*="kill_background"] body {
+  background-image: none !important;
+  background-color: #000 !important;
+  color: #BBB !important;
+}
+html[hc*="kill_background"] * {
+  color: #BBB !important;
+}
+html[hc*="kill_background"] *[deluminate_imagetype]:not(img):not(a) {
+  background-image: none !important;
+  background-color: none !important;
+  color: #BBB !important;
+  text-indent: 0 !important;
+}
 
 /* Override the above with a low-contrast version if selected. */
 html[hc^="delumine"][hc*="low-contrast"] {
