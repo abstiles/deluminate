@@ -82,6 +82,12 @@ html[hc^="noinvert-dim5"][hc*="low-contrast"] {
   display: block;
   z-index: -1;
 }
+#deluminate_fullscreen_workaround[enabled="true"] {
+  visibility: visible;
+}
+#deluminate_fullscreen_workaround[enabled="false"] {
+  visibility: hidden;
+}
 
 /* Workaround for blurriness on high dpi displays. See Chromium issue 156019. */
 html[hc*="hw_accel"] {
