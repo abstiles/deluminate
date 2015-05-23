@@ -147,6 +147,7 @@ html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) :-webkit-any(
 	 * identifiable even when inverted. */
 	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]):not([src^="data:image"]),
 	[itemprop="photo"],
+	[itemprop="image"],
 	[src^="data:image/jpeg"],
 	[deluminate_imageType="jpg"],
 	[deluminate_imageType="animated gif"],
@@ -171,6 +172,7 @@ html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) [role="dialog"] [
 html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) :-webkit-any(
 	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]):not([src^="data:image"]),
 	[itemprop="photo"],
+	[itemprop="image"],
 	[src^="data:image/jpeg"],
 	[deluminate_imageType="jpg"],
 	[style*=".jpg"],
@@ -186,6 +188,7 @@ html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) :-webkit-any(
 	video) :-webkit-any(
 	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]):not([src^="data:image"]),
 	[itemprop="photo"],
+	[itemprop="image"],
 	[src^="data:image/jpeg"],
 	[deluminate_imageType="jpg"],
 	[style*=".jpg"],
