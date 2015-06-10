@@ -267,7 +267,7 @@ html[hc*="delumine-noimg"][hc*="force_text"] input[style*="url"]:-webkit-any(
 
 /* Crude workaround for my inability to inject deluminate into preview iframes
  * on the new tab page. */
-html[hc*="delumine-noimg"] iframe[src^="chrome-search://most-visited/thumbnail"],
-html[hc*="delumine-smart"] iframe[src^="chrome-search://most-visited/thumbnail"] {
+html[hc*="delumine-noimg"] iframe[src^="chrome-search://most-visited"],
+html[hc*="delumine-smart"] iframe[src^="chrome-search://most-visited"] {
   -webkit-filter: contrast(95%) brightness(95%) hue-rotate(180deg) invert();
 }
