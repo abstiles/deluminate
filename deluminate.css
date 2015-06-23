@@ -69,24 +69,17 @@ html[hc^="noinvert-dim5"][hc*="low-contrast"] {
 }
 
 
-/* Workaround for new issue in Chrome 36 that prevents the filter from applying
- * across the entire window when the page doesn't fill the window. Force the
- * page to fill the window with this element that fills the screen.
+/* Workaround for new issue in Chrome 45 that prevents the filter from applying
+ * to the canvas background.
  */
 #deluminate_fullscreen_workaround {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   display: block;
-  z-index: -1;
-}
-#deluminate_fullscreen_workaround[enabled="true"] {
-  visibility: visible;
-}
-#deluminate_fullscreen_workaround[enabled="false"] {
-  visibility: hidden;
+  z-index: -2147483648;
 }
 
 /* Workaround for blurriness on high dpi displays. See Chromium issue 156019. */

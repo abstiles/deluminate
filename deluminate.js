@@ -1,6 +1,9 @@
 var scheme_prefix;
 var fullscreen_workaround;
 var animGifHandler;
+var resize_observer;
+var background_observer;
+var size_checker_interval;
 
 function onExtensionMessage(request) {
   if (request.enabled && request.scheme != 'normal') {
@@ -10,12 +13,10 @@ function onExtensionMessage(request) {
       hc += ' hw_accel';
     }
     document.documentElement.setAttribute('hc', hc);
-    addFullscreenWorkaround();
+    setupFullscreenWorkaround();
   } else {
     document.documentElement.removeAttribute('hc');
-    workaround_div = document.getElementById("deluminate_fullscreen_workaround");
-    if (workaround_div != null)
-      workaround_div.remove();
+    removeFullscreenWorkaround();
   }
   if (request.enabled && request.settings.detect_animation === 'enabled' &&
       request.scheme == 'delumine-smart') {
@@ -31,36 +32,85 @@ function onExtensionMessage(request) {
   }
 }
 
-function addFullscreenWorkaround() {
+function setupFullscreenWorkaround() {
   // Skip adding this in nested iframes
   if (window != window.top) return;
-  var style;
   /* If the DOM is not loaded, wait before adding the workaround to it.
    * Otherwise add it immediately. */
   if (document.body == null) {
     document.addEventListener('DOMContentLoaded', function() {
-      style = window.getComputedStyle(document.documentElement);
-      fullscreen_workaround.style.backgroundColor = style['background-color'];
-      if (document.documentElement.scrollHeight <
-          document.documentElement.clientHeight) {
-        fullscreen_workaround.setAttribute('enabled', true);
-      } else {
-        fullscreen_workaround.setAttribute('enabled', false);
-      }
-      document.body.appendChild(fullscreen_workaround);
+      addFullscreenWorkaround();
     });
   } else if (document.body != null &&
       document.getElementById("deluminate_fullscreen_workaround") == null) {
-    style = window.getComputedStyle(document.documentElement);
-    fullscreen_workaround.style.backgroundColor = style['background-color'];
-    if (document.documentElement.scrollHeight <
-        document.documentElement.clientHeight) {
-      fullscreen_workaround.setAttribute('enabled', true);
-    } else {
-      fullscreen_workaround.setAttribute('enabled', false);
-    }
-    document.body.appendChild(fullscreen_workaround);
+    addFullscreenWorkaround();
   }
+}
+
+function addFullscreenWorkaround() {
+  fullscreen_workaround.style.background = calculateBackground();
+  resetFullscreenWorkaroundHeight();
+  /* Adding to the root node rather than body so it is not subject to absolute
+   * positioning of the body. */
+  document.documentElement.appendChild(fullscreen_workaround);
+  markCssImages(fullscreen_workaround);
+  // Need to periodically reset the size (e.g., for loaded images)
+  size_checker_interval = setInterval(resetFullscreenWorkaroundHeight, 1000);
+  resize_observer.observe(document.documentElement, {
+    childList: true,
+    subtree: true,
+  });
+  background_observer.observe(document.documentElement, {
+    childList: true,
+    attributes: true
+  });
+  background_observer.observe(document.head, {
+    childList: true,
+    attributes: true,
+    subtree: true,
+    characterData: true
+  });
+  background_observer.observe(document.body, {
+    attributes: true
+  });
+}
+
+function removeFullscreenWorkaround() {
+  var workaround_div;
+  resize_observer.disconnect();
+  clearInterval(size_checker_interval);
+  background_observer.disconnect();
+  workaround_div = document.getElementById("deluminate_fullscreen_workaround");
+  if (workaround_div != null) {
+    workaround_div.remove();
+  }
+}
+
+function resetFullscreenWorkaroundHeight() {
+  fullscreen_workaround.style.height = 0;
+  var new_height = Math.max(document.body.scrollHeight,
+                            document.documentElement.clientHeight)
+  var new_width = Math.max(document.body.scrollWidth,
+                           document.documentElement.clientWidth)
+  fullscreen_workaround.style.height = new_height + 'px';
+  fullscreen_workaround.style.width = new_width + 'px';
+}
+
+function calculateBackground() {
+  var no_color = 'rgba(0, 0, 0, 0)';
+  var no_image = 'none';
+  var root_style = window.getComputedStyle(document.documentElement);
+  var body_style = window.getComputedStyle(document.body);
+  if (root_style.backgroundColor != no_color ||
+      root_style.backgroundImage != no_image) {
+    return root_style.background;
+  } else if (body_style.backgroundColor != no_color ||
+             body_style.backgroundImage != no_image) {
+    return body_style.background;
+  } else {
+    return 'white';
+  }
+  return background;
 }
 
 function onEvent(evt) {
@@ -182,26 +232,6 @@ function init() {
     document.documentElement.insertBefore(link, null);
   }, 50);
 
-  /* To reduce flicker, slam a black background in place ASAP. */
-  var color = document.documentElement.style.backgroundColor;
-  if (scheme_prefix != "nested_") {
-    document.documentElement.style.backgroundColor = "#000";
-  }
-  /* Restore the original color when body elements appear. */
-  var observer = new MutationObserver(function(mutations) {
-      mutations.forEach(function(mutation) {
-          if (mutation.target.nodeName == "BODY") {
-              observer.disconnect();
-              document.documentElement.style.backgroundColor = color || "";
-          }
-      });
-  });
-  if (document.body && document.body.firstChild) {
-    document.documentElement.style.backgroundColor = color || "";
-  } else {
-    observer.observe(document, { childList: true, subtree: true });
-  }
-
   fullscreen_workaround = document.createElement('div');
   fullscreen_workaround.id = scheme_prefix + "deluminate_fullscreen_workaround";
 
@@ -210,14 +240,6 @@ function init() {
       onExtensionMessage);
   document.addEventListener('keydown', onEvent, false);
   document.addEventListener('DOMContentLoaded', deepImageProcessing);
-  window.addEventListener('resize', function() {
-    if (document.documentElement.scrollHeight <
-        document.documentElement.clientHeight) {
-      fullscreen_workaround.setAttribute('enabled', true);
-    } else {
-      fullscreen_workaround.setAttribute('enabled', false);
-    }
-  }, false);
 
   animGifHandler = new MutationObserver(function(mutations, obs) {
     for(var i=0; i<mutations.length; ++i) {
@@ -231,6 +253,21 @@ function init() {
       }
     }
   });
+
+  resize_observer = new MutationObserver(function(mutations, obs) {
+    if (mutations.length > 0) {
+      resetFullscreenWorkaroundHeight();
+    }
+  });
+
+  background_observer = new MutationObserver(function(mutations, obs) {
+    if (mutations.length > 0) {
+      fullscreen_workaround.style.background = calculateBackground();
+      markCssImages(fullscreen_workaround);
+    }
+  });
+
+  window.addEventListener('resize', resetFullscreenWorkaroundHeight);
 }
 
 init();
