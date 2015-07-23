@@ -7,16 +7,32 @@ function injectContentScripts() {
         if (url.indexOf('chrome') == 0 || url.indexOf('about') == 0) {
           continue;
         }
-        chrome.tabs.executeScript(tabs[j].id, {
-          file: 'deluminate.js',
-          allFrames: true,
-          matchAboutBlank: true,
-          runAt: 'document_start'
-        });
+        injectTabCSS(tabs[j]);
       }
     }
   });
 };
+
+function injectTabCSS(tab) {
+  console.log("Injecting CSS into tab:", tab);
+  var url = tab.url;
+  chrome.tabs.insertCSS(tab.id, {
+    file: 'deluminate.css',
+    allFrames: true,
+    matchAboutBlank: true,
+    runAt: 'document_start'
+  }, function() {
+    if (chrome.runtime.lastError) {
+      // Don't bother logging the expected error in this case.
+      if (url.indexOf('chrome') != 0 && url.indexOf('about') != 0) {
+        console.log('Error injecting CSS into tab:', url,
+                    chrome.runtime.lastError.message, tab);
+      }
+      console.log("Telling tab to inject manually.");
+      chrome.tabs.sendMessage(tab.id, {manual_css: true});
+    }
+  });
+}
 
 function updateTabs() {
   var msg = {
@@ -73,10 +89,16 @@ function init() {
         if (request['toggle_site']) {
           toggleSite(sender.tab ? sender.tab.url : 'www.example.com');
         }
+        if (request['log']) {
+          console.log(sender.tab, request.log);
+        }
         if (request['init']) {
           var url = sender.tab ? sender.tab.url : request['url'];
           var scheme = getDefaultScheme();
           var modifiers = getDefaultModifiers();
+          if (sender.tab) {
+            injectTabCSS(sender.tab);
+          }
           if (url) {
             scheme = getSiteScheme(siteFromUrl(url));
             modifiers = getSiteModifiers(siteFromUrl(url));
@@ -90,6 +112,15 @@ function init() {
           sendResponse(msg);
         }
       });
+
+  /* Ensure tab CSS is re-inserted into replaced tabs. */
+  chrome.tabs.onReplaced.addListener(function (addedTabId, removedTabId) {
+    chrome.tabs.get(addedTabId, function(tab) {
+      console.log("Tab replaced, reinjecting CSS into it:", tab);
+      injectTabCSS(tab);
+    });
+  });
+
 
   document.addEventListener('storage', function(evt) {
     updateTabs();

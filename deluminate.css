@@ -96,7 +96,7 @@ html[hc*="hw_accel"] {
 
 /* Uninvert dialog boxes (except the "Compose" box in Gmail, identified by the
  * "aria-labelledby" attribute. */
-html[hc*="delumine"]:not(*:-webkit-full-screen-ancestor) [role="dialog"]:not([aria-labelledby]) {
+html[hc*="delumine"]:not(*:-webkit-full-screen-ancestor) [role="dialog"]:not([aria-labelledby]):not(paper-dialog) {
   -webkit-filter: contrast(95%) brightness(95%) hue-rotate(180deg) invert();
 }
 

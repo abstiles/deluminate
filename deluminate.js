@@ -6,6 +6,12 @@ var background_observer;
 var size_checker_interval;
 
 function onExtensionMessage(request) {
+  console.log(request);
+  if (request['manual_css']) {
+    console.log('Received request to install CSS manually');
+    addCSSLink();
+    return;
+  }
   if (request.enabled && request.scheme != 'normal') {
     hc = scheme_prefix + request.scheme + ' ' + request.modifiers;
     if (request.settings.hw_accel === 'enabled' ||
@@ -30,6 +36,20 @@ function onExtensionMessage(request) {
   } else {
     animGifHandler.disconnect();
   }
+}
+
+function addCSSLink() {
+  /* Add CSS in a way that still works on chrome URLs. */
+  var cssURL = chrome.extension.getURL('deluminate.css');
+  var selector = 'link[href="' + cssURL + '"]'
+  if (document.querySelector(selector) !== null) {
+    return; // Don't re-add if it's already there.
+  }
+  var link = document.createElement('link');
+  link.href = cssURL;
+  link.rel = 'stylesheet';
+  link.media = 'screen';
+  document.documentElement.insertBefore(link, null);
 }
 
 function setupFullscreenWorkaround() {
@@ -215,6 +235,28 @@ function deepImageProcessing() {
     markCssImages);
 }
 
+function log() {
+  chrome.runtime.sendMessage({'log':
+                             Array.prototype.slice.call(arguments).join(' ')});
+}
+
+function jsonify(o) {
+  var cache = [];
+  s = JSON.stringify(o, function(key, value) {
+      if (typeof value === 'object' && value !== null) {
+          if (cache.indexOf(value) !== -1) {
+              // Circular reference found, discard key
+              return;
+          }
+          // Store value in our collection
+          cache.push(value);
+      }
+      return value;
+  });
+  cache = null;
+  return s;
+}
+
 function init() {
   if (window == window.top || !window.top.injected) {
     scheme_prefix = '';
@@ -222,15 +264,11 @@ function init() {
   } else {
     scheme_prefix = 'nested_';
   }
+  log("Initializing.", scheme_prefix);
 
-  setTimeout(function () {
-    /* Add CSS in a way that is slightly faster than injectCSS. */
-    var link = document.createElement('link');
-    link.href =  chrome.extension.getURL('deluminate.css');
-    link.rel = 'stylesheet';
-    link.media = 'screen';
-    document.documentElement.insertBefore(link, null);
-  }, 50);
+  if (window.top.document.baseURI.indexOf("chrome-extension") == 0) {
+    addCSSLink();
+  }
 
   fullscreen_workaround = document.createElement('div');
   fullscreen_workaround.id = scheme_prefix + "deluminate_fullscreen_workaround";
