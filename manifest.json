@@ -31,5 +31,5 @@
    "options_page": "options.html",
    "permissions": [ "\u003Call_urls\u003E", "tabs" ],
    "web_accessible_resources": [ "deluminate.css" ],
-   "version": "0.6.3"
+   "version": "0.6.4"
 }
