@@ -117,18 +117,21 @@ function resetFullscreenWorkaroundHeight() {
 function calculateBackground() {
   var no_color = 'rgba(0, 0, 0, 0)';
   var no_image = 'none';
+  var new_style_item = document.createElement('div');
   var root_style = window.getComputedStyle(document.documentElement);
   var body_style = window.getComputedStyle(document.body);
   if (root_style.backgroundColor != no_color ||
       root_style.backgroundImage != no_image) {
-    return root_style.background;
-  } else if (body_style.backgroundColor != no_color ||
-             body_style.backgroundImage != no_image) {
-    return body_style.background;
+    new_style_item.style.background = root_style.background;
   } else {
-    return 'white';
+    new_style_item.style.background = body_style.background;
   }
-  return background;
+  /* Force an unspecified background color to white so it gets inverted to
+   * black properly. */
+  if (new_style_item.style.backgroundColor == no_color) {
+    new_style_item.style.backgroundColor = 'white';
+  }
+  return new_style_item.style.background;
 }
 
 function onEvent(evt) {
