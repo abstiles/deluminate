@@ -6,9 +6,7 @@ var background_observer;
 var size_checker_interval;
 
 function onExtensionMessage(request) {
-  console.log(request);
   if (request['manual_css']) {
-    console.log('Received request to install CSS manually');
     addCSSLink();
     return;
   }
