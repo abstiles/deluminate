@@ -8,8 +8,13 @@ html {
   border-radius: 6px;
 }
 body {
+  margin: 0;
+  border-radius: 6px;
+}
+body > * {
   padding: 0.75em;
   border-radius: 6px;
+  background-color: #FFF;
 }
 * {
   font-family: Arial, Helvetica, sans-serif;
@@ -114,7 +119,7 @@ input[type='range']::-webkit-slider-thumb {
 <script type="text/javascript" src="common.js"></script>
 <script type="text/javascript" src="popup.js"></script>
 </head>
-<body>
+<body><div>
 
 <h2 id="title" tabIndex="0"></h2>
 
@@ -176,5 +181,5 @@ input[type='range']::-webkit-slider-thumb {
   Something wrong? Let me know!
 </a>
 
-</body>
+</div></body>
 </html>
