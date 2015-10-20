@@ -68,6 +68,30 @@ html[hc^="noinvert-dim5"][hc*="low-contrast"] {
   -webkit-filter: contrast(85%) brightness(50%);
 }
 
+/* For the -img variant, uninvert all images. */
+html[hc*="noinvert-img"]:not(*:-webkit-full-screen-ancestor) :-webkit-any(
+img,
+/* Check for "url" in the style attribute, which is usually a fancy way to specify an image */
+[style*="url"],
+[deluminate_imageType],
+canvas,
+embed,
+object,
+video) {
+  -webkit-filter: contrast(95%) brightness(95%) hue-rotate(180deg) invert();
+}
+
+html[hc*="noinvert-img"]:not(*:-webkit-full-screen-ancestor) [role="dialog"] :-webkit-any(
+	img,
+	[deluminate_imageType],
+	[style*="url"],
+	canvas,
+	embed,
+	object,
+	video) {
+  -webkit-filter: contrast(95%) brightness(95%) hue-rotate(180deg) invert();
+}
+
 
 /* Workaround for new issue in Chrome 45 that prevents the filter from applying
  * to the canvas background.
