@@ -68,7 +68,7 @@ html[hc^="noinvert-dim5"][hc*="low-contrast"] {
   -webkit-filter: contrast(85%) brightness(50%);
 }
 
-/* For the -img variant, uninvert all images. */
+/* For the -img variant, invert all images. */
 html[hc*="noinvert-img"]:not(*:-webkit-full-screen-ancestor) :-webkit-any(
 img,
 /* Check for "url" in the style attribute, which is usually a fancy way to specify an image */
@@ -81,7 +81,7 @@ video) {
   -webkit-filter: contrast(95%) brightness(95%) hue-rotate(180deg) invert();
 }
 
-html[hc*="noinvert-img"]:not(*:-webkit-full-screen-ancestor) [role="dialog"] :-webkit-any(
+/*html[hc*="noinvert-img"]:not(*:-webkit-full-screen-ancestor) [role="dialog"] :-webkit-any(
 	img,
 	[deluminate_imageType],
 	[style*="url"],
@@ -90,7 +90,7 @@ html[hc*="noinvert-img"]:not(*:-webkit-full-screen-ancestor) [role="dialog"] :-w
 	object,
 	video) {
   -webkit-filter: contrast(95%) brightness(95%) hue-rotate(180deg) invert();
-}
+}*/
 
 
 /* Workaround for new issue in Chrome 45 that prevents the filter from applying
@@ -276,6 +276,13 @@ html[hc*="delumine-smart"][hc*="force_text"] input[type="text"]:-webkit-any(
 }
 
 html[hc*="delumine-noimg"][hc*="force_text"] input[style*="url"]:-webkit-any(
+  [type="text"], [dir]) {
+  background-image: none !important;
+  background-color: black !important;
+  color: white !important;
+}
+
+html[hc*="noinvert-img"][hc*="force_text"] input[style*="url"]:-webkit-any(
   [type="text"], [dir]) {
   background-image: none !important;
   background-color: black !important;
