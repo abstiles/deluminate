@@ -140,6 +140,18 @@ object,
 video) {
   -webkit-filter: none;
 }
+/* Reinvert iframes inside tags with background-images specified. */
+html[hc*="delumine-noimg"]:not(*:-webkit-full-screen-ancestor) :-webkit-any(
+img,
+/* Check for "url" in the style attribute, which is usually a fancy way to specify an image */
+[style*="url"],
+[deluminate_imageType],
+canvas,
+embed,
+object,
+video) iframe {
+  -webkit-filter: contrast(95%) brightness(95%) hue-rotate(180deg) invert();
+}
 
 /* The "smart" filter is more selective about what to uninvert. */
 html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) body :-webkit-any(
@@ -206,6 +218,27 @@ html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) body :-webkit-any
 	object,
 	video) {
   -webkit-filter: none;
+}
+/* Reinvert iframes inside tags with background-images specified. */
+html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) body :-webkit-any(
+	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]):not([src^="data:image"]),
+	[itemprop="photo"],
+	[itemprop="image"],
+	[role="img"],
+	[src^="data:image/jpeg"],
+	[deluminate_imageType="jpg"],
+	[style*=".jpg"],
+	[style*=".JPG"],
+	[style*=".jpeg"],
+	[style*=".JPEG"],
+	[style*=".webp"],
+	[style*=".WEBP"],
+	[role="dialog"],
+	canvas,
+	embed:not([type$="pdf"]),
+	object,
+	video) iframe {
+  -webkit-filter: contrast(95%) brightness(95%) hue-rotate(180deg) invert();
 }
 
 /* Reinvert all images that have been uninverted collectively by being in a dialog. */
