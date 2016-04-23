@@ -105,13 +105,12 @@ function removeFullscreenWorkaround() {
 }
 
 function resetFullscreenWorkaroundHeight() {
-  fullscreen_workaround.style.height = 0;
-  var new_height = Math.max(document.body.scrollHeight,
-                            document.documentElement.clientHeight)
-  var new_width = Math.max(document.body.scrollWidth,
-                           document.documentElement.clientWidth)
-  fullscreen_workaround.style.height = new_height + 'px';
-  fullscreen_workaround.style.width = new_width + 'px';
+  var page_height = Math.max(document.body.scrollHeight,
+                             document.documentElement.clientHeight);
+  var page_width = Math.max(document.body.scrollWidth,
+                            document.documentElement.clientWidth);
+  fullscreen_workaround.style.height = page_height + 'px';
+  fullscreen_workaround.style.width = page_width + 'px';
 }
 
 function calculateBackground() {
