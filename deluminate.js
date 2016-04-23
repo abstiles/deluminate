@@ -258,23 +258,18 @@ function jsonify(o) {
 }
 
 function init() {
-  if (window == window.top || !window.top.injected) {
+  if (window == window.top) {
     scheme_prefix = '';
-    window.top.injected = true;
   } else {
     scheme_prefix = 'nested_';
   }
   log("Initializing.", scheme_prefix);
 
-  if (window.top.document.baseURI.indexOf("chrome-extension") == 0) {
-    addCSSLink();
-  }
-
   fullscreen_workaround = document.createElement('div');
   fullscreen_workaround.id = scheme_prefix + "deluminate_fullscreen_workaround";
 
   chrome.runtime.onMessage.addListener(onExtensionMessage);
-  chrome.runtime.sendMessage({'init': true, 'url': window.top.document.baseURI},
+  chrome.runtime.sendMessage({'init': true, 'url': window.document.baseURI},
       onExtensionMessage);
   document.addEventListener('keydown', onEvent, false);
   document.addEventListener('DOMContentLoaded', deepImageProcessing);
