@@ -77,6 +77,28 @@ function toggleSite(url) {
   updateTabs();
 }
 
+var gifProcessor;
+var workQueue = {};
+
+function initializeGifProcessor() {
+  gifProcessor = new Worker(chrome.extension.getURL('animated_gif_checker.js'));
+  gifProcessor.onmessage = function(e) {
+    workQueue[e.data.id]({'is_animated': e.data.result});
+    delete workQueue[e.data.id];
+  }
+}
+
+function processGif(src, response_cb) {
+  if(processGif.lastJobId === undefined) {
+    processGif.lastJobId = -1;
+  }
+  workQueue[++processGif.lastJobId] = response_cb;
+  gifProcessor.postMessage(
+    { 'id': processGif.lastJobId
+    , 'src': src
+    });
+}
+
 function init() {
   injectContentScripts();
   updateTabs();
@@ -91,6 +113,10 @@ function init() {
         }
         if (request['log']) {
           console.log(sender.tab, request.log);
+        }
+        if (request['detect_gif']) {
+          processGif(request.src, sendResponse);
+          return true;
         }
         if (request['init']) {
           var url = sender.tab ? sender.tab.url : request['url'];
@@ -144,6 +170,8 @@ function init() {
         break;
     }
   });
+
+  initializeGifProcessor();
 };
 
 init();

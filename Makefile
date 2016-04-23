@@ -3,6 +3,7 @@
 SHELL := /bin/bash
 
 MANIFEST := \
+	animated_gif_checker.js \
 	background.js \
 	common.js \
 	deluminate-*.png \
