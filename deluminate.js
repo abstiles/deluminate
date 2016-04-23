@@ -210,7 +210,7 @@ function markCssImages(tag) {
   var imageType;
   if (containsAny(bgImage, ['data:image/png', '.png', '.PNG'])) {
     imageType = 'png';
-  } else if (containsAny(bgImage, ['data:image/gif', '.gif', '.GIF'])) {
+  } else if (containsAny(bgImage, ['.gif', '.GIF'])) {
     imageType = 'gif';
   } else if (containsAny(bgImage,
       ['data:image/jpeg', '.jpg', '.JPG', '.jpeg', '.JPEG'])) {
