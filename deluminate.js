@@ -240,23 +240,6 @@ function log() {
                              Array.prototype.slice.call(arguments).join(' ')});
 }
 
-function jsonify(o) {
-  var cache = [];
-  s = JSON.stringify(o, function(key, value) {
-      if (typeof value === 'object' && value !== null) {
-          if (cache.indexOf(value) !== -1) {
-              // Circular reference found, discard key
-              return;
-          }
-          // Store value in our collection
-          cache.push(value);
-      }
-      return value;
-  });
-  cache = null;
-  return s;
-}
-
 function init() {
   if (window == window.top) {
     scheme_prefix = '';
