@@ -4,6 +4,7 @@ var animGifHandler;
 var resize_observer;
 var background_observer;
 var size_checker_interval;
+var deluminateFullyInitialized = false;
 
 function onExtensionMessage(request) {
   if (request['manual_css']) {
@@ -34,6 +35,7 @@ function onExtensionMessage(request) {
   } else {
     animGifHandler.disconnect();
   }
+  deluminateFullyInitialized = true;
 }
 
 function addCSSLink() {
@@ -53,20 +55,21 @@ function addCSSLink() {
 function setupFullscreenWorkaround() {
   // Skip adding this in nested iframes
   if (window != window.top) return;
-  /* If the DOM is not loaded, wait before adding the workaround to it.
-   * Otherwise add it immediately. */
-  if (document.body == null) {
-    document.addEventListener('DOMContentLoaded', function() {
-      addFullscreenWorkaround();
-    });
-  } else if (document.body != null &&
-      document.getElementById("deluminate_fullscreen_workaround") == null) {
+  if (document.getElementById("deluminate_fullscreen_workaround") == null) {
     addFullscreenWorkaround();
   }
 }
 
 function addFullscreenWorkaround() {
   fullscreen_workaround.style.background = calculateBackground();
+  fullscreen_workaround.style.position = 'absolute';
+  fullscreen_workaround.style.top = 0;
+  fullscreen_workaround.style.left = 0;
+  fullscreen_workaround.style.width = '100%';
+  fullscreen_workaround.style.height = '100%';
+  fullscreen_workaround.style.display = 'block';
+  fullscreen_workaround.style['z-index'] = -2147483648;
+
   resetFullscreenWorkaroundHeight();
   /* Adding to the root node rather than body so it is not subject to absolute
    * positioning of the body. */
@@ -82,14 +85,16 @@ function addFullscreenWorkaround() {
     childList: true,
     attributes: true
   });
-  background_observer.observe(document.head, {
-    childList: true,
-    attributes: true,
-    subtree: true,
-    characterData: true
-  });
-  background_observer.observe(document.body, {
-    attributes: true
+  afterDomLoaded(function() {
+    background_observer.observe(document.head, {
+      childList: true,
+      attributes: true,
+      subtree: true,
+      characterData: true
+    });
+    background_observer.observe(document.body, {
+      attributes: true
+    });
   });
 }
 
@@ -105,20 +110,43 @@ function removeFullscreenWorkaround() {
 }
 
 function resetFullscreenWorkaroundHeight() {
-  var page_height = Math.max(document.body.scrollHeight,
+  var body_scroll_height;
+  try {
+    body_scroll_height = document.body.scrollHeight;
+  } catch(err) {
+    body_scroll_height = 0;
+  }
+  var page_height = Math.max(body_scroll_height,
                              document.documentElement.clientHeight);
-  var page_width = Math.max(document.body.scrollWidth,
+  var body_scroll_width;
+  try {
+    body_scroll_width = document.body.scrollWidth;
+  } catch(err) {
+    body_scroll_width = 0;
+  }
+  var page_width = Math.max(body_scroll_width,
                             document.documentElement.clientWidth);
   fullscreen_workaround.style.height = page_height + 'px';
   fullscreen_workaround.style.width = page_width + 'px';
 }
 
 function calculateBackground() {
+  if (!deluminateFullyInitialized) {
+    return 'black';
+  }
+  var root_style = window.getComputedStyle(document.documentElement);
+  if (!domContentLoaded) {
+    // We're still pre-DOM-load, so keep things black.
+    if (root_style['-webkit-filter'].indexOf('invert') >= 0) {
+      return 'white';
+    } else {
+      return 'black';
+    }
+  }
+  var body_style = window.getComputedStyle(document.body);
   var no_color = 'rgba(0, 0, 0, 0)';
   var no_image = 'none';
   var new_style_item = document.createElement('div');
-  var root_style = window.getComputedStyle(document.documentElement);
-  var body_style = window.getComputedStyle(document.body);
   if (root_style.backgroundColor != no_color ||
       root_style.backgroundImage != no_image) {
     new_style_item.style.background = root_style.background;
@@ -194,6 +222,19 @@ function deepImageProcessing() {
     markCssImages);
 }
 
+var domContentLoaded = false;
+function domLoaded() {
+  domContentLoaded = true;
+}
+
+function afterDomLoaded(cb) {
+  if(domContentLoaded) {
+    cb();
+  } else {
+    document.addEventListener('DOMContentLoaded', cb);
+  }
+}
+
 function log() {
   chrome.runtime.sendMessage({'log':
                              Array.prototype.slice.call(arguments).join(' ')});
@@ -214,7 +255,8 @@ function init() {
   chrome.runtime.sendMessage({'init': true, 'url': window.document.baseURI},
       onExtensionMessage);
   document.addEventListener('keydown', onEvent, false);
-  document.addEventListener('DOMContentLoaded', deepImageProcessing);
+  document.addEventListener('DOMContentLoaded', domLoaded);
+  afterDomLoaded(deepImageProcessing);
 
   animGifHandler = new MutationObserver(function(mutations, obs) {
     for(var i=0; i<mutations.length; ++i) {
@@ -243,6 +285,7 @@ function init() {
   });
 
   window.addEventListener('resize', resetFullscreenWorkaroundHeight);
+  setupFullscreenWorkaround();
 }
 
 init();
