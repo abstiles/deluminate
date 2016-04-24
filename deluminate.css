@@ -80,19 +80,6 @@ html[hc*="hw_accel"] {
  * images in this scenario.
  */
 
-/* Uninvert dialog boxes (except the "Compose" box in Gmail, identified by the
- * "aria-labelledby" attribute. */
-html[hc*="delumine"]:not(*:-webkit-full-screen-ancestor)
-[role*="dialog"]:not([aria-labelledby]):not(paper-dialog) {
-  -webkit-filter: contrast(95%) brightness(95%) hue-rotate(180deg) invert();
-}
-html[hc*="delumine"]:not(*:-webkit-full-screen-ancestor)
-[role*="dialog"]:not([aria-labelledby]):not(paper-dialog)
-[role*="dialog"]:not([aria-labelledby]):not(paper-dialog) {
-  -webkit-filter: none;
-}
-
-
 /* For the -noimg variant, uninvert all images. */
 html[hc*="delumine-noimg"]:not(*:-webkit-full-screen-ancestor) :-webkit-any(
 img,
@@ -111,7 +98,6 @@ html[hc*="delumine-noimg"]:not(*:-webkit-full-screen-ancestor) :-webkit-any(
 img,
 [style*="url"],
 [deluminate_imageType],
-[role="dialog"],
 canvas,
 embed,
 object,
@@ -119,7 +105,6 @@ video) :-webkit-any(
 img,
 [style*="url"],
 [deluminate_imageType],
-[role="dialog"],
 canvas,
 embed,
 object,
@@ -143,7 +128,7 @@ video) iframe {
 html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) body :-webkit-any(
 	/* Leave PNG and GIF format images inverted, since they usually are
 	 * identifiable even when inverted. */
-	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]):not([src^="data:image"]),
+	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]):not([src^="data:image"]):not([src^="blob:"]),
 	[itemprop="photo"],
 	[itemprop="image"],
 	[role="img"],
@@ -160,16 +145,13 @@ html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) body :-webkit-any
 	canvas,
 	embed:not([type$="pdf"]),
 	object,
-	video),
-/* Handle PDF previews in Gmail by reinverting the uninverted document in the
- * dialog. */
-html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) [role="dialog"] [role="document"] {
+	video) {
   -webkit-filter: contrast(95%) brightness(95%) hue-rotate(180deg) invert();
 }
 /* Avoid performing the uninversion process on anything that is a descendant of
  * something uninverted. */
 html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) body :-webkit-any(
-	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]):not([src^="data:image"]),
+	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]):not([src^="data:image"]):not([src^="blob:"]),
 	[itemprop="photo"],
 	[itemprop="image"],
 	[role="img"],
@@ -181,12 +163,11 @@ html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) body :-webkit-any
 	[style*=".JPEG"],
 	[style*=".webp"],
 	[style*=".WEBP"],
-	[role="dialog"],
 	canvas,
 	embed:not([type$="pdf"]),
 	object,
 	video) :-webkit-any(
-	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]):not([src^="data:image"]),
+	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]):not([src^="data:image"]):not([src^="blob:"]),
 	[itemprop="photo"],
 	[itemprop="image"],
 	[role="img"],
@@ -198,7 +179,6 @@ html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) body :-webkit-any
 	[style*=".JPEG"],
 	[style*=".webp"],
 	[style*=".WEBP"],
-	[role="dialog"],
 	canvas,
 	embed:not([type$="pdf"]),
 	object,
@@ -207,7 +187,7 @@ html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) body :-webkit-any
 }
 /* Reinvert iframes inside tags with background-images specified. */
 html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) body :-webkit-any(
-	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]):not([src^="data:image"]),
+	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]):not([src^="data:image"]):not([src^="blob:"]),
 	[itemprop="photo"],
 	[itemprop="image"],
 	[role="img"],
@@ -219,43 +199,11 @@ html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) body :-webkit-any
 	[style*=".JPEG"],
 	[style*=".webp"],
 	[style*=".WEBP"],
-	[role="dialog"],
 	canvas,
 	embed:not([type$="pdf"]),
 	object,
 	video) iframe {
   -webkit-filter: contrast(95%) brightness(95%) hue-rotate(180deg) invert();
-}
-
-/* Reinvert all images that have been uninverted collectively by being in a dialog. */
-html[hc*="delumine-all"]:not(*:-webkit-full-screen-ancestor) [role="dialog"] :-webkit-any(
-	img,
-	[deluminate_imageType],
-	[style*="url"],
-	canvas,
-	embed,
-	object,
-	video) {
-  -webkit-filter: contrast(95%) brightness(95%) hue-rotate(180deg) invert();
-}
-/* Avoid performing the reinversion process on anything that is a descendant of
- * something reinverted. */
-html[hc*="delumine-all"]:not(*:-webkit-full-screen-ancestor) [role="dialog"] :-webkit-any(
-	img,
-	[deluminate_imageType],
-	[style*="url"],
-	canvas,
-	embed,
-	object,
-	video) :-webkit-any(
-	img,
-	[deluminate_imageType],
-	[style*="url"],
-	canvas,
-	embed,
-	object,
-	video) {
-  -webkit-filter: none;
 }
 
 /* Force text to plain black text on white (which, when inverted, is the
