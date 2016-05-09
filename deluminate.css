@@ -142,7 +142,7 @@ html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) body :-webkit-any
 	[style*=".webp"],
 	[style*=".WEBP"],
 	/* It's usually not desireable to invert these tags. */
-	canvas,
+	canvas:not([src^="data:image/png;base64"]),
 	embed:not([type$="pdf"]),
 	object,
 	video) {
@@ -163,7 +163,7 @@ html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) body :-webkit-any
 	[style*=".JPEG"],
 	[style*=".webp"],
 	[style*=".WEBP"],
-	canvas,
+	canvas:not([src^="data:image/png;base64"]),
 	embed:not([type$="pdf"]),
 	object,
 	video) :-webkit-any(
@@ -179,7 +179,7 @@ html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) body :-webkit-any
 	[style*=".JPEG"],
 	[style*=".webp"],
 	[style*=".WEBP"],
-	canvas,
+	canvas:not([src^="data:image/png;base64"]),
 	embed:not([type$="pdf"]),
 	object,
 	video) {
@@ -199,7 +199,7 @@ html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) body :-webkit-any
 	[style*=".JPEG"],
 	[style*=".webp"],
 	[style*=".WEBP"],
-	canvas,
+	canvas:not([src^="data:image/png;base64"]),
 	embed:not([type$="pdf"]),
 	object,
 	video) iframe {
