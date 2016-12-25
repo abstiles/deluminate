@@ -6,8 +6,10 @@ websites to make them easier on the eyes.
 
 **Warning:** because of the way this extension inverts the luminance of
 rendered pages, it may cause noticeable slowdowns for some users. If this
-happens, you may prefer another extension that uses custom CSS to set the
-default background and text color of web pages.
+happens, try pasting chrome://flags/ into your URL bar and click 'enable'
+on the "Override software rendering list" option. Otherwise, you may 
+prefer another extension that uses custom CSS to set the default background
+and text color of web pages.
 
 Details
 -------
