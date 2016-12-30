@@ -149,6 +149,9 @@ function getDefaultModifiers() {
   if (getForceText()) {
     modifiers.push('force_text');
   }
+  if (getKillBackground()) {
+    modifiers.push('kill_background');
+  }
   return modifiers.join(' ');
 }
 
