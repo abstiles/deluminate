@@ -1,6 +1,13 @@
 Deluminate
 ==========
 
+[![Chrome Web Store](
+https://img.shields.io/chrome-web-store/v/iebboopaeangfpceklajfohhbpkkfiaa.svg)](https://chrome.google.com/webstore/detail/deluminate/iebboopaeangfpceklajfohhbpkkfiaa)
+[![Chrome Web Store](
+https://img.shields.io/chrome-web-store/d/iebboopaeangfpceklajfohhbpkkfiaa.svg)](https://chrome.google.com/webstore/detail/deluminate/iebboopaeangfpceklajfohhbpkkfiaa)
+[![Chrome Web Store](
+https://img.shields.io/chrome-web-store/rating/iebboopaeangfpceklajfohhbpkkfiaa.svg)](https://chrome.google.com/webstore/detail/deluminate/iebboopaeangfpceklajfohhbpkkfiaa)
+
 An extension for Google Chrome (and Chromium) that inverts the luminance of
 websites to make them easier on the eyes.
 
