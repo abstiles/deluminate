@@ -19,6 +19,20 @@ function onExtensionMessage(request) {
       hc += ' hw_accel';
     }
     document.documentElement.setAttribute('hc', hc);
+    if (request.scheme.indexOf("delumine") >= 0) {
+      // This results in a more instant, if imperfect, inversion. Injected CSS
+      // apparently takes a moment to be processed.
+      var oldStyle = document.documentElement.getAttribute('style');
+      document.documentElement.setAttribute(
+        'style', "filter: hue-rotate(180deg) invert(100%)");
+      afterDomLoaded(() => {
+        if (oldStyle !== null) {
+          document.documentElement.setAttribute('style', oldStyle);
+        } else {
+          document.documentElement.removeAttribute('style');
+        }
+      });
+    }
     setupFullscreenWorkaround();
   } else {
     document.documentElement.removeAttribute('hc');
