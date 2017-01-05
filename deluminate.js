@@ -7,6 +7,7 @@ var size_checker_interval;
 var deluminateFullyInitialized = false;
 
 function onExtensionMessage(request) {
+  deluminateFullyInitialized = true;
   if (request['manual_css']) {
     addCSSLink();
     return;
@@ -18,6 +19,20 @@ function onExtensionMessage(request) {
       hc += ' hw_accel';
     }
     document.documentElement.setAttribute('hc', hc);
+    if (request.scheme.indexOf("delumine") >= 0) {
+      // This results in a more instant, if imperfect, inversion. Injected CSS
+      // apparently takes a moment to be processed.
+      var oldStyle = document.documentElement.getAttribute('style');
+      document.documentElement.setAttribute(
+        'style', "filter: hue-rotate(180deg) invert(100%)");
+      afterDomLoaded(() => {
+        if (oldStyle !== null) {
+          document.documentElement.setAttribute('style', oldStyle);
+        } else {
+          document.documentElement.removeAttribute('style');
+        }
+      });
+    }
     setupFullscreenWorkaround();
   } else {
     document.documentElement.removeAttribute('hc');
@@ -35,7 +50,6 @@ function onExtensionMessage(request) {
   } else {
     animGifHandler.disconnect();
   }
-  deluminateFullyInitialized = true;
 }
 
 function addCSSLink() {
@@ -57,11 +71,13 @@ function setupFullscreenWorkaround() {
   if (window != window.top) return;
   if (document.getElementById("deluminate_fullscreen_workaround") == null) {
     addFullscreenWorkaround();
+  } else {
+    resetFullscreenWorkaroundBackground();
+    resetFullscreenWorkaroundHeight();
   }
 }
 
 function addFullscreenWorkaround() {
-  fullscreen_workaround.style.background = calculateBackground();
   fullscreen_workaround.style.position = 'absolute';
   fullscreen_workaround.style.top = 0;
   fullscreen_workaround.style.left = 0;
@@ -70,11 +86,11 @@ function addFullscreenWorkaround() {
   fullscreen_workaround.style.display = 'block';
   fullscreen_workaround.style['z-index'] = -2147483648;
 
+  resetFullscreenWorkaroundBackground();
   resetFullscreenWorkaroundHeight();
   /* Adding to the root node rather than body so it is not subject to absolute
    * positioning of the body. */
   document.documentElement.appendChild(fullscreen_workaround);
-  markCssImages(fullscreen_workaround);
   // Need to periodically reset the size (e.g., for loaded images)
   size_checker_interval = setInterval(resetFullscreenWorkaroundHeight, 1000);
   resize_observer.observe(document.documentElement, {
@@ -86,6 +102,8 @@ function addFullscreenWorkaround() {
     attributes: true
   });
   afterDomLoaded(function() {
+    resetFullscreenWorkaroundBackground();
+    resetFullscreenWorkaroundHeight();
     background_observer.observe(document.head, {
       childList: true,
       attributes: true,
@@ -137,7 +155,7 @@ function calculateBackground() {
   var root_style = window.getComputedStyle(document.documentElement);
   if (!domContentLoaded) {
     // We're still pre-DOM-load, so keep things black.
-    if (root_style['-webkit-filter'].indexOf('invert') >= 0) {
+    if (root_style.filter.indexOf('invert') >= 0) {
       return 'white';
     } else {
       return 'black';
@@ -240,6 +258,11 @@ function log() {
                              Array.prototype.slice.call(arguments).join(' ')});
 }
 
+function resetFullscreenWorkaroundBackground() {
+  fullscreen_workaround.style.background = calculateBackground();
+  markCssImages(fullscreen_workaround);
+}
+
 function init() {
   if (window == window.top) {
     scheme_prefix = '';
@@ -279,8 +302,7 @@ function init() {
 
   background_observer = new MutationObserver(function(mutations, obs) {
     if (mutations.length > 0) {
-      fullscreen_workaround.style.background = calculateBackground();
-      markCssImages(fullscreen_workaround);
+      resetFullscreenWorkaroundBackground();
     }
   });
 
