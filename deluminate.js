@@ -175,8 +175,38 @@ function calculateBackground() {
    * black properly. */
   if (new_style_item.style.backgroundColor == no_color) {
     new_style_item.style.backgroundColor = 'white';
+  } else {
+    new_style_item.style.backgroundColor =
+      computeEffectiveCanvasColor(new_style_item.style.backgroundColor);
   }
   return new_style_item.style.background;
+}
+
+function computeEffectiveCanvasColor(color) {
+  // Compute the effective canvas color by simulating the blending (due to an
+  // alpha channel) against the default white background. This must be
+  // calculated manually.
+  var rgbaColorRegex = /rgba\((\d+), (\d+), (\d+), (\d*\.?\d+)\)/;
+  var match = rgbaColorRegex.exec(color);
+  try {
+    var [_, r, g, b, a] = match.map(Number);
+    // Calculate the alpha-weighted blend against a white background.
+    [r, g, b] = [r, g, b].map(channel => {
+      var channelComponent = channel * a;
+      var whiteComponent = 255 * (1 - a);
+      var result = Math.round(channelComponent + whiteComponent);
+      var clampedTo8bit = result <= 0   ? 0
+                        : result >= 255 ? 255
+                        : result
+      return clampedTo8bit;
+    });
+    return `rgb(${r}, ${g}, ${b})`;
+  } catch (exc) {
+    // If this regex doesn't match, leave the color unchanged since we don't
+    // know what's reasonable. It's probably fine?
+    log("Unexpected background color format. Leaving alone: " + color);
+    return color;
+  }
 }
 
 function onEvent(evt) {
