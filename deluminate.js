@@ -219,6 +219,8 @@ function markCssImages(tag) {
   }
   if (imageType) {
     tag.setAttribute('deluminate_imageType', imageType);
+  } else {
+    tag.removeAttribute('deluminate_imageType');
   }
 }
 
