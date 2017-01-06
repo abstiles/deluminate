@@ -213,7 +213,6 @@ function computeEffectiveCanvasColor(color) {
   } catch (exc) {
     // If this regex doesn't match, leave the color unchanged since we don't
     // know what's reasonable. It's probably fine?
-    log("Unexpected background color format. Leaving alone: " + color);
     return color;
   }
 }
