@@ -39,7 +39,11 @@ function onExtensionMessage(request) {
     document.documentElement.removeAttribute('hc');
     removeFullscreenWorkaround();
   }
-  if (request.enabled && request.scheme.indexOf("delumine") >= 0) {
+  // Enable advanced image recognition on invert modes except "invert all
+  // images" mode.
+  if (request.enabled
+      && request.scheme.indexOf("delumine") >= 0
+      && request.scheme.indexOf("delumine-all") < 0) {
     newImageHandler.observe(document.documentElement, {
       childList: true,
       subtree: true
