@@ -1,6 +1,7 @@
 var scheme_prefix;
 var fullscreen_workaround;
 var animGifHandler;
+var newImageHandler;
 var resize_observer;
 var background_observer;
 var size_checker_interval;
@@ -37,6 +38,14 @@ function onExtensionMessage(request) {
   } else {
     document.documentElement.removeAttribute('hc');
     removeFullscreenWorkaround();
+  }
+  if (request.enabled && request.scheme.indexOf("delumine") >= 0) {
+    newImageHandler.observe(document.documentElement, {
+      childList: true,
+      subtree: true
+    });
+  } else {
+      newImageHandler.disconnect();
   }
   if (request.enabled && request.settings.detect_animation === 'enabled' &&
       request.scheme == 'delumine-smart') {
@@ -321,6 +330,19 @@ function init() {
           Array.prototype.forEach.call(
             newTag.querySelectorAll('img[src*=".gif"], img[src*=".GIF"]'),
             detectAnimatedGif);
+        }
+      }
+    }
+  });
+
+  newImageHandler = new MutationObserver(function(mutations, obs) {
+    for(var i=0; i<mutations.length; ++i) {
+      for(var j=0; j<mutations[i].addedNodes.length; ++j) {
+        var newTag = mutations[i].addedNodes[j];
+        if (newTag.querySelectorAll) {
+          Array.prototype.forEach.call(
+            newTag.querySelectorAll('*:not([style*="url"])'),
+            markCssImages);
         }
       }
     }
