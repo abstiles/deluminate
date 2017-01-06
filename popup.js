@@ -63,11 +63,6 @@ function onToggle() {
   update();
 }
 
-function onForget() {
-  resetSiteSchemes();
-  update();
-}
-
 function onRadioChange(name, value) {
   switch (name) {
     case 'keyaction':

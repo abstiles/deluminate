@@ -10,6 +10,7 @@ function initSettings() {
 
 function onForget() {
   resetSiteSchemes();
+  resetSiteModifiers();
   loadSettingsDisplay();
 }
 

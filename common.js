@@ -228,6 +228,11 @@ function delSiteModifier(site, modifier) {
   localStorage['sitemodifiers'] = JSON.stringify(siteModifiers);
 }
 
+function resetSiteModifiers() {
+  var siteModifiers = {};
+  localStorage['sitemodifiers'] = JSON.stringify(siteModifiers);
+}
+
 function changedFromDefault() {
   var siteModList = getSiteModifiers(site);
   var defaultModList = getDefaultModifiers();
