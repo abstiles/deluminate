@@ -140,24 +140,41 @@ function removeFullscreenWorkaround() {
 }
 
 function resetFullscreenWorkaroundHeight() {
-  var body_scroll_height;
-  try {
-    body_scroll_height = document.body.scrollHeight;
-  } catch(err) {
-    body_scroll_height = 0;
-  }
-  var page_height = Math.max(body_scroll_height,
-                             document.documentElement.clientHeight);
-  var body_scroll_width;
-  try {
-    body_scroll_width = document.body.scrollWidth;
-  } catch(err) {
-    body_scroll_width = 0;
-  }
-  var page_width = Math.max(body_scroll_width,
-                            document.documentElement.clientWidth);
-  fullscreen_workaround.style.height = page_height + 'px';
-  fullscreen_workaround.style.width = page_width + 'px';
+  // We need to calculate the size of the page _minus_ the current size of the
+  // fullscreen workaround div, so that an initial large size does not
+  // permanently peg the page at that minimum size.
+  //
+  // First, reduce the height of the fullscreen workaround div to the smallest
+  // it can be while still covering the viewable region.
+  var lowestVisiblePoint =
+    window.scrollY + document.documentElement.clientHeight;
+  var rightestVisiblePoint =
+    window.scrollX + document.documentElement.clientWidth;
+  fullscreen_workaround.style.height = lowestVisiblePoint;
+  fullscreen_workaround.style.width = rightestVisiblePoint;
+
+  // Yield to the renderer, then reset the size to the calculated region.
+  setTimeout(() => {
+    var body_scroll_height;
+    try {
+      body_scroll_height = document.body.scrollHeight;
+    } catch(err) {
+      body_scroll_height = 0;
+    }
+    var page_height = Math.max(body_scroll_height,
+                               document.documentElement.clientHeight);
+    var body_scroll_width;
+    try {
+      body_scroll_width = document.body.scrollWidth;
+    } catch(err) {
+      body_scroll_width = 0;
+    }
+    var page_width = Math.max(body_scroll_width,
+                              document.documentElement.clientWidth);
+
+    fullscreen_workaround.style.height = page_height + 'px';
+    fullscreen_workaround.style.width = page_width + 'px';
+  }, 0);
 }
 
 function calculateBackground() {
