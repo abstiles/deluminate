@@ -1,5 +1,6 @@
 var scheme_prefix;
 var fullscreen_workaround;
+var backdrop;
 var animGifHandler;
 var newImageHandler;
 var resize_observer;
@@ -96,13 +97,21 @@ function addFullscreenWorkaround() {
   fullscreen_workaround.style.width = '100%';
   fullscreen_workaround.style.height = '100%';
   fullscreen_workaround.style.display = 'block';
-  fullscreen_workaround.style['z-index'] = -2147483648;
+  fullscreen_workaround.style['z-index'] = -2147483647;
+
+  backdrop.style.position = 'fixed';
+  backdrop.style.top = 0;
+  backdrop.style.left = 0;
+  backdrop.style.height = '100vh';
+  backdrop.style.width = '100vw';
+  backdrop.style['z-index'] = -2147483648;
 
   resetFullscreenWorkaroundBackground();
   resetFullscreenWorkaroundHeight();
   /* Adding to the root node rather than body so it is not subject to absolute
    * positioning of the body. */
   document.documentElement.appendChild(fullscreen_workaround);
+  document.documentElement.appendChild(backdrop);
   // Need to periodically reset the size (e.g., for loaded images)
   size_checker_interval = setInterval(resetFullscreenWorkaroundHeight, 1000);
   resize_observer.observe(document.documentElement, {
@@ -133,9 +142,14 @@ function removeFullscreenWorkaround() {
   resize_observer.disconnect();
   clearInterval(size_checker_interval);
   background_observer.disconnect();
-  workaround_div = document.getElementById("deluminate_fullscreen_workaround");
-  if (workaround_div != null) {
-    workaround_div.remove();
+  removeById('deluminate_fullscreen_workaround');
+  removeById('deluminate_backdrop');
+}
+
+function removeById(id) {
+  element = document.getElementById(id);
+  if (element !== null) {
+    element.remove();
   }
 }
 
@@ -331,6 +345,8 @@ function init() {
 
   fullscreen_workaround = document.createElement('div');
   fullscreen_workaround.id = scheme_prefix + "deluminate_fullscreen_workaround";
+  backdrop = document.createElement('div');
+  backdrop.id = scheme_prefix + "deluminate_backdrop";
 
   chrome.runtime.onMessage.addListener(onExtensionMessage);
   chrome.runtime.sendMessage({'init': true, 'url': window.document.baseURI},
