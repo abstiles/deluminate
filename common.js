@@ -260,3 +260,8 @@ function getSettingsViewed() {
 function setSettingsViewed() {
   localStorage['settings_viewed'] = true;
 }
+
+/* Necessary node bootstrapping for testing. */
+if (typeof(global) !== 'undefined') {
+  global.getStoredBool = getStoredBool;
+}
