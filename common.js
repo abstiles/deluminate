@@ -264,4 +264,20 @@ function setSettingsViewed() {
 /* Necessary node bootstrapping for testing. */
 if (typeof(global) !== 'undefined') {
   global.getStoredBool = getStoredBool;
+  global.getEnabled = getEnabled;
+  global.setEnabled = setEnabled;
+  global.getLowContrast = getLowContrast;
+  global.setLowContrast = setLowContrast;
+  global.getForceText = getForceText;
+  global.setForceText = setForceText;
+  global.getKillBackground = getKillBackground;
+  global.setKillBackground = setKillBackground;
+  global.getDefaultScheme = getDefaultScheme;
+  global.setDefaultScheme = setDefaultScheme;
+  global.getDefaultModifiers = getDefaultModifiers;
+  global.setDefaultModifiers = setDefaultModifiers;
+  global.getGlobalSettings = getGlobalSettings;
+  global.setGlobalSetting = setGlobalSetting;
+  global.getSettingsViewed = getSettingsViewed;
+  global.setSettingsViewed = setSettingsViewed;
 }
