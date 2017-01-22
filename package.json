@@ -1,0 +1,26 @@
+{
+  "name": "deluminate",
+  "version": "0.7.4",
+  "description": "Invert the luminance of a website to make it easier on the eyes.",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abstiles/deluminate.git"
+  },
+  "keywords": [
+    "chrome",
+    "extension",
+    "invert",
+    "luminance",
+    "dark",
+    "contrast"
+  ],
+  "author": "Andrew Stiles",
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/abstiles/deluminate/issues"
+  },
+  "homepage": "https://deluminate.github.io"
+}
