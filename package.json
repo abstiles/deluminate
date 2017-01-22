@@ -25,6 +25,7 @@
   "homepage": "https://deluminate.github.io",
   "devDependencies": {
     "jasmine": "^2.5.3",
-    "jasmine-reporters": "^2.2.0"
+    "jasmine-reporters": "^2.2.0",
+    "mock-local-storage": "^1.0.2"
   }
 }

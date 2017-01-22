@@ -5,3 +5,7 @@ var junitReporter = new reporters.JUnitXmlReporter({
   consolidateAll: false
 });
 jasmine.getEnv().addReporter(junitReporter);
+
+/* Needed for tests which interact with the local storage. */
+require('mock-local-storage');
+afterEach(localStorage.clear);
