@@ -1,2 +1,7 @@
 build/
 *.zip
+
+node_modules/
+
+# Test output
+spec/**/*.xml
