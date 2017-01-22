@@ -239,3 +239,10 @@ html[hc*="delumine-noimg"] iframe[src^="chrome-search://most-visited"],
 html[hc*="delumine-smart"] iframe[src^="chrome-search://most-visited"] {
   -webkit-filter: contrast(95%) brightness(95%) hue-rotate(180deg) invert();
 }
+
+/* Stupid workaround just for Medium's stupid canvas which, as far as I can
+ * tell, has no value whatsoever. */
+html[hc*="delumine-noimg"] body canvas.canvas-renderer,
+html[hc*="delumine-smart"] body canvas.canvas-renderer {
+  -webkit-filter: none !important;
+}
