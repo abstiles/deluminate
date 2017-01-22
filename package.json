@@ -3,7 +3,7 @@
   "version": "0.7.4",
   "description": "Invert the luminance of a website to make it easier on the eyes.",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jasmine"
   },
   "repository": {
     "type": "git",
@@ -22,5 +22,9 @@
   "bugs": {
     "url": "https://github.com/abstiles/deluminate/issues"
   },
-  "homepage": "https://deluminate.github.io"
+  "homepage": "https://deluminate.github.io",
+  "devDependencies": {
+    "jasmine": "^2.5.3",
+    "jasmine-reporters": "^2.2.0"
+  }
 }

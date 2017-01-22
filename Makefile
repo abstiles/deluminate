@@ -1,4 +1,4 @@
-.PHONY: clean package
+.PHONY: clean package test
 
 SHELL := /bin/bash
 
@@ -43,3 +43,10 @@ $(BUILD_DIR):
 
 clean:
 	rm -f deluminate*.zip
+	find spec -name 'junit*.xml' -exec rm -f {} +
+
+test: node_modules
+	npm test
+
+node_modules: package.json
+	npm install
