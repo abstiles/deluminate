@@ -1,0 +1,3 @@
+test:
+  post:
+    - mv spec/junitresults "$CIRCLE_TEST_REPORTS/junitresults"
