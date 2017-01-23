@@ -291,4 +291,5 @@ if (typeof(global) !== 'undefined') {
   global.changedFromDefault = changedFromDefault;
   global.isDisallowedUrl = isDisallowedUrl;
   global.$ = $;
+  global.getKeyAction = getKeyAction;
 }
