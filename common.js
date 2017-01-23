@@ -290,4 +290,5 @@ if (typeof(global) !== 'undefined') {
   global.resetSiteModifiers = resetSiteModifiers;
   global.changedFromDefault = changedFromDefault;
   global.isDisallowedUrl = isDisallowedUrl;
+  global.$ = $;
 }
