@@ -280,4 +280,14 @@ if (typeof(global) !== 'undefined') {
   global.setGlobalSetting = setGlobalSetting;
   global.getSettingsViewed = getSettingsViewed;
   global.setSettingsViewed = setSettingsViewed;
+  global.siteFromUrl = siteFromUrl;
+  global.getSiteScheme = getSiteScheme;
+  global.setSiteScheme = setSiteScheme;
+  global.resetSiteSchemes = resetSiteSchemes;
+  global.getSiteModifiers = getSiteModifiers;
+  global.addSiteModifier = addSiteModifier;
+  global.delSiteModifier = delSiteModifier;
+  global.resetSiteModifiers = resetSiteModifiers;
+  global.changedFromDefault = changedFromDefault;
+  global.isDisallowedUrl = isDisallowedUrl;
 }
