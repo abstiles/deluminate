@@ -260,3 +260,36 @@ function getSettingsViewed() {
 function setSettingsViewed() {
   localStorage['settings_viewed'] = true;
 }
+
+/* Necessary node bootstrapping for testing. */
+if (typeof(global) !== 'undefined') {
+  global.getStoredBool = getStoredBool;
+  global.getEnabled = getEnabled;
+  global.setEnabled = setEnabled;
+  global.getLowContrast = getLowContrast;
+  global.setLowContrast = setLowContrast;
+  global.getForceText = getForceText;
+  global.setForceText = setForceText;
+  global.getKillBackground = getKillBackground;
+  global.setKillBackground = setKillBackground;
+  global.getDefaultScheme = getDefaultScheme;
+  global.setDefaultScheme = setDefaultScheme;
+  global.getDefaultModifiers = getDefaultModifiers;
+  global.setDefaultModifiers = setDefaultModifiers;
+  global.getGlobalSettings = getGlobalSettings;
+  global.setGlobalSetting = setGlobalSetting;
+  global.getSettingsViewed = getSettingsViewed;
+  global.setSettingsViewed = setSettingsViewed;
+  global.siteFromUrl = siteFromUrl;
+  global.getSiteScheme = getSiteScheme;
+  global.setSiteScheme = setSiteScheme;
+  global.resetSiteSchemes = resetSiteSchemes;
+  global.getSiteModifiers = getSiteModifiers;
+  global.addSiteModifier = addSiteModifier;
+  global.delSiteModifier = delSiteModifier;
+  global.resetSiteModifiers = resetSiteModifiers;
+  global.changedFromDefault = changedFromDefault;
+  global.isDisallowedUrl = isDisallowedUrl;
+  global.$ = $;
+  global.getKeyAction = getKeyAction;
+}
