@@ -225,3 +225,8 @@ function init() {
 
 window.addEventListener('load', init, false);
 document.addEventListener('DOMContentLoaded', onLinkClick);
+
+if (typeof(global) !== 'undefined') {
+    global.onMakeDefault = onMakeDefault;
+    global.changedFromDefault = changedFromDefault;
+}

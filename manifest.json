@@ -18,7 +18,7 @@
    "content_scripts": [ {
       "all_frames": true,
       "js": [ "deluminate.js" ],
-      "matches": [ "\u003Call_urls\u003E" ],
+      "matches": [ "<all_urls>" ],
       "match_about_blank": true,
       "run_at": "document_start"
    } ],
@@ -29,7 +29,7 @@
    "name": "Deluminate",
    "manifest_version": 2,
    "options_page": "options.html",
-   "permissions": [ "\u003Call_urls\u003E", "tabs" ],
+   "permissions": [ "<all_urls>", "tabs" ],
    "web_accessible_resources": [ "deluminate.css" ],
    "version": "0.7.4"
 }

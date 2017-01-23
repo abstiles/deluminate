@@ -55,3 +55,8 @@ function init() {
 
 window.addEventListener('load', init, false);
 document.addEventListener('DOMContentLoaded', onLinkClick);
+
+/* Necessary node bootstrapping for testing. */
+if (typeof(global) !== 'undefined') {
+  global.onForget = onForget;
+}
