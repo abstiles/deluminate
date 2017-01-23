@@ -1,5 +1,7 @@
 require('../common.js');
 
+const jsdom = require('jsdom')
+
 describe("A stored bool getter", function() {
   beforeEach(function() {
     localStorage.setItem('presentTrue', true);
@@ -153,5 +155,111 @@ describe("Global settings functions", function() {
     // Must convert to string because mock cannot override key access notation.
     localStorage.settings_viewed = localStorage.settings_viewed.toString();
     expect(getSettingsViewed()).toBe(true);
+  });
+});
+
+describe("Site manipulation functions", function() {
+  beforeEach(() => {
+    global.document = jsdom.jsdom();
+  });
+
+  it("can extract a hostname from a full URL", function() {
+    var testUrl = "https://subdomain.example.com:8080/path/to/page?ans=42";
+    expect(siteFromUrl(testUrl)).toEqual("subdomain.example.com");
+  });
+
+  it("will get the default scheme for a site by default", function() {
+    var expectedScheme = getDefaultScheme();
+    expect(getSiteScheme("subdomain.example.com")).toEqual(expectedScheme);
+  });
+
+  it("can override the default scheme for a site", function() {
+    var expectedScheme = "test-scheme";
+    setSiteScheme("subdomain.example.com", expectedScheme);
+    expect(getSiteScheme("subdomain.example.com")).toEqual(expectedScheme);
+  });
+
+  it("can reset all site scheme overrides", function() {
+    var expectedScheme = getDefaultScheme();
+    setSiteScheme("subdomain.example.com", "test-scheme");
+    resetSiteSchemes();
+    expect(getSiteScheme("subdomain.example.com")).toEqual(expectedScheme);
+  });
+
+  it("gets no site modifiers for a site by default", function() {
+    var expectedModifiers = getDefaultModifiers();
+    expect(getSiteModifiers("example.com")).toEqual(expectedModifiers);
+  });
+
+  it("can add site modifiers", function() {
+    var expectedModifiers = 'mod1 mod2'
+    addSiteModifier("example.com", 'mod1');
+    addSiteModifier("example.com", 'mod2');
+    expect(getSiteModifiers("example.com")).toEqual(expectedModifiers);
+  });
+
+  it("can remove site modifiers", function() {
+    var expectedModifiers = 'mod1 mod3'
+    addSiteModifier("example.com", 'mod1');
+    addSiteModifier("example.com", 'mod2');
+    addSiteModifier("example.com", 'mod3');
+    delSiteModifier("example.com", 'mod2');
+    expect(getSiteModifiers("example.com")).toEqual(expectedModifiers);
+  });
+
+  it("can clear all site modifiers", function() {
+    addSiteModifier("example.com", 'mod1');
+    addSiteModifier("example.com", 'mod2');
+    resetSiteModifiers();
+    expect(getSiteModifiers("example.com")).toEqual('');
+  });
+
+  it("reports site settings unchanged by default", function() {
+    // This expects this variable to be set by popup.js.
+    global.site = "example.com";
+    expect(changedFromDefault()).toBe(false);
+  });
+
+  it("reports site settings changed when a scheme is changed", function() {
+    setSiteScheme("example.com", "test-scheme");
+    // changedFromDefault expects this variable to be set by popup.js.
+    global.site = "example.com";
+    expect(changedFromDefault()).toBe(true);
+  });
+
+  it("reports site settings changed when a modifier is changed", function() {
+    addSiteModifier("example.com", 'mod1');
+    // changedFromDefault expects this variable to be set by popup.js.
+    global.site = "example.com";
+    expect(changedFromDefault()).toBe(true);
+  });
+
+  it("reports site settings unchanged after resetting them", function() {
+    setSiteScheme("example.com", "test-scheme");
+    addSiteModifier("example.com", 'mod1');
+    // changedFromDefault expects this variable to be set by popup.js.
+    global.site = "example.com";
+    expect(changedFromDefault()).toBe(true);
+    resetSiteSchemes();
+    resetSiteModifiers();
+    expect(changedFromDefault()).toBe(false);
+  });
+});
+
+describe("Url classifier", function() {
+  it("reports ordinary URLs as allowed", function() {
+    expect(isDisallowedUrl("https://www.example.com/path")).toBe(false);
+  });
+
+  it("reports the new tab page as allowed", function() {
+    expect(isDisallowedUrl("chrome://newtab/")).toBe(false);
+  });
+
+  it("reports chrome URLs (other than new tab) as not allowed", function() {
+    expect(isDisallowedUrl("chrome://extensions/")).toBe(true);
+  });
+
+  it("reports about URLs as not allowed", function() {
+    expect(isDisallowedUrl("about:blank")).toBe(true);
   });
 });
