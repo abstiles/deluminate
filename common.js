@@ -121,13 +121,15 @@ function siteFromUrl(url) {
   var site = "Bad";
   a.href = url;
   var query = a.host+a.pathname;
-  siteSchemes = JSON.parse(localStorage['siteschemes']);
-  Object.keys(siteSchemes).forEach(function(k) {
-    if (query.includes(k)) {
-      site = k;
-      return;
-    }
-  });
+  try {
+    siteSchemes = JSON.parse(localStorage['siteschemes']);
+    Object.keys(siteSchemes).forEach(function(k) {
+      if (query.includes(k)) {
+        site = k;
+        return;
+      }
+    });
+  } catch (e) {}
   if (site == "Bad") {
     site = a.host;
   }
