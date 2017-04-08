@@ -118,8 +118,20 @@ function resetSiteSchemes() {
 
 function siteFromUrl(url) {
   var a = document.createElement('a');
+  var site = "Bad";
   a.href = url;
-  return a.hostname;
+  var query = a.host+a.pathname;
+  siteSchemes = JSON.parse(localStorage['siteschemes']);
+  Object.keys(siteSchemes).forEach(function(k) {
+    if (query.includes(k)) {
+      site = k;
+      return;
+    }
+  });
+  if (site == "Bad") {
+    site = a.host;
+  }
+  return site;
 }
 
 function getSiteModifiers(site) {
