@@ -153,6 +153,25 @@ function removeById(id) {
   }
 }
 
+function getScrollbarWidth() {
+  const outer = document.createElement('div');
+  const inner = document.createElement('div');
+
+  outer.style.visibility = 'hidden';
+  outer.style.width = '100px';
+  inner.style.width = '100%';
+  outer.appendChild(inner);
+  document.documentElement.appendChild(outer);
+
+  const widthWithoutScrollbar = outer.offsetWidth;
+  outer.style.overflow = 'scroll';
+  const widthWithScrollbar = inner.offsetWidth;
+  document.documentElement.removeChild(outer);
+  return (widthWithoutScrollbar - widthWithScrollbar);
+}
+
+var scw = getScrollbarWidth();
+
 function resetFullscreenWorkaroundHeight() {
   // We need to calculate the size of the page _minus_ the current size of the
   // fullscreen workaround div, so that an initial large size does not
@@ -165,7 +184,7 @@ function resetFullscreenWorkaroundHeight() {
   var rightestVisiblePoint =
     window.scrollX + window.innerWidth;
   fullscreen_workaround.style.height = lowestVisiblePoint + 'px';
-  fullscreen_workaround.style.width = rightestVisiblePoint + 'px';
+  fullscreen_workaround.style.width = rightestVisiblePoint - scw + 'px';
 
   // Yield to the renderer, then reset the size to the calculated region.
   setTimeout(() => {
