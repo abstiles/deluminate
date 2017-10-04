@@ -180,7 +180,7 @@ function resetFullscreenWorkaroundHeight() {
   // First, reduce the height of the fullscreen workaround div to the smallest
   // it can be while still covering the viewable region.
   var lowestVisiblePoint =
-    window.scrollY + window.innerHeight;
+    window.scrollY + window.innerHeight - scw;
   var rightestVisiblePoint =
     window.scrollX + window.innerWidth - scw;
   fullscreen_workaround.style.height = lowestVisiblePoint + 'px';
