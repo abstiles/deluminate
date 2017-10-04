@@ -182,9 +182,9 @@ function resetFullscreenWorkaroundHeight() {
   var lowestVisiblePoint =
     window.scrollY + window.innerHeight;
   var rightestVisiblePoint =
-    window.scrollX + window.innerWidth;
+    window.scrollX + window.innerWidth - scw;
   fullscreen_workaround.style.height = lowestVisiblePoint + 'px';
-  fullscreen_workaround.style.width = rightestVisiblePoint - scw + 'px';
+  fullscreen_workaround.style.width = rightestVisiblePoint + 'px';
 
   // Yield to the renderer, then reset the size to the calculated region.
   setTimeout(() => {
