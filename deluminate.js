@@ -170,7 +170,7 @@ function getScrollbarWidth() {
   return (widthWithoutScrollbar - widthWithScrollbar);
 }
 
-var scw = getScrollbarWidth();
+var scw = getScrollbarWidth() + 1;
 
 function resetFullscreenWorkaroundHeight() {
   // We need to calculate the size of the page _minus_ the current size of the
