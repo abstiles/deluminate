@@ -1,6 +1,9 @@
 machine:
   node:
     version: 6.1.0
+compile:
+  post:
+    - mv deluminate*.zip "$CIRCLE_ARTIFACTS/"
 test:
   override:
     - npm run lint
