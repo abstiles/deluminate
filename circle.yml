@@ -1,6 +1,3 @@
-machine:
-  node:
-    version: 6.1.0
 test:
   override:
     - npm run lint
@@ -15,8 +12,5 @@ deployment:
   staging:
     branch: dev
     commands:
-      - make deploy-dev
-  temptest:
-    branch: continuous-delivery
-    commands:
+      - git fetch --unshallow
       - make deploy-dev
