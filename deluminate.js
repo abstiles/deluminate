@@ -170,7 +170,14 @@ function getScrollbarWidth() {
   return (widthWithoutScrollbar - widthWithScrollbar);
 }
 
-var scw = getScrollbarWidth() + 1;
+function detectScrollbars(element) {
+  return {
+    'vertical': element.scrollHeight > element.clientHeight,
+    'horizontal': element.scrollWidth > element.clientWidth
+  }
+}
+
+var scw = getScrollbarWidth();
 
 function resetFullscreenWorkaroundHeight() {
   // We need to calculate the size of the page _minus_ the current size of the
@@ -180,9 +187,16 @@ function resetFullscreenWorkaroundHeight() {
   // First, reduce the height of the fullscreen workaround div to the smallest
   // it can be while still covering the viewable region.
   var lowestVisiblePoint =
-    window.scrollY + window.innerHeight - scw;
+    window.scrollY + window.innerHeight;
   var rightestVisiblePoint =
-    window.scrollX + window.innerWidth - scw;
+    window.scrollX + window.innerWidth;
+  var scrollbarsPresent = detectScrollbars(document.documentElement);
+  if (scrollbarsPresent.vertical) {
+    rightestVisiblePoint -= scw;
+  }
+  if (scrollbarsPresent.horizontal) {
+    lowestVisiblePoint -= scw;
+  }
   fullscreen_workaround.style.height = lowestVisiblePoint + 'px';
   fullscreen_workaround.style.width = rightestVisiblePoint + 'px';
 
