@@ -2,6 +2,8 @@ machine:
   node:
     version: 6.1.0
 compile:
+  override:
+    - make
   post:
     - mv deluminate*.zip "$CIRCLE_ARTIFACTS/"
 test:
