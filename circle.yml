@@ -4,3 +4,12 @@ test:
     - npm test
   post:
     - mv spec/junitresults "$CIRCLE_TEST_REPORTS/junitresults"
+deployment:
+  release:
+    branch: master
+    commands:
+      - make deploy
+  staging:
+    branch: dev
+    commands:
+      - make deploy-dev
