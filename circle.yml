@@ -5,7 +5,7 @@ compile:
   override:
     - make
   post:
-    - mv deluminate*.zip "$CIRCLE_ARTIFACTS/"
+    - cp deluminate*.zip "$CIRCLE_ARTIFACTS/"
 test:
   override:
     - npm run lint
