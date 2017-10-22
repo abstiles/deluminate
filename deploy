@@ -48,6 +48,7 @@ function main {
 	fi
 
 	local args=()
+	args+=( upload )
 	args+=( --client-id "${OAUTH_CLIENT_ID}" )
 	args+=( --client-secret "${OAUTH_CLIENT_SECRET}" )
 	args+=( --refresh-token "${OAUTH_REFRESH_TOKEN}" )
