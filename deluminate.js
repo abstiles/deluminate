@@ -305,6 +305,8 @@ function markCssImages(tag) {
   } else if (containsAny(bgImage,
       ['data:image/jpeg', '.jpg', '.JPG', '.jpeg', '.JPEG'])) {
     imageType = 'jpg';
+  } else if (containsAny(bgImage, ['url', 'data:image'])) {
+    imageType = 'unknown';
   }
   if (imageType) {
     tag.setAttribute('deluminate_imageType', imageType);
