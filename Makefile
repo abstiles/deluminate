@@ -50,3 +50,9 @@ test: node_modules
 
 node_modules: package.json
 	npm install
+
+deploy: deluminate.zip
+	npm run deploy -- "$<"
+
+deploy-dev: deluminate$(PKG_SUFFIX).zip
+	npm run deploy-dev -- "$<"

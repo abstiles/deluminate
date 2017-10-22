@@ -1,6 +1,24 @@
+machine:
+  node:
+    version: 6.1.0
+compile:
+  override:
+    - git fetch --unshallow
+    - make
+  post:
+    - cp deluminate*.zip "$CIRCLE_ARTIFACTS/"
 test:
   override:
     - npm run lint
     - npm test
   post:
     - mv spec/junitresults "$CIRCLE_TEST_REPORTS/junitresults"
+deployment:
+  release:
+    branch: master
+    commands:
+      - make deploy
+  staging:
+    branch: dev
+    commands:
+      - make deploy-dev
