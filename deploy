@@ -1,0 +1,67 @@
+#!/bin/bash
+
+set -Eu
+set -o pipefail
+
+readonly RELEASE_DEFAULT=false
+
+# Set an error handler to log the location of an error before exiting
+function _exit_err {
+	local retval=$1
+	echo "ERROR: $BASH_SOURCE: line $BASH_LINENO: $BASH_COMMAND" >&2
+	exit "$retval"
+}; trap '_exit_err $?' ERR
+
+# Logs an error, then terminates with nonzero exit code
+function die { error "$@"; exit 1; }
+
+# Logs message to stderr
+function error {
+	if (( $# == 1 )); then set -- "%b\n" "$1"; fi
+	# shellcheck disable=SC2059
+	printf "$1\n" "${@:2}" >&2
+}
+
+# Process options, filter out positional arguments
+declare -a positional_args
+while (( $# )); do
+	case $1 in
+		--release) release_opt=true;;
+		--) shift; break ;;
+		-?*) die "ERROR: Unrecognized option $1" ;;
+		*) positional_args+=("$1") ;;
+	esac
+	shift
+done
+# Handle the positional arguments
+if (( ${#positional_args[@]} > 0 )); then
+	set -- "${positional_args[@]}" "$@"
+fi
+unset positional_args
+
+function main {
+	local release=${release_opt-${RELEASE_DEFAULT}}
+	local package=$1
+
+	if ! [[ -r $package ]]; then
+		die "Could not find package file '%s' for upload" "$package"
+	fi
+
+	local args=()
+	args+=( upload )
+	args+=( --client-id "${OAUTH_CLIENT_ID}" )
+	args+=( --client-secret "${OAUTH_CLIENT_SECRET}" )
+	args+=( --refresh-token "${OAUTH_REFRESH_TOKEN}" )
+	args+=( --source "${package}" )
+
+	if ${release}; then
+		args+=( --extension-id "${WEBSTORE_ID_PRODUCTION}" )
+	else
+		args+=( --extension-id "${WEBSTORE_ID_DEV}" )
+		args+=( --auto-publish )
+	fi
+
+	webstore "${args[@]}"
+}
+
+main "$@"

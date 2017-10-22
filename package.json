@@ -4,7 +4,9 @@
   "description": "Invert the luminance of a website to make it easier on the eyes.",
   "scripts": {
     "lint": "jshint *.js",
-    "test": "jasmine"
+    "test": "jasmine",
+    "deploy": "./deploy --release",
+    "deploy-dev": "./deploy"
   },
   "repository": {
     "type": "git",
@@ -25,6 +27,7 @@
   },
   "homepage": "https://deluminate.github.io",
   "devDependencies": {
+    "chrome-webstore-upload-cli": "^1.1.1",
     "jasmine": "^2.5.3",
     "jasmine-reporters": "^2.2.0",
     "jsdom": "^9.9.1",
