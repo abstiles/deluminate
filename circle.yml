@@ -22,7 +22,3 @@ deployment:
     branch: dev
     commands:
       - make deploy-dev
-  temptest:
-    branch: continuous-delivery
-    commands:
-      - make deploy-dev
