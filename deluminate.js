@@ -209,6 +209,7 @@ function resetFullscreenWorkaroundHeight() {
       body_scroll_height = 0;
     }
     var page_height = Math.max(body_scroll_height,
+                               document.documentElement.scrollHeight,
                                document.documentElement.clientHeight);
     var body_scroll_width;
     try {
@@ -217,6 +218,7 @@ function resetFullscreenWorkaroundHeight() {
       body_scroll_width = 0;
     }
     var page_width = Math.max(body_scroll_width,
+                              document.documentElement.scrollWidth,
                               document.documentElement.clientWidth);
 
     fullscreen_workaround.style.height = page_height + 'px';
