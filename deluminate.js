@@ -173,8 +173,53 @@ function getScrollbarWidth() {
 function detectScrollbars(element) {
   return {
     'vertical': element.scrollHeight > element.clientHeight,
-    'horizontal': element.scrollWidth > element.clientWidth
+    'horizontal': element.scrollWidth > element.clientWidth,
   }
+}
+
+function getVisibleRect() {
+  // One of the following strategies should give the right value for the
+  // actually visible region of the document:
+  var innerWindow = getWindowMinusScrollbars();
+  var documentClient = getDocumentClientRegion();
+
+  // Take the smallest value among the strategies for determining visible
+  // region to avoid the "flashing scrollbar" phenomenon.
+  var visibleHeight = Math.min(innerWindow.height, documentClient.height);
+  var visibleWidth = Math.min(innerWindow.width, documentClient.width);
+
+  return {
+    'top': window.scrollY,
+    'left': window.scrollX,
+    'height': visibleHeight,
+    'width': visibleWidth,
+  }
+}
+
+function getWindowMinusScrollbars() {
+  // Get the visible area by grabbing the inner window size and compensating
+  // for any scrollbars present. This works to identify the real visible
+  // region in most cases, but fails for Windows 8+.
+  var scrollbarsPresent = detectScrollbars(document.documentElement);
+  return {
+    'height': window.innerHeight - (scrollbarsPresent.horizontal
+                                   ? scw
+                                   : 0),
+    'width': window.innerWidth - (scrollbarsPresent.vertical
+                                 ? scw
+                                 : 0),
+  };
+}
+
+function getDocumentClientRegion() {
+  // Get the visible area based on what the document reports as its client
+  // dimensions, which usually looks like the visible region minus the
+  // scrollbars, but this has been known to report the dimensions *including*
+  // scrollbars on Linux.
+  return {
+    'height': document.documentElement.clientHeight,
+    'width': document.documentElement.clientWidth,
+  };
 }
 
 var scw = getScrollbarWidth();
@@ -186,17 +231,9 @@ function resetFullscreenWorkaroundHeight() {
   //
   // First, reduce the height of the fullscreen workaround div to the smallest
   // it can be while still covering the viewable region.
-  var lowestVisiblePoint =
-    window.scrollY + window.innerHeight;
-  var rightestVisiblePoint =
-    window.scrollX + window.innerWidth;
-  var scrollbarsPresent = detectScrollbars(document.documentElement);
-  if (scrollbarsPresent.vertical) {
-    rightestVisiblePoint -= scw;
-  }
-  if (scrollbarsPresent.horizontal) {
-    lowestVisiblePoint -= scw;
-  }
+  var visibleRegion = getVisibleRect();
+  var lowestVisiblePoint = visibleRegion.top + visibleRegion.height;
+  var rightestVisiblePoint = visibleRegion.left + visibleRegion.width;
   fullscreen_workaround.style.height = lowestVisiblePoint + 'px';
   fullscreen_workaround.style.width = rightestVisiblePoint + 'px';
 
