@@ -1,6 +1,6 @@
 /* Invert the luminance iff any of the "delumine" styles are selected. */
 html[hc^="delumine"] {
-  -webkit-filter: invert() hue-rotate(180deg) brightness(105%) contrast(105%);
+  -webkit-filter: invert(100%) hue-rotate(180deg);
 }
 html[hc^="delumine"][hc*="kill_background"],
 html[hc^="delumine"][hc*="kill_background"] body {
@@ -24,7 +24,7 @@ html[hc^="delumine"] #deluminate_backdrop {
 
 /* Override the above with a low-contrast version if selected. */
 html[hc^="delumine"][hc*="low-contrast"] {
-  -webkit-filter: invert() hue-rotate(180deg) brightness(105%) contrast(85%);
+  -webkit-filter: invert(92%) hue-rotate(180deg);
 }
 
 /* Lower the contrast without inverting the luminance. */
@@ -66,11 +66,6 @@ html[hc^="noinvert-dim5"][hc*="low-contrast"] {
   -webkit-filter: contrast(85%) brightness(50%);
 }
 
-/* Workaround for blurriness on high dpi displays. See Chromium issue 156019. */
-html[hc*="hw_accel"] {
-  -webkit-backface-visibility: hidden;
-}
-
 /* Uninvert select items within the document.
  * Note: Chrome clears -webkit-filter on all full-screen ancestor tags, killing
  * the top-level delumination filter. This is usually desirable (e.g., for
@@ -88,7 +83,7 @@ canvas,
 embed,
 object,
 video) {
-  -webkit-filter: contrast(95%) brightness(95%) hue-rotate(180deg) invert();
+  -webkit-filter: hue-rotate(180deg) invert(100%);
 }
 /* Avoid performing the uninversion process on anything that is a descendant of
  * something uninverted. */
@@ -119,7 +114,7 @@ canvas,
 embed,
 object,
 video) iframe {
-  -webkit-filter: contrast(95%) brightness(95%) hue-rotate(180deg) invert();
+  -webkit-filter: hue-rotate(180deg) invert(100%);
 }
 
 /* The "smart" filter is more selective about what to uninvert. */
@@ -146,7 +141,7 @@ html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) body :-webkit-any
 	embed:not([type$="pdf"]),
 	object,
 	video):not([aria-hidden="true"]) {
-  -webkit-filter: contrast(95%) brightness(95%) hue-rotate(180deg) invert();
+  -webkit-filter: hue-rotate(180deg) invert(100%);
 }
 /* Avoid performing the uninversion process on anything that is a descendant of
  * something uninverted. */
@@ -209,7 +204,7 @@ html[hc*="delumine-smart"]:not(*:-webkit-full-screen-ancestor) body :-webkit-any
 	embed:not([type$="pdf"]),
 	object,
 	video):not([aria-hidden="true"]) iframe {
-  -webkit-filter: contrast(95%) brightness(95%) hue-rotate(180deg) invert();
+  -webkit-filter: hue-rotate(180deg) invert(100%);
 }
 
 /* Force text to plain black text on white (which, when inverted, is the
@@ -245,7 +240,7 @@ html[hc*="delumine-noimg"][hc*="force_text"] input[style*="url"]:-webkit-any(
  * on the new tab page. */
 html[hc*="delumine-noimg"] iframe[src^="chrome-search://most-visited"],
 html[hc*="delumine-smart"] iframe[src^="chrome-search://most-visited"] {
-  -webkit-filter: contrast(95%) brightness(95%) hue-rotate(180deg) invert();
+  -webkit-filter: hue-rotate(180deg) invert(100%);
 }
 
 /* Stupid workaround just for Medium's stupid canvas which, as far as I can
