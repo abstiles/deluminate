@@ -38,6 +38,21 @@ function loadSettingsDisplay() {
   $('settings').value = JSON.stringify(settings, null, 4);
 }
 
+function editSaveCustomizations() {
+  let editSaveButton = document.getElementById('edit-save');
+  let settingsText = document.getElementById('settings');
+
+  if(editSaveButton.textContent === 'Save site customizations') {
+    editSaveButton.textContent = 'Edit site customizations';
+    settingsText.readOnly = true;
+    localStorage['siteschemes'] = JSON.stringify(JSON.parse(settingsText.value).schemes);
+    localStorage['sitemodifiers'] = JSON.stringify(JSON.parse(settingsText.value).modifiers);
+  } else {
+    editSaveButton.textContent = 'Save site customizations';
+    settingsText.readOnly = false;
+  }
+}
+
 function init() {
   initSettings();
   $('forget').addEventListener('click', onForget, false);
