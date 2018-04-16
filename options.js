@@ -42,7 +42,7 @@ function onEditSave() {
   let editSaveButton = document.getElementById('edit-save');
   let settingsText = document.getElementById('settings');
 
-  if(editSaveButton.textContent === 'Save site customizations') {
+  if (!settingsText.readOnly) {
     editSaveButton.textContent = 'Edit site customizations';
     settingsText.readOnly = true;
     localStorage['siteschemes'] = JSON.stringify(JSON.parse(settingsText.value).schemes);
