@@ -54,7 +54,7 @@ function onExtensionMessage(request) {
 function injectInstantInversion() {
   // This results in a more instant, if imperfect, inversion. Injected CSS
   // apparently takes a moment to be processed.
-  document.documentElement.style.filter = "hue-rotate(180deg) invert()";
+  document.documentElement.style.filter = "hue-rotate(180deg) invert(100%)";
   afterDomLoaded(() => {
     // Restore filter control to the injected CSS.
     document.documentElement.style.filter = "";
