@@ -92,6 +92,8 @@ function addFullscreenWorkaround() {
   fullscreen_workaround.style.left = 0;
   fullscreen_workaround.style.width = '100%';
   fullscreen_workaround.style.height = '100%';
+  fullscreen_workaround.style.maxWidth = '100%';
+  fullscreen_workaround.style.overflow = 'hidden';
   fullscreen_workaround.style.display = 'block';
   fullscreen_workaround.style['z-index'] = -2147483647;
 
