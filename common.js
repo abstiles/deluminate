@@ -1,6 +1,11 @@
 var DEFAULT_SCHEME = "delumine-smart";
 var DEFAULT_MODS = [];
 
+// In firefox, alias global chrome variable to firefox equivalent
+if ((typeof chrome === 'undefined') && (typeof browser !== 'undefined')) {
+  var chrome = browser;
+}
+
 function $(id) {
   return document.getElementById(id);
 }
