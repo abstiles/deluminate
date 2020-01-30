@@ -1,11 +1,7 @@
 var scheme_prefix;
-var fullscreen_workaround;
 var backdrop;
 var animGifHandler;
 var newImageHandler;
-var resize_observer;
-var background_observer;
-var size_checker_interval;
 var deluminateFullyInitialized = false;
 
 function onExtensionMessage(request) {
@@ -54,10 +50,10 @@ function onExtensionMessage(request) {
 function injectInstantInversion() {
   // This results in a more instant, if imperfect, inversion. Injected CSS
   // apparently takes a moment to be processed.
-  document.documentElement.style.filter = "hue-rotate(180deg) invert(100%)";
+  backdrop.style.background = "black";
   afterDomLoaded(() => {
     // Restore filter control to the injected CSS.
-    document.documentElement.style.filter = "";
+    backdrop.style.background = "transparent";
   });
 }
 
@@ -78,67 +74,26 @@ function addCSSLink() {
 function setupFullscreenWorkaround() {
   // Skip adding this in nested iframes
   if (window != window.top) return;
-  if (document.getElementById("deluminate_fullscreen_workaround") == null) {
-    addFullscreenWorkaround();
-  } else {
-    resetFullscreenWorkaroundBackground();
-    resetFullscreenWorkaroundHeight();
+  if (document.getElementById("deluminate_backdrop") == null) {
+    addBackdrop();
   }
 }
 
-function addFullscreenWorkaround() {
-  fullscreen_workaround.style.position = 'absolute';
-  fullscreen_workaround.style.top = 0;
-  fullscreen_workaround.style.left = 0;
-  fullscreen_workaround.style.width = '100%';
-  fullscreen_workaround.style.height = '100%';
-  fullscreen_workaround.style.display = 'block';
-  fullscreen_workaround.style['z-index'] = -2147483647;
-
+function addBackdrop() {
   backdrop.style.position = 'fixed';
   backdrop.style.top = 0;
   backdrop.style.left = 0;
   backdrop.style.height = '100vh';
   backdrop.style.width = '100vw';
+  backdrop.style.pointerEvents = 'none';
   backdrop.style['z-index'] = 2147483647;
 
-  resetFullscreenWorkaroundBackground();
-  resetFullscreenWorkaroundHeight();
   /* Adding to the root node rather than body so it is not subject to absolute
    * positioning of the body. */
-  // document.documentElement.appendChild(fullscreen_workaround);
   document.documentElement.appendChild(backdrop);
-  // Need to periodically reset the size (e.g., for loaded images)
-  size_checker_interval = setInterval(resetFullscreenWorkaroundHeight, 1000);
-  resize_observer.observe(document.documentElement, {
-    childList: true,
-    subtree: true,
-  });
-  background_observer.observe(document.documentElement, {
-    childList: true,
-    attributes: true
-  });
-  afterDomLoaded(function() {
-    resetFullscreenWorkaroundBackground();
-    resetFullscreenWorkaroundHeight();
-    background_observer.observe(document.head, {
-      childList: true,
-      attributes: true,
-      subtree: true,
-      characterData: true
-    });
-    background_observer.observe(document.body, {
-      attributes: true
-    });
-  });
 }
 
 function removeFullscreenWorkaround() {
-  var workaround_div;
-  resize_observer.disconnect();
-  clearInterval(size_checker_interval);
-  background_observer.disconnect();
-  removeById('deluminate_fullscreen_workaround');
   removeById('deluminate_backdrop');
 }
 
@@ -147,174 +102,6 @@ function removeById(id) {
   if (element !== null) {
     element.remove();
   }
-}
-
-function getScrollbarWidth() {
-  const outer = document.createElement('div');
-  const inner = document.createElement('div');
-
-  outer.style.visibility = 'hidden';
-  outer.style.width = '100px';
-  inner.style.width = '100%';
-  outer.appendChild(inner);
-  document.documentElement.appendChild(outer);
-
-  const widthWithoutScrollbar = outer.offsetWidth;
-  outer.style.overflow = 'scroll';
-  const widthWithScrollbar = inner.offsetWidth;
-  document.documentElement.removeChild(outer);
-  return (widthWithoutScrollbar - widthWithScrollbar);
-}
-
-function detectScrollbars(element) {
-  return {
-    'vertical': element.scrollHeight > element.clientHeight,
-    'horizontal': element.scrollWidth > element.clientWidth,
-  }
-}
-
-function getVisibleRect() {
-  // One of the following strategies should give the right value for the
-  // actually visible region of the document:
-  var innerWindow = getWindowMinusScrollbars();
-  var documentClient = getDocumentClientRegion();
-
-  // Take the smallest value among the strategies for determining visible
-  // region to avoid the "flashing scrollbar" phenomenon.
-  var visibleHeight = Math.min(innerWindow.height, documentClient.height);
-  var visibleWidth = Math.min(innerWindow.width, documentClient.width);
-
-  return {
-    'top': window.scrollY,
-    'left': window.scrollX,
-    'height': visibleHeight,
-    'width': visibleWidth,
-  }
-}
-
-function getWindowMinusScrollbars() {
-  // Get the visible area by grabbing the inner window size and compensating
-  // for any scrollbars present. This works to identify the real visible
-  // region in most cases, but fails for Windows 8+.
-  var scrollbarsPresent = detectScrollbars(document.documentElement);
-  return {
-    'height': window.innerHeight - (scrollbarsPresent.horizontal
-                                   ? scw
-                                   : 0),
-    'width': window.innerWidth - (scrollbarsPresent.vertical
-                                 ? scw
-                                 : 0),
-  };
-}
-
-function getDocumentClientRegion() {
-  // Get the visible area based on what the document reports as its client
-  // dimensions, which usually looks like the visible region minus the
-  // scrollbars, but this has been known to report the dimensions *including*
-  // scrollbars on Linux.
-  return {
-    'height': document.documentElement.clientHeight,
-    'width': document.documentElement.clientWidth,
-  };
-}
-
-var scw = getScrollbarWidth();
-
-function resetFullscreenWorkaroundHeight() {
-  // We need to calculate the size of the page _minus_ the current size of the
-  // fullscreen workaround div, so that an initial large size does not
-  // permanently peg the page at that minimum size.
-  //
-  // First, reduce the height of the fullscreen workaround div to the smallest
-  // it can be while still covering the viewable region.
-  var visibleRegion = getVisibleRect();
-  var lowestVisiblePoint = visibleRegion.top + visibleRegion.height;
-  var rightestVisiblePoint = visibleRegion.left + visibleRegion.width;
-  fullscreen_workaround.style.height = lowestVisiblePoint + 'px';
-  fullscreen_workaround.style.width = rightestVisiblePoint + 'px';
-
-  // Yield to the renderer, then reset the size to the calculated region.
-  setTimeout(() => {
-    var body_scroll_height;
-    try {
-      body_scroll_height = document.body.scrollHeight;
-    } catch(err) {
-      body_scroll_height = 0;
-    }
-    var page_height = Math.max(body_scroll_height,
-                               document.documentElement.scrollHeight,
-                               document.documentElement.clientHeight);
-    var body_scroll_width;
-    try {
-      body_scroll_width = document.body.scrollWidth;
-    } catch(err) {
-      body_scroll_width = 0;
-    }
-    var page_width = Math.max(body_scroll_width,
-                              document.documentElement.scrollWidth,
-                              document.documentElement.clientWidth);
-
-    fullscreen_workaround.style.height = page_height + 'px';
-    fullscreen_workaround.style.width = page_width + 'px';
-  }, 0);
-}
-
-function calculateBackground() {
-  if (!deluminateFullyInitialized) {
-    return 'black';
-  }
-  var root_style = window.getComputedStyle(document.documentElement);
-  if (!domContentLoaded) {
-    // We're still pre-DOM-load, so keep things black.
-    if (root_style.filter.indexOf('invert') >= 0) {
-      return 'white';
-    } else {
-      return 'black';
-    }
-  }
-  var body_style = window.getComputedStyle(document.body);
-  var no_color = 'rgba(0, 0, 0, 0)';
-  var no_image = 'none';
-  var new_style_item = document.createElement('div');
-  if (root_style.backgroundColor != no_color ||
-      root_style.backgroundImage != no_image) {
-    new_style_item.style.background = root_style.background;
-  } else {
-    new_style_item.style.background = body_style.background;
-  }
-  /* Force an unspecified background color to white so it gets inverted to
-   * black properly. */
-  if (new_style_item.style.backgroundColor == no_color) {
-    new_style_item.style.backgroundColor = 'white';
-  } else {
-    new_style_item.style.backgroundColor =
-      computeEffectiveCanvasColor(new_style_item.style.backgroundColor);
-  }
-  return new_style_item.style.background;
-}
-
-function computeEffectiveCanvasColor(color) {
-  var rgbaColorRegex = /rgba\((\d+), (\d+), (\d+), (\d*\.?\d+)\)/;
-  var match = rgbaColorRegex.exec(color);
-  if (!match) {
-    // If this regex doesn't match, it has no alpha component, so it's fine.
-    return color;
-  }
-  // Compute the effective canvas color by simulating the blending (due to an
-  // alpha channel) against the default white background. This must be
-  // calculated manually.
-  var [_, r, g, b, a] = match.map(Number);
-  // Calculate the alpha-weighted blend against a white background.
-  [r, g, b] = [r, g, b].map(channel => {
-    var channelComponent = channel * a;
-    var whiteComponent = 255 * (1 - a);
-    var result = Math.round(channelComponent + whiteComponent);
-    var clampedTo8bit = result <= 0   ? 0
-                      : result >= 255 ? 255
-                      : result
-    return clampedTo8bit;
-  });
-  return `rgb(${r}, ${g}, ${b})`;
 }
 
 function onEvent(evt) {
@@ -400,11 +187,6 @@ function log() {
                              Array.prototype.slice.call(arguments).join(' ')});
 }
 
-function resetFullscreenWorkaroundBackground() {
-  fullscreen_workaround.style.background = calculateBackground();
-  markCssImages(fullscreen_workaround);
-}
-
 function init() {
   if (window == window.top) {
     scheme_prefix = '';
@@ -413,8 +195,6 @@ function init() {
   }
   log("Initializing.", scheme_prefix);
 
-  fullscreen_workaround = document.createElement('div');
-  fullscreen_workaround.id = scheme_prefix + "deluminate_fullscreen_workaround";
   backdrop = document.createElement('div');
   backdrop.id = scheme_prefix + "deluminate_backdrop";
 
@@ -451,19 +231,6 @@ function init() {
     }
   });
 
-  resize_observer = new MutationObserver(function(mutations, obs) {
-    if (mutations.length > 0) {
-      resetFullscreenWorkaroundHeight();
-    }
-  });
-
-  background_observer = new MutationObserver(function(mutations, obs) {
-    if (mutations.length > 0) {
-      resetFullscreenWorkaroundBackground();
-    }
-  });
-
-  window.addEventListener('resize', resetFullscreenWorkaroundHeight);
   setupFullscreenWorkaround();
 }
 
