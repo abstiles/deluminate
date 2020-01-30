@@ -101,13 +101,13 @@ function addFullscreenWorkaround() {
   backdrop.style.left = 0;
   backdrop.style.height = '100vh';
   backdrop.style.width = '100vw';
-  backdrop.style['z-index'] = -2147483648;
+  backdrop.style['z-index'] = 2147483647;
 
   resetFullscreenWorkaroundBackground();
   resetFullscreenWorkaroundHeight();
   /* Adding to the root node rather than body so it is not subject to absolute
    * positioning of the body. */
-  document.documentElement.appendChild(fullscreen_workaround);
+  // document.documentElement.appendChild(fullscreen_workaround);
   document.documentElement.appendChild(backdrop);
   // Need to periodically reset the size (e.g., for loaded images)
   size_checker_interval = setInterval(resetFullscreenWorkaroundHeight, 1000);
