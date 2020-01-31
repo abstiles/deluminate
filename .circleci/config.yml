@@ -2,7 +2,7 @@ version: 2
 jobs:
   test:
     docker:
-      - image: circleci/node:9.11
+      - image: circleci/node:13.7
     steps:
       - checkout
       - run: npm run lint
@@ -12,13 +12,13 @@ jobs:
           destination: junitresults
   deploy:
     docker:
-      - image: circleci/node:9.11
+      - image: circleci/node:13.7
     steps:
       - checkout
       - run: make deploy
   deploy-dev:
     docker:
-      - image: circleci/node:9.11
+      - image: circleci/node:13.7
     steps:
       - checkout
       - run: make deploy-dev
