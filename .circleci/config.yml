@@ -5,6 +5,7 @@ jobs:
       - image: circleci/node:13.7
     steps:
       - checkout
+      - run: npm install
       - run: npm run lint
       - run: npm test
       - store_test_results:
