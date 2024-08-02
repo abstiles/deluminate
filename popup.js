@@ -71,7 +71,9 @@ function update() {
   } else {
     document.documentElement.setAttribute('hc', 'normal');
   }
-  chrome.extension.getBackgroundPage().updateTabs();
+  chrome.runtime.sendMessage({
+    update_tabs: true,
+  });
 }
 
 function changedFromDefault() {

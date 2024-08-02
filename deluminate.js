@@ -64,7 +64,7 @@ function injectInstantInversion() {
 
 function addCSSLink() {
   /* Add CSS in a way that still works on chrome URLs. */
-  var cssURL = chrome.extension.getURL('deluminate.css');
+  var cssURL = chrome.runtime.getURL('deluminate.css');
   var selector = 'link[href="' + cssURL + '"]'
   if (document.querySelector(selector) !== null) {
     return; // Don't re-add if it's already there.

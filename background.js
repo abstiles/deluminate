@@ -29,6 +29,7 @@ function injectContentScripts() {
 };
 
 function injectTabCSS(tab) {
+  return;
   console.log("Injecting CSS into tab:", tab);
   var url = tab.url;
   chrome.tabs.insertCSS(tab.id, {
@@ -96,7 +97,7 @@ var gifProcessor;
 var workQueue = {};
 
 function initializeGifProcessor() {
-  gifProcessor = new Worker(chrome.extension.getURL('animated_gif_checker.js'));
+  gifProcessor = new Worker(chrome.runtime.getURL('animated_gif_checker.js'));
   gifProcessor.onmessage = function(e) {
     workQueue[e.data.id]({'is_animated': e.data.result});
     delete workQueue[e.data.id];
@@ -121,6 +122,9 @@ function init() {
   chrome.runtime.onMessage.addListener(
       function(request, sender, sendResponse) {
         if (request.target === 'offscreen') return;
+        if (request['update_tabs']) {
+          // Update tabs already complete.
+        }
         if (request['toggle_global']) {
           toggleEnabled();
         }
@@ -173,7 +177,7 @@ function init() {
   });
 
   if (navigator.appVersion.indexOf("Mac") != -1) {
-    chrome.browserAction.setTitle({'title': 'Deluminate (Cmd+Shift+F11)'});
+    chrome.action.setTitle({'title': 'Deluminate (Cmd+Shift+F11)'});
   }
   chrome.commands.onCommand.addListener(function(command) {
     switch(command) {
