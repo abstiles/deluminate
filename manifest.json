@@ -1,6 +1,7 @@
 {
    "background": {
-      "scripts": [ "common.js", "background.js" ]
+      "service_worker": [ "background.js" ],
+      "type": "module"
    },
    "browser_action": {
       "default_icon": "deluminate-128.png",
@@ -27,9 +28,15 @@
       "128": "deluminate-128.png"
    },
    "name": "Deluminate",
-   "manifest_version": 2,
+   "manifest_version": 3,
    "options_page": "options.html",
-   "permissions": [ "<all_urls>", "tabs" ],
-   "web_accessible_resources": [ "deluminate.css" ],
+   "permissions": [ "tabs", "offscreen" ],
+   "host_permissions": [ "<all_urls>" ],
+   "web_accessible_resources": [
+       {
+           "resources": [ "deluminate.css" ],
+           "matches": [ "<all_urls>" ]
+       }
+   ],
    "version": "0.7.7"
 }

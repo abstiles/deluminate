@@ -1,3 +1,18 @@
+import {
+  DEFAULT_SCHEME,
+  refreshStore,
+  getEnabled,
+  setEnabled,
+  getDefaultScheme,
+  getSiteScheme,
+  setSiteScheme,
+  siteFromUrl,
+  getSiteModifiers,
+  getDefaultModifiers,
+  getGlobalSettings,
+  isDisallowedUrl,
+} from 'common.js';
+
 function injectContentScripts() {
   chrome.windows.getAll({'populate': true}, function(windows) {
     for (var i = 0; i < windows.length; i++) {
@@ -105,6 +120,7 @@ function init() {
 
   chrome.runtime.onMessage.addListener(
       function(request, sender, sendResponse) {
+        if (request.target === 'offscreen') return;
         if (request['toggle_global']) {
           toggleEnabled();
         }
@@ -148,9 +164,13 @@ function init() {
   });
 
 
-  document.addEventListener('storage', function(evt) {
-    updateTabs();
-  }, false);
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === 'sync') {
+      refreshStore().then(() => {
+        updateTabs();
+      });
+    }
+  });
 
   if (navigator.appVersion.indexOf("Mac") != -1) {
     chrome.browserAction.setTitle({'title': 'Deluminate (Cmd+Shift+F11)'});

@@ -1,3 +1,26 @@
+import {
+    $,
+    getEnabled,
+    setEnabled,
+    getLowContrast,
+    setLowContrast,
+    getForceText,
+    setForceText,
+    getKillBackground,
+    setKillBackground,
+    getKeyAction,
+    setKeyAction,
+    getDefaultScheme,
+    setDefaultScheme,
+    getSiteScheme,
+    setSiteScheme,
+    siteFromUrl,
+    getSiteModifiers,
+    isDisallowedUrl,
+    getSettingsViewed,
+    setSettingsViewed,
+} from 'common.js';
+
 var site;
 var key1;
 var key2;

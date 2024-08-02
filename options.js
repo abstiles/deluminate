@@ -1,3 +1,12 @@
+import {
+    $,
+    storeSet,
+    getGlobalSettings,
+    setGlobalSetting,
+    resetSiteSchemes,
+    resetSiteModifiers,
+} from 'common.js';
+
 function initSettings() {
   var globalSettings = getGlobalSettings();
   if (globalSettings['detect_animation']) {
@@ -29,36 +38,39 @@ function onDetectAnim(evt) {
   setGlobalSetting('detect_animation', evt.target.value);
 }
 
-function loadSettingsDisplay() {
+function loadSettingsDisplay(store) {
   var settings = {
     'version': 1,
-    'schemes': JSON.parse(localStorage['siteschemes']),
-    'modifiers': JSON.parse(localStorage['sitemodifiers'] || '{}')
+    'schemes': JSON.parse(store['siteschemes']),
+    'modifiers': JSON.parse(store['sitemodifiers'] || '{}')
   }
   $('settings').value = JSON.stringify(settings, null, 4);
 }
 
-function onEditSave() {
-  let editSaveButton = document.getElementById('edit-save');
-  let settingsText = document.getElementById('settings');
+function onEditSave(store) {
+  return () => {
+    let editSaveButton = document.getElementById('edit-save');
+    let settingsText = document.getElementById('settings');
 
-  if (!settingsText.readOnly) {
-    editSaveButton.textContent = 'Edit site customizations';
-    settingsText.readOnly = true;
-    localStorage['siteschemes'] = JSON.stringify(JSON.parse(settingsText.value).schemes);
-    localStorage['sitemodifiers'] = JSON.stringify(JSON.parse(settingsText.value).modifiers);
-  } else {
-    editSaveButton.textContent = 'Save site customizations';
-    settingsText.readOnly = false;
-  }
+    if (!settingsText.readOnly) {
+      editSaveButton.textContent = 'Edit site customizations';
+      settingsText.readOnly = true;
+      store['siteschemes'] = JSON.stringify(JSON.parse(settingsText.value).schemes);
+      store['sitemodifiers'] = JSON.stringify(JSON.parse(settingsText.value).modifiers);
+    } else {
+      editSaveButton.textContent = 'Save site customizations';
+      settingsText.readOnly = false;
+    }
+  };
 }
 
-function init() {
+async function init() {
+  const store = await syncStore();
   initSettings();
   $('forget').addEventListener('click', onForget, false);
-  $('edit-save').addEventListener('click', onEditSave, false);
+  $('edit-save').addEventListener('click', onEditSave(store), false);
   $('detect_animation').addEventListener('change', onDetectAnim, false);
-  loadSettingsDisplay();
+  loadSettingsDisplay(store);
 }
 
 window.addEventListener('load', init, false);

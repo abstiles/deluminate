@@ -9,6 +9,7 @@ var size_checker_interval;
 var deluminateFullyInitialized = false;
 
 function onExtensionMessage(request) {
+  if (request.target === 'offscreen') return;
   deluminateFullyInitialized = true;
   if (request['manual_css']) {
     addCSSLink();
