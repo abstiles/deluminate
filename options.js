@@ -1,11 +1,12 @@
 import {
-    $,
-    storeSet,
-    getGlobalSettings,
-    setGlobalSetting,
-    resetSiteSchemes,
-    resetSiteModifiers,
-} from 'common.js';
+  $,
+  syncStore,
+  storeSet,
+  getGlobalSettings,
+  setGlobalSetting,
+  resetSiteSchemes,
+  resetSiteModifiers,
+} from './common.js';
 
 function initSettings() {
   var globalSettings = getGlobalSettings();

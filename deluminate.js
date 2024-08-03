@@ -371,7 +371,7 @@ function detectAnimatedGif(tag) {
     , 'src': tag.src
     },
     function(result) {
-      if (result.is_animated) {
+      if (result) {
         tag.setAttribute('deluminate_imageType', 'animated gif');
       }
     });

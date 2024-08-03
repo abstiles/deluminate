@@ -1,25 +1,30 @@
 import {
-    $,
-    getEnabled,
-    setEnabled,
-    getLowContrast,
-    setLowContrast,
-    getForceText,
-    setForceText,
-    getKillBackground,
-    setKillBackground,
-    getKeyAction,
-    setKeyAction,
-    getDefaultScheme,
-    setDefaultScheme,
-    getSiteScheme,
-    setSiteScheme,
-    siteFromUrl,
-    getSiteModifiers,
-    isDisallowedUrl,
-    getSettingsViewed,
-    setSettingsViewed,
-} from 'common.js';
+  $,
+  syncStore,
+  getEnabled,
+  setEnabled,
+  getLowContrast,
+  setLowContrast,
+  getForceText,
+  setForceText,
+  getKillBackground,
+  setKillBackground,
+  getKeyAction,
+  setKeyAction,
+  getDefaultScheme,
+  setDefaultScheme,
+  getSiteScheme,
+  setSiteScheme,
+  siteFromUrl,
+  getDefaultModifiers,
+  setDefaultModifiers,
+  getSiteModifiers,
+  addSiteModifier,
+  delSiteModifier,
+  isDisallowedUrl,
+  getSettingsViewed,
+  setSettingsViewed,
+} from './common.js';
 
 var site;
 var key1;
@@ -71,9 +76,6 @@ function update() {
   } else {
     document.documentElement.setAttribute('hc', 'normal');
   }
-  chrome.runtime.sendMessage({
-    update_tabs: true,
-  });
 }
 
 function changedFromDefault() {
@@ -194,7 +196,7 @@ function onSettings() {
   chrome.tabs.create({active: true, url: "options.html"});
 }
 
-function init() {
+async function init() {
   addRadioListeners('keyaction');
   addRadioListeners('apply');
   addRadioListeners('scheme');
@@ -213,6 +215,7 @@ function init() {
     key2 = 'Shift+F12';
   }
 
+  await syncStore();
   if (!getSettingsViewed()) {
     $('settings').className += " new";
   }
@@ -234,10 +237,9 @@ function init() {
         }
       }
     }
+    let currentScheme = getDefaultScheme(site);
     if (site) {
       currentScheme = getSiteScheme(site);
-    } else {
-      currentScheme = getDefaultScheme(site);
     }
     if (currentScheme.lastIndexOf('noinvert-dim', 0) === 0) {
       currentDimLevel = currentScheme.replace(/.*(\d+)$/, '$1');

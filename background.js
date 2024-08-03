@@ -11,7 +11,7 @@ import {
   getDefaultModifiers,
   getGlobalSettings,
   isDisallowedUrl,
-} from 'common.js';
+} from './common.js';
 
 function injectContentScripts() {
   chrome.windows.getAll({'populate': true}, function(windows) {
@@ -30,6 +30,7 @@ function injectContentScripts() {
 
 function injectTabCSS(tab) {
   return;
+  /*
   console.log("Injecting CSS into tab:", tab);
   var url = tab.url;
   chrome.tabs.insertCSS(tab.id, {
@@ -48,13 +49,15 @@ function injectTabCSS(tab) {
       chrome.tabs.sendMessage(tab.id, {manual_css: true});
     }
   });
+  */
 }
 
 function updateTabs() {
   var msg = {
     'enabled': getEnabled()
   };
-  chrome.windows.getAll({'populate': true}, function(windows) {
+
+  function initTabs(windows) {
     for (var i = 0; i < windows.length; i++) {
       var tabs = windows[i].tabs;
       for (var j = 0; j < tabs.length; j++) {
@@ -71,7 +74,9 @@ function updateTabs() {
         chrome.tabs.sendMessage(tabs[j].id, msg);
       }
     }
-  });
+  };
+
+  chrome.windows.getAll({'populate': true}, initTabs);
 };
 
 function toggleEnabled() {
@@ -93,71 +98,50 @@ function toggleSite(url) {
   updateTabs();
 }
 
-var gifProcessor;
-var workQueue = {};
-
-function initializeGifProcessor() {
-  gifProcessor = new Worker(chrome.runtime.getURL('animated_gif_checker.js'));
-  gifProcessor.onmessage = function(e) {
-    workQueue[e.data.id]({'is_animated': e.data.result});
-    delete workQueue[e.data.id];
+function messageDispatcher(request, sender, sendResponse) {
+  if (request.target === 'offscreen') return;
+  if (request['update_tabs']) {
+    updateTabs();
   }
-}
-
-function processGif(src, response_cb) {
-  if(processGif.lastJobId === undefined) {
-    processGif.lastJobId = -1;
+  if (request['toggle_global']) {
+    toggleEnabled();
   }
-  workQueue[++processGif.lastJobId] = response_cb;
-  gifProcessor.postMessage(
-    { 'id': processGif.lastJobId
-    , 'src': src
-    });
+  if (request['toggle_site']) {
+    toggleSite(sender.tab ? sender.tab.url : 'www.example.com');
+  }
+  if (request['log']) {
+    console.log(JSON.stringify(sender.tab), request.log);
+  }
+  if (request['detect_gif']) {
+    isAnimatedGif(request.src).then(sendResponse)
+    return true;
+  }
+  if (request['init']) {
+    var url = sender.tab ? sender.tab.url : request['url'];
+    var scheme = getDefaultScheme();
+    var modifiers = getDefaultModifiers();
+    if (sender.tab) {
+      injectTabCSS(sender.tab);
+    }
+    if (url) {
+      scheme = getSiteScheme(siteFromUrl(url));
+      modifiers = getSiteModifiers(siteFromUrl(url));
+    }
+    var msg = {
+      'enabled': getEnabled(),
+      'scheme': scheme,
+      'modifiers': modifiers,
+      'settings': getGlobalSettings()
+    };
+    sendResponse(msg);
+  }
 }
 
 function init() {
+  chrome.runtime.onMessage.addListener(messageDispatcher);
+
   injectContentScripts();
   updateTabs();
-
-  chrome.runtime.onMessage.addListener(
-      function(request, sender, sendResponse) {
-        if (request.target === 'offscreen') return;
-        if (request['update_tabs']) {
-          // Update tabs already complete.
-        }
-        if (request['toggle_global']) {
-          toggleEnabled();
-        }
-        if (request['toggle_site']) {
-          toggleSite(sender.tab ? sender.tab.url : 'www.example.com');
-        }
-        if (request['log']) {
-          console.log(sender.tab, request.log);
-        }
-        if (request['detect_gif']) {
-          processGif(request.src, sendResponse);
-          return true;
-        }
-        if (request['init']) {
-          var url = sender.tab ? sender.tab.url : request['url'];
-          var scheme = getDefaultScheme();
-          var modifiers = getDefaultModifiers();
-          if (sender.tab) {
-            injectTabCSS(sender.tab);
-          }
-          if (url) {
-            scheme = getSiteScheme(siteFromUrl(url));
-            modifiers = getSiteModifiers(siteFromUrl(url));
-          }
-          var msg = {
-            'enabled': getEnabled(),
-            'scheme': scheme,
-            'modifiers': modifiers,
-            'settings': getGlobalSettings()
-          };
-          sendResponse(msg);
-        }
-      });
 
   /* Ensure tab CSS is re-inserted into replaced tabs. */
   chrome.tabs.onReplaced.addListener(function (addedTabId, removedTabId) {
@@ -194,8 +178,47 @@ function init() {
         break;
     }
   });
+}
 
-  initializeGifProcessor();
-};
+async function isAnimatedGif(src) {
+  if (src.indexOf('data:') == 0) {
+    return;
+  }
+  const response = await fetch(src);
+  const arrayBuffer = await response.arrayBuffer();
+  const arr = new Uint8Array(arrayBuffer);
+
+  // make sure it's a gif (GIF8)
+  if (arr[0] !== 0x47 || arr[1] !== 0x49 ||
+      arr[2] !== 0x46 || arr[3] !== 0x38) {
+    return false;
+  }
+
+  //ported from php http://www.php.net/manual/en/function.imagecreatefromgif.php#104473
+  //an animated gif contains multiple "frames", with each frame having a
+  //header made up of:
+  // * a static 4-byte sequence (\x00\x21\xF9\x04)
+  // * 4 variable bytes
+  // * a static 2-byte sequence (\x00\x2C) (some variants may use \x00\x21 ?)
+  // We read through the file til we reach the end of the file, or we've found
+  // at least 2 frame headers
+  let frames = 0;
+  const length = arr.length;
+  for (let i=0; i < length - 9; ++i) {
+    if (arr[i] === 0x00 && arr[i+1] === 0x21 &&
+        arr[i+2] === 0xF9 && arr[i+3] === 0x04 &&
+        arr[i+8] === 0x00 &&
+        (arr[i+9] === 0x2C || arr[i+9] === 0x21))
+    {
+      frames++;
+    }
+    if (frames > 1) {
+      break;
+    }
+  }
+
+  // if frame count > 1, it's animated
+  return frames > 1;
+}
 
 init();

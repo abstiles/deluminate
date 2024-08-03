@@ -35,6 +35,7 @@ export async function refreshStore() {
 }
 
 export function storeSet(key, value) {
+  storeCache[key] = value;
   chrome.storage.sync.set({[key]: value});
 }
 
@@ -46,6 +47,9 @@ function getStoredBool(key, default_val) {
   default_val = typeof default_val !== 'undefined' ? default_val : 'false';
 
   var result = storeCache[key];
+  if (result === true || result === false) {
+    return result;
+  }
   if (result === 'true' || result === 'false') {
     return (result === 'true');
   }
@@ -160,9 +164,7 @@ export function resetSiteSchemes() {
 }
 
 export function siteFromUrl(url) {
-  var a = document.createElement('a');
-  a.href = url;
-  return a.hostname;
+  return new URL(url).hostname;
 }
 
 export function getSiteModifiers(site) {
@@ -236,7 +238,7 @@ export function addSiteModifier(site, modifier) {
   } catch (e) {
     siteModifiers[site] = {};
     // Get a list of non-empty modifiers
-    defaultModifiers = getDefaultModifiers().split(' ').filter(
+    let defaultModifiers = getDefaultModifiers().split(' ').filter(
       function(x) { return x.length > 0; }
     );
     for (var i = 0; i < defaultModifiers.length; i++) {

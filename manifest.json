@@ -1,6 +1,6 @@
 {
    "background": {
-      "service_worker": [ "background.js" ],
+      "service_worker": "background.js",
       "type": "module"
    },
    "action": {
@@ -31,7 +31,7 @@
    "name": "Deluminate",
    "manifest_version": 3,
    "options_page": "options.html",
-   "permissions": [ "tabs", "offscreen" ],
+   "permissions": [ "tabs", "offscreen", "storage" ],
    "host_permissions": [ "<all_urls>" ],
    "web_accessible_resources": [
        {
