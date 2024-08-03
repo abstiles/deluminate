@@ -17,9 +17,6 @@ function onExtensionMessage(request) {
   if (request.enabled && request.scheme != 'normal') {
     hc = scheme_prefix + request.scheme + ' ' + request.modifiers;
     document.documentElement.setAttribute('hc', hc);
-    if (request.scheme.indexOf("delumine") >= 0) {
-      injectInstantInversion();
-    }
     setupFullscreenWorkaround();
   } else {
     document.documentElement.removeAttribute('hc');
@@ -51,16 +48,6 @@ function onExtensionMessage(request) {
   }
 }
 
-function injectInstantInversion() {
-  // This results in a more instant, if imperfect, inversion. Injected CSS
-  // apparently takes a moment to be processed.
-  backdrop.style.background = "black";
-  afterDomLoaded(() => {
-    // Restore filter control to the injected CSS.
-    backdrop.style.background = "transparent";
-  });
-}
-
 function addCSSLink() {
   /* Add CSS in a way that still works on chrome URLs. */
   var cssURL = chrome.runtime.getURL('deluminate.css');
@@ -84,6 +71,9 @@ function setupFullscreenWorkaround() {
 }
 
 function addBackdrop() {
+  // This results in a more instant, if imperfect, inversion. Injected CSS
+  // apparently takes a moment to be processed.
+  backdrop.style.background = "black";
   backdrop.style.position = 'fixed';
   backdrop.style.top = 0;
   backdrop.style.left = 0;
@@ -95,6 +85,9 @@ function addBackdrop() {
   /* Adding to the root node rather than body so it is not subject to absolute
    * positioning of the body. */
   document.documentElement.appendChild(backdrop);
+  afterDomLoaded(() => {
+    backdrop.style.display = "none";
+  });
 }
 
 function removeFullscreenWorkaround() {

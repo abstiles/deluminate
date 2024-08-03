@@ -1,6 +1,6 @@
 /* Invert the luminance iff any of the "delumine" styles are selected. */
-html[hc^="delumine"] #deluminate_backdrop {
-  backdrop-filter: invert(100%) hue-rotate(180deg);
+html[hc^="delumine"] {
+  filter: invert(100%) hue-rotate(180deg);
 }
 html[hc^="delumine"][hc*="kill_background"],
 html[hc^="delumine"][hc*="kill_background"] body {
@@ -14,49 +14,52 @@ html[hc^="noinvert"][hc*="kill_background"] body {
   background-color: #000 !important;
   color: #FFF !important;
 }
+html[hc^="delumine"] #deluminate_backdrop {
+  background: transparent !important;
+}
 
 /* Override the above with a low-contrast version if selected. */
-html[hc^="delumine"][hc*="low-contrast"] #deluminate_backdrop {
-  backdrop-filter: invert(92%) hue-rotate(180deg);
+html[hc^="delumine"][hc*="low-contrast"] {
+  filter: invert(92%) hue-rotate(180deg);
 }
 
 /* Lower the contrast without inverting the luminance. */
-html[hc^="noinvert-low-contrast"] #deluminate_backdrop {
-  backdrop-filter: contrast(85%);
+html[hc^="noinvert-low-contrast"] {
+  filter: contrast(85%);
 }
 
 /* Lower the brightness without inverting the luminance. */
-html[hc^="noinvert-dim1"] #deluminate_backdrop {
-  backdrop-filter: brightness(90%);
+html[hc^="noinvert-dim1"] {
+  filter: brightness(90%);
 }
-html[hc^="noinvert-dim2"] #deluminate_backdrop {
-  backdrop-filter: brightness(80%);
+html[hc^="noinvert-dim2"] {
+  filter: brightness(80%);
 }
-html[hc^="noinvert-dim3"] #deluminate_backdrop {
-  backdrop-filter: brightness(70%);
+html[hc^="noinvert-dim3"] {
+  filter: brightness(70%);
 }
-html[hc^="noinvert-dim4"] #deluminate_backdrop {
-  backdrop-filter: brightness(60%);
+html[hc^="noinvert-dim4"] {
+  filter: brightness(60%);
 }
-html[hc^="noinvert-dim5"] #deluminate_backdrop {
-  backdrop-filter: brightness(50%);
+html[hc^="noinvert-dim5"] {
+  filter: brightness(50%);
 }
 
 /* The low-contrast version of the above. */
-html[hc^="noinvert-dim1"][hc*="low-contrast"] #deluminate_backdrop {
-  backdrop-filter: contrast(85%) brightness(90%);
+html[hc^="noinvert-dim1"][hc*="low-contrast"] {
+  filter: contrast(85%) brightness(90%);
 }
-html[hc^="noinvert-dim2"][hc*="low-contrast"] #deluminate_backdrop {
-  backdrop-filter: contrast(85%) brightness(80%);
+html[hc^="noinvert-dim2"][hc*="low-contrast"] {
+  filter: contrast(85%) brightness(80%);
 }
-html[hc^="noinvert-dim3"][hc*="low-contrast"] #deluminate_backdrop {
-  backdrop-filter: contrast(85%) brightness(70%);
+html[hc^="noinvert-dim3"][hc*="low-contrast"] {
+  filter: contrast(85%) brightness(70%);
 }
-html[hc^="noinvert-dim4"][hc*="low-contrast"] #deluminate_backdrop {
-  backdrop-filter: contrast(85%) brightness(60%);
+html[hc^="noinvert-dim4"][hc*="low-contrast"] {
+  filter: contrast(85%) brightness(60%);
 }
-html[hc^="noinvert-dim5"][hc*="low-contrast"] #deluminate_backdrop {
-  backdrop-filter: contrast(85%) brightness(50%);
+html[hc^="noinvert-dim5"][hc*="low-contrast"] {
+  filter: contrast(85%) brightness(50%);
 }
 
 /* Uninvert select items within the document. */
