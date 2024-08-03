@@ -1,6 +1,7 @@
 import {
   DEFAULT_SCHEME,
   refreshStore,
+  syncStore,
   getEnabled,
   setEnabled,
   getDefaultScheme,
@@ -13,43 +14,66 @@ import {
   isDisallowedUrl,
 } from './common.js';
 
-function injectContentScripts() {
-  chrome.windows.getAll({'populate': true}, function(windows) {
-    for (var i = 0; i < windows.length; i++) {
-      var tabs = windows[i].tabs;
-      for (var j = 0; j < tabs.length; j++) {
-        var url = tabs[j].url;
-        if (url.indexOf('chrome') == 0 || url.indexOf('about') == 0) {
-          continue;
-        }
-        injectTabCSS(tabs[j]);
-      }
+async function injectContentScripts() {
+  const injectTasks = [];
+  const windows = await chrome.windows.getAll({'populate': true});
+  for (const window of windows) {
+    for (const tab of window.tabs) {
+      injectTasks.push(injectTab(tab));
     }
-  });
-};
+  }
+  return Promise.allSettled(injectTasks);
+}
 
-function injectTabCSS(tab) {
-  return;
-  /*
-  console.log("Injecting CSS into tab:", tab);
-  var url = tab.url;
-  chrome.tabs.insertCSS(tab.id, {
-    file: 'deluminate.css',
-    allFrames: true,
-    matchAboutBlank: true,
-    runAt: 'document_start'
-  }, function() {
-    if (chrome.runtime.lastError) {
-      // Don't bother logging the expected error in this case.
-      if (url.indexOf('chrome') != 0 && url.indexOf('about') != 0) {
-        console.log('Error injecting CSS into tab:', url,
-                    chrome.runtime.lastError.message, tab);
-      }
-      console.log("Telling tab to inject manually.");
-      chrome.tabs.sendMessage(tab.id, {manual_css: true});
-    }
+async function injectTab(tab) {
+  const url = tab.url;
+  if (url.indexOf('chrome') == 0 || url.indexOf('about') == 0) {
+    return [];
+  }
+  return await Promise.allSettled([
+    injectTabJS(tab),
+    injectTabCSS(tab),
+  ]);
+}
+
+function tabSummary(tab) {
+  const details = {url: tab.url, id: tab.id};
+  return JSON.stringify(details);
+}
+
+async function injectTabJS(tab) {
+  console.log(`Injecting JS into tab: ${tabSummary(tab)}`);
+  try {
+  return await chrome.scripting.executeScript({
+    target: {tabId: tab.id, allFrames: true},
+    files: ["deluminate.js"],
+    injectImmediately: true,
   });
-  */
+  } finally {
+    console.log(`Done injecting JS into tab: ${tabSummary(tab)}`);
+  }
+}
+
+async function injectTabCSS(tab) {
+  console.log(`Injecting CSS into tab: ${tabSummary(tab)}`);
+  var url = tab.url;
+  try {
+    return await chrome.scripting.insertCSS({
+      target: {tabId: tab.id, allFrames: true},
+      files: ["deluminate.css"],
+    });
+  } catch (err) {
+    // Don't bother logging the expected error in this case.
+    if (url.indexOf('chrome') != 0 && url.indexOf('about') != 0) {
+      console.log('Error injecting CSS into tab:', url, err, tabSummary(tab));
+    }
+    /*
+    // Race condition here where this won't work if the content script isn't
+    // loaded yet.
+    console.log("Telling tab to inject manually.");
+    chrome.tabs.sendMessage(tab.id, {manual_css: true});
+    */
+  }
 }
 
 function updateTabs() {
@@ -58,23 +82,26 @@ function updateTabs() {
   };
 
   function initTabs(windows) {
-    for (var i = 0; i < windows.length; i++) {
-      var tabs = windows[i].tabs;
-      for (var j = 0; j < tabs.length; j++) {
-        var url = tabs[j].url;
+    for (const window of windows) {
+      for (const tab of window.tabs) {
+        const url = tab.url;
         if (isDisallowedUrl(url)) {
           continue;
         }
-        var msg = {
+        const msg = {
           'enabled': getEnabled(),
           'scheme': getSiteScheme(siteFromUrl(url)),
           'modifiers': getSiteModifiers(siteFromUrl(url)),
           'settings': getGlobalSettings()
         };
-        chrome.tabs.sendMessage(tabs[j].id, msg);
+        chrome.tabs.sendMessage(tab.id, msg, {}, () => {
+          if (chrome.runtime.lastError) {
+            console.log(`Failed to communicate with tab ${JSON.stringify(tab)}: ${JSON.stringify(chrome.runtime.lastError)}`);
+          }
+        });
       }
     }
-  };
+  }
 
   chrome.windows.getAll({'populate': true}, initTabs);
 };
@@ -110,7 +137,7 @@ function messageDispatcher(request, sender, sendResponse) {
     toggleSite(sender.tab ? sender.tab.url : 'www.example.com');
   }
   if (request['log']) {
-    console.log(JSON.stringify(sender.tab), request.log);
+    console.log("Log:", tabSummary(sender.tab), request.log);
   }
   if (request['detect_gif']) {
     isAnimatedGif(request.src).then(sendResponse)
@@ -120,9 +147,6 @@ function messageDispatcher(request, sender, sendResponse) {
     var url = sender.tab ? sender.tab.url : request['url'];
     var scheme = getDefaultScheme();
     var modifiers = getDefaultModifiers();
-    if (sender.tab) {
-      injectTabCSS(sender.tab);
-    }
     if (url) {
       scheme = getSiteScheme(siteFromUrl(url));
       modifiers = getSiteModifiers(siteFromUrl(url));
@@ -134,20 +158,26 @@ function messageDispatcher(request, sender, sendResponse) {
       'settings': getGlobalSettings()
     };
     sendResponse(msg);
+  } else {
+    sendResponse();
   }
 }
 
 function init() {
+  console.log("Initializing service worker.");
   chrome.runtime.onMessage.addListener(messageDispatcher);
 
-  injectContentScripts();
-  updateTabs();
-
+  chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+    if (changeInfo.url || changeInfo.status === "loading") {
+      console.log(`Tab updated, reinjecting ${tab.url}: ${JSON.stringify(changeInfo)}`);
+      injectTab(tab);
+    }
+  });
   /* Ensure tab CSS is re-inserted into replaced tabs. */
   chrome.tabs.onReplaced.addListener(function (addedTabId, removedTabId) {
     chrome.tabs.get(addedTabId, function(tab) {
-      console.log("Tab replaced, reinjecting CSS into it:", tab);
-      injectTabCSS(tab);
+      console.log("Tab replaced, reinjecting:", tab.url);
+      injectTab(tab);
     });
   });
 
@@ -161,22 +191,49 @@ function init() {
   });
 
   if (navigator.appVersion.indexOf("Mac") != -1) {
-    chrome.action.setTitle({'title': 'Deluminate (Cmd+Shift+F11)'});
+    chrome.action.setTitle({'title': 'Deluminate (Shift+F11)'});
   }
   chrome.commands.onCommand.addListener(function(command) {
     switch(command) {
       case 'command_toggle_global':
-        console.log('global toggled');
         toggleEnabled();
         break;
       case 'command_toggle_site':
-        console.log('site toggled');
         chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
           console.log('site toggled: ' + tabs[0].url);
           toggleSite(tabs[0].url);
         });
         break;
     }
+  });
+
+  let asyncInitializing = true;
+  (async () => {
+    try {
+      console.log("Fetching settings.");
+      await syncStore();
+      console.log("Injecting content scripts.");
+      await injectContentScripts();
+      console.log("Deluminate is ready.");
+    } finally {
+      asyncInitializing = false;
+    }
+  })();
+
+  chrome.runtime.onInstalled.addListener(async ({reason}) => {
+    console.log(`Install event - reason: ${reason}`);
+    // It is unclear to me whether there are cases in which the browser runs the
+    // top-level code (i.e., init) or fires the onInstalled event without doing
+    // the other. This listener might be wholly redundant if we're doing all the
+    // same things in init. Either way, don't run this code if init is running.
+    if (asyncInitializing) {
+      console.log("Already initializing, skipping onInstall steps.");
+      return;
+    }
+    await syncStore();
+    console.log("Updated settings cache.");
+    await injectContentScripts();
+    console.log("Reloaded all tabs.");
   });
 }
 

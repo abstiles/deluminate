@@ -16,14 +16,6 @@
        "description": "Toggle inversion on a site"
      }
    },
-   "content_scripts": [ {
-      "all_frames": true,
-      "js": [ "deluminate.js" ],
-      "css": [ "deluminate.css" ],
-      "matches": [ "<all_urls>" ],
-      "match_about_blank": true,
-      "run_at": "document_start"
-   } ],
    "description": "Invert the luminance of a website to make it easier on the eyes.",
    "icons": {
       "128": "deluminate-128.png"
@@ -31,7 +23,7 @@
    "name": "Deluminate",
    "manifest_version": 3,
    "options_page": "options.html",
-   "permissions": [ "tabs", "offscreen", "storage" ],
+   "permissions": [ "tabs", "offscreen", "storage", "scripting" ],
    "host_permissions": [ "<all_urls>" ],
    "web_accessible_resources": [
        {

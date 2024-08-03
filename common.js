@@ -15,6 +15,10 @@ async function migrateFromLocalStorage() {
   const result = await chrome.runtime.sendMessage({
     target: 'offscreen',
     action: 'migrate',
+  }, {}, () => {
+    if (chrome.runtime.lastError) {
+      console.log(`Failed to communicate migrate request.`);
+    }
   });
   if (result.hasOwnProperty('localStorage')) {
     chrome.storage.sync.set(result.localStorage);

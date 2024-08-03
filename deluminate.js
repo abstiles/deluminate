@@ -5,6 +5,9 @@ var newImageHandler;
 var deluminateFullyInitialized = false;
 
 function onExtensionMessage(request) {
+  if (chrome.runtime.lastError) {
+    console.log(`Failed to communicate init request`);
+  }
   if (request.target === 'offscreen') return;
   deluminateFullyInitialized = true;
   if (request['manual_css']) {
@@ -106,6 +109,7 @@ function removeById(id) {
 }
 
 function onEvent(evt) {
+  if (checkDisconnected()) return true;
   if (evt.keyCode == 122 /* F11 */ &&
       evt.shiftKey) {
     chrome.runtime.sendMessage({'toggle_global': true});
@@ -153,11 +157,16 @@ function markCssImages(tag) {
 }
 
 function detectAnimatedGif(tag) {
+  if (checkDisconnected()) return;
   chrome.runtime.sendMessage(
     { 'detect_gif': true
     , 'src': tag.src
     },
+    {},
     function(result) {
+      if (chrome.runtime.lastError) {
+        console.log(`Failed to request gif detection`);
+      }
       if (result) {
         tag.setAttribute('deluminate_imageType', 'animated gif');
       }
@@ -170,13 +179,8 @@ function deepImageProcessing() {
     markCssImages);
 }
 
-var domContentLoaded = false;
-function domLoaded() {
-  domContentLoaded = true;
-}
-
 function afterDomLoaded(cb) {
-  if(domContentLoaded) {
+  if(document.readyState !== "loading") {
     cb();
   } else {
     document.addEventListener('DOMContentLoaded', cb);
@@ -184,8 +188,9 @@ function afterDomLoaded(cb) {
 }
 
 function log() {
-  chrome.runtime.sendMessage({'log':
-                             Array.prototype.slice.call(arguments).join(' ')});
+  if (checkDisconnected()) return;
+  const msg = Array.prototype.slice.call(arguments).join(' ');
+  chrome.runtime.sendMessage({'log': msg});
 }
 
 function init() {
@@ -200,10 +205,12 @@ function init() {
   backdrop.id = scheme_prefix + "deluminate_backdrop";
 
   chrome.runtime.onMessage.addListener(onExtensionMessage);
-  chrome.runtime.sendMessage({'init': true, 'url': window.document.baseURI},
-      onExtensionMessage);
+  chrome.runtime.sendMessage(
+    {'init': true, 'url': window.document.baseURI},
+    {},
+    onExtensionMessage,
+  );
   document.addEventListener('keydown', onEvent, false);
-  document.addEventListener('DOMContentLoaded', domLoaded);
   afterDomLoaded(deepImageProcessing);
 
   animGifHandler = new MutationObserver(function(mutations, obs) {
@@ -220,6 +227,7 @@ function init() {
   });
 
   newImageHandler = new MutationObserver(function(mutations, obs) {
+    if (checkDisconnected()) return;
     for(var i=0; i<mutations.length; ++i) {
       for(var j=0; j<mutations[i].addedNodes.length; ++j) {
         var newTag = mutations[i].addedNodes[j];
@@ -233,6 +241,20 @@ function init() {
   });
 
   setupFullscreenWorkaround();
+}
+
+function unloadAll() {
+  animGifHandler.disconnect();
+  newImageHandler.disconnect();
+  document.removeEventListener('keydown', onEvent, false);
+}
+
+function checkDisconnected() {
+  if (!chrome.runtime?.id) {
+    unloadAll();
+    return true;
+  }
+  return false;
 }
 
 init();
