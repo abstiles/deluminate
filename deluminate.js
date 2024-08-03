@@ -244,8 +244,12 @@ function init() {
 }
 
 function unloadAll() {
-  animGifHandler.disconnect();
-  newImageHandler.disconnect();
+  if (animGifHandler?.disconnect) {
+    animGifHandler.disconnect();
+  }
+  if (newImageHandler?.disconnect) {
+    newImageHandler.disconnect();
+  }
   document.removeEventListener('keydown', onEvent, false);
 }
 
