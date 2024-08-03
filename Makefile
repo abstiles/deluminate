@@ -14,7 +14,10 @@ MANIFEST := \
 	options.html \
 	options.js \
 	popup.html \
-	popup.js
+	popup.js \
+	url_selector.css \
+	url_selector.js \
+	utils.js
 
 BUILD_DIR := build
 

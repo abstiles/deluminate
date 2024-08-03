@@ -1,0 +1,54 @@
+.url_selector {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  cursor: default;
+  user-select: none;
+  text-wrap: nowrap;
+  max-height: 100px;
+  overflow-y: scroll;
+}
+.url_selector span {
+  background-color: #222;
+  border: 2px solid #222;
+  border-radius: 5px;
+  font-family: sans-serif;
+  font-weight: bold;
+  overflow-x: hidden;
+}
+.url_selector span.host:not(#domain):after {
+  content: '.';
+}
+.url_selector span.path:before {
+  content: '/';
+}
+.url_selector span.start {
+  background-color: #337;
+  border: 2px solid #337;
+  border-right: none;
+  border-radius: 5px 0 0 5px;
+}
+.url_selector span.start ~ * {
+  background-color: #337;
+  border: 2px solid #337;
+  border-right: none;
+  border-left: none;
+  border-radius: 0;
+}
+.url_selector span.end {
+  background-color: #337;
+  border: 2px solid #337;
+  border-left: none;
+  border-radius: 0 5px 5px 0;
+}
+.url_selector span.start.end {
+  border: 2px solid #337;
+  border-radius: 5px;
+}
+.url_selector span.end ~ span {
+  background-color: #222;
+  border: 2px solid #222;
+  border-radius: 5px;
+}
+
+/* vim: set et ts=2 sts=2 sw=2 :*/

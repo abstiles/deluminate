@@ -1,3 +1,4 @@
+import UrlSelector from './url_selector.js';
 import {
   $,
   syncStore,
@@ -26,6 +27,7 @@ import {
   setSettingsViewed,
 } from './common.js';
 
+let selector;
 var site;
 var key1;
 var key2;
@@ -45,13 +47,13 @@ function update() {
   document.body.className = getEnabled() ? '' : 'disabled';
 
   if (getEnabled()) {
-    $('title').innerText = 'Deluminate is Enabled';
-    $('toggle').innerHTML = '<b>Disable</b> ' +
+    // $('title').innerText = 'Deluminate is Enabled';
+    $('toggle').innerHTML = 'Deluminate is Enabled ' +
                             '<span class="kb">(' + key1 + ')</span>';
     $('subcontrols').style.display = 'block';
   } else {
-    $('title').innerText = 'Deluminate is Disabled';
-    $('toggle').innerHTML = '<b>Enable</b> ' +
+    // $('title').innerText = 'Deluminate is Disabled';
+    $('toggle').innerHTML = 'Deluminate is Disabled ' +
                             '<span class="kb">(' + key1 + ')</span>';
     $('subcontrols').style.display = 'none';
   }
@@ -68,13 +70,6 @@ function update() {
     $('toggle_contrast').checked = getLowContrast();
     $('force_textfield').checked = getForceText();
     $('kill_bgfield').checked = getKillBackground();
-  }
-  if (getEnabled()) {
-    document.documentElement.setAttribute(
-        'hc',
-        site ? getSiteScheme(site) : getDefaultScheme());
-  } else {
-    document.documentElement.setAttribute('hc', 'normal');
   }
 }
 
@@ -149,7 +144,7 @@ function onKillBackground(evt) {
 }
 
 function onDimLevel(evt) {
-  dimLevel = "noinvert-dim" + evt.target.value;
+  let dimLevel = "noinvert-dim" + evt.target.value;
   $('dim_radio').value = dimLevel;
   if (site) {
     setSiteScheme(site, dimLevel);
@@ -207,18 +202,10 @@ async function init() {
   $('toggle').addEventListener('click', onToggle, false);
   $('make_default').addEventListener('click', onMakeDefault, false);
   $('settings').addEventListener('click', onSettings, false);
-  if (navigator.appVersion.indexOf('Mac') != -1) {
-    key1 = '&#x2318;+Shift+F11';
-    key2 = '&#x2318;+Shift+F12';
-  } else {
-    key1 = 'Shift+F11';
-    key2 = 'Shift+F12';
-  }
+  key1 = 'Shift+F11';
+  key2 = 'Shift+F12';
 
   await syncStore();
-  if (!getSettingsViewed()) {
-    $('settings').className += " new";
-  }
 
   chrome.windows.getLastFocused({'populate': true}, function(window) {
     site = '';
@@ -228,10 +215,14 @@ async function init() {
         if (isDisallowedUrl(tab.url)) {
           $('scheme_title').innerText = 'Default color scheme:';
           $('make_default').style.display = 'none';
+          selector = null;
         } else {
           site = siteFromUrl(tab.url);
-          $('scheme_title').innerHTML = 'Color scheme for <b>' + site +
-              '</b>:<br><span class="kb">(' + key2 + ')</span>';
+          $('scheme_title').innerHTML = 'Color scheme for ' +
+              '<div id="selector"></div>' +
+              '<div class="kb">(Toggle: ' + key2 + ')</div>';
+          selector = new UrlSelector(tab.url);
+          selector.render_to($('selector'));
           $('make_default').style.display = 'block';
           break;
         }
@@ -242,7 +233,7 @@ async function init() {
       currentScheme = getSiteScheme(site);
     }
     if (currentScheme.lastIndexOf('noinvert-dim', 0) === 0) {
-      currentDimLevel = currentScheme.replace(/.*(\d+)$/, '$1');
+      let currentDimLevel = currentScheme.replace(/.*(\d+)$/, '$1');
       $('dim_amount').value = currentDimLevel;
       $('dim_radio').value = 'noinvert-dim' + currentDimLevel;
     }
@@ -250,8 +241,29 @@ async function init() {
   });
 }
 
+function onEvent(evt) {
+  if (evt.keyCode == 122 /* F11 */ &&
+      evt.shiftKey) {
+    chrome.runtime.sendMessage({'toggle_global': true});
+    evt.stopPropagation();
+    evt.preventDefault();
+    update();
+    return false;
+  }
+  if (evt.keyCode == 123 /* F12 */ &&
+      evt.shiftKey) {
+    chrome.runtime.sendMessage({'toggle_site': true});
+    evt.stopPropagation();
+    evt.preventDefault();
+    update();
+    return false;
+  }
+  return true;
+}
+
 window.addEventListener('load', init, false);
 document.addEventListener('DOMContentLoaded', onLinkClick);
+document.addEventListener('keydown', onEvent, false);
 
 if (typeof(global) !== 'undefined') {
     global.onMakeDefault = onMakeDefault;
