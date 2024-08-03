@@ -4,7 +4,7 @@ var animGifHandler;
 var newImageHandler;
 var deluminateFullyInitialized = false;
 
-function onExtensionMessage(request) {
+function onExtensionMessage(request, sender, sendResponse) {
   if (chrome.runtime.lastError) {
     console.log(`Failed to communicate init request`);
   }
@@ -45,6 +45,9 @@ function onExtensionMessage(request) {
     });
   } else {
     animGifHandler.disconnect();
+  }
+  if (sendResponse) {
+    sendResponse();
   }
 }
 
