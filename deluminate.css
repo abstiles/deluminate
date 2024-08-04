@@ -28,8 +28,8 @@ html[hc^="noinvert"][hc*="kill_background"] body {
   background-color: #000 !important;
   color: #FFF !important;
 }
-html:not([hc*="dynamic"]) #deluminate_backdrop {
-  background: transparent !important;
+html[hc*="delumine"] #deluminate_backdrop {
+  background: white !important;
 }
 
 /* Override the above with a low-contrast version if selected. */
