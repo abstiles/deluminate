@@ -2,6 +2,9 @@
 html[hc^="delumine"] {
   filter: invert(100%) hue-rotate(180deg);
 }
+html[hc^="delumine"][hc*="dynamic"][looks-dark] {
+  filter: none;
+}
 html[hc^="delumine"][hc*="kill_background"],
 html[hc^="delumine"][hc*="kill_background"] body {
   background-image: none !important;
@@ -14,7 +17,7 @@ html[hc^="noinvert"][hc*="kill_background"] body {
   background-color: #000 !important;
   color: #FFF !important;
 }
-#deluminate_backdrop {
+html:not([hc*="dynamic"]) #deluminate_backdrop {
   background: transparent !important;
 }
 
@@ -65,7 +68,7 @@ html[hc^="noinvert-dim5"][hc*="low-contrast"] {
 /* Uninvert select items within the document. */
 
 /* For the -noimg variant, uninvert all images. */
-html[hc*="delumine-noimg"] :-webkit-any(
+html[hc*="delumine-noimg"]:not([hc*="dynamic"][looks-dark]) :-webkit-any(
 img,
 /* Check for "url" in the style attribute, which is usually a fancy way to specify an image */
 [style*="url"]:not([style*="transparent"]),
@@ -78,7 +81,7 @@ video) {
 }
 /* Avoid performing the uninversion process on anything that is a descendant of
  * something uninverted. */
-html[hc*="delumine-noimg"] :-webkit-any(
+html[hc*="delumine-noimg"]:not([hc*="dynamic"][looks-dark]) :-webkit-any(
 img,
 [style*="url"]:not([style*="transparent"]),
 [deluminate_imageType],
@@ -96,7 +99,7 @@ video) {
   filter: none;
 }
 /* Reinvert iframes inside tags with background-images specified. */
-html[hc*="delumine-noimg"] :-webkit-any(
+html[hc*="delumine-noimg"]:not([hc*="dynamic"][looks-dark]) :-webkit-any(
 img,
 /* Check for "url" in the style attribute, which is usually a fancy way to specify an image */
 [style*="url"]:not([style*="transparent"]),
@@ -109,7 +112,7 @@ video) iframe {
 }
 
 /* The "smart" filter is more selective about what to uninvert. */
-html[hc*="delumine-smart"] body :-webkit-any(
+html[hc*="delumine-smart"]:not([hc*="dynamic"][looks-dark]) body :-webkit-any(
 	/* Leave PNG and GIF format images inverted, since they usually are
 	 * identifiable even when inverted. */
 	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]):not([src^="data:image"]):not([src^="blob:"]),
@@ -136,7 +139,7 @@ html[hc*="delumine-smart"] body :-webkit-any(
 }
 /* Avoid performing the uninversion process on anything that is a descendant of
  * something uninverted. */
-html[hc*="delumine-smart"] body :-webkit-any(
+html[hc*="delumine-smart"]:not([hc*="dynamic"][looks-dark]) body :-webkit-any(
 	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]):not([src^="data:image"]):not([src^="blob:"]),
 	[itemprop="photo"],
 	[itemprop="image"],
@@ -176,7 +179,7 @@ html[hc*="delumine-smart"] body :-webkit-any(
   filter: none;
 }
 /* Reinvert iframes inside tags with background-images specified. */
-html[hc*="delumine-smart"] body :-webkit-any(
+html[hc*="delumine-smart"]:not([hc*="dynamic"][looks-dark]) body :-webkit-any(
 	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]):not([src^="data:image"]):not([src^="blob:"]),
 	[itemprop="photo"],
 	[itemprop="image"],

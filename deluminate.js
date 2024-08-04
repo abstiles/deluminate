@@ -15,7 +15,7 @@ function onExtensionMessage(request, sender, sendResponse) {
     return;
   }
   if (request.enabled && request.scheme != 'normal') {
-    hc = scheme_prefix + request.scheme + ' ' + request.modifiers;
+    hc = scheme_prefix + request.scheme + ' ' + request.modifiers.join(' ');
     document.documentElement.setAttribute('hc', hc);
     setupFullscreenWorkaround();
   } else {
@@ -27,12 +27,22 @@ function onExtensionMessage(request, sender, sendResponse) {
   if (request.enabled
       && request.scheme.indexOf("delumine") >= 0
       && request.scheme.indexOf("delumine-all") < 0) {
+    afterDomLoaded(deepImageProcessing);
     newImageHandler.observe(document.documentElement, {
       childList: true,
       subtree: true
     });
   } else {
-      newImageHandler.disconnect();
+    newImageHandler.disconnect();
+  }
+  if (request.enabled
+      && request.scheme.indexOf("delumine") >= 0
+      && request.modifiers.indexOf("dynamic") >= 0
+  ) {
+    afterDomLoaded(() => {
+      detectAlreadyDark();
+      backdrop.style.display = "none";
+    });
   }
   if (request.enabled && request.settings.detect_animation === 'enabled' &&
       request.scheme == 'delumine-smart') {
@@ -49,6 +59,13 @@ function onExtensionMessage(request, sender, sendResponse) {
   if (sendResponse) {
     sendResponse();
   }
+}
+
+function currentPageSettings() {
+  return new Set(
+    (document.documentElement.getAttribute("hc") ?? "")
+      .split(" ").slice(1)
+  );
 }
 
 function addCSSLink() {
@@ -89,7 +106,10 @@ function addBackdrop() {
    * positioning of the body. */
   document.documentElement.appendChild(backdrop);
   afterDomLoaded(() => {
-    backdrop.style.display = "none";
+    // If in dynamic mode, let the dynamic handler remove this page blocker.
+    if (!currentPageSettings().has("dynamic")) {
+      backdrop.style.display = "none";
+    }
   });
 }
 
@@ -169,10 +189,26 @@ function detectAnimatedGif(tag) {
     });
 }
 
+let deepImageProcessingComplete = false;
 function deepImageProcessing() {
+  if (deepImageProcessingComplete) return;
   Array.prototype.forEach.call(
     document.querySelectorAll('body *:not([style*="url"])'),
     markCssImages);
+  deepImageProcessingComplete = true;
+}
+
+let detectAlreadyDarkComplete = false;
+function detectAlreadyDark() {
+  if (detectAlreadyDarkComplete) return;
+  if (usesLightTextColor()) {
+    document.documentElement.setAttribute('looks-dark', '');
+  } else if (checksPreferredScheme()) {
+    document.documentElement.setAttribute('looks-dark', '');
+  } else {
+    document.documentElement.removeAttribute('looks-dark');
+  }
+  detectAlreadyDarkComplete = true;
 }
 
 function afterDomLoaded(cb) {
@@ -187,6 +223,61 @@ function log() {
   if (checkDisconnected()) return;
   const msg = Array.prototype.slice.call(arguments).join(' ');
   chrome.runtime.sendMessage({'log': msg});
+}
+
+// Cheap and simple calculation to classify colors as light, dark or ambiguous.
+// Return -1 for dark, 0 for gray, 1 for light.
+function colorValence(color) {
+  const {r, g, b, a} = colorToRGBA(color);
+  const total = r + g + b;
+  // Alpha transparency widens the effective gray range from the middle third
+  // (at 100% opaque) to the whole range (at 0%).
+  const grayMin = a, grayMax = (255 * 3) - a;
+  return total < grayMin ? -1
+    : total > grayMax ? 1
+    : 0
+    ;
+}
+
+function usesLightTextColor() {
+  const paras = document.querySelectorAll('p');
+  let charTypes = [0, 0, 0];
+  let total = 0;
+  for (const p of paras) {
+    const color = getComputedStyle(p)?.color;
+    if (!color) continue;
+    const text = p.textContent;
+    charTypes[colorValence(color) + 1] += text.length;
+    total += length;
+    // Arbitrarily chosen good-enough threshold.
+    if (total > 4096) break;
+  }
+  // If light text is a supermajority of the text, we'll say this page uses
+  // light text overall.
+  return charTypes[2] > charTypes[0] + charTypes[1];
+}
+
+function checksPreferredScheme() {
+  for (const css of document?.styleSheets ?? []) {
+    try {
+      for (const m of css.media ?? []) {
+        if (m.includes("prefers-color-scheme")) {
+          return true;
+        }
+      }
+      const cssRules = css.rules;
+      for (const rule of cssRules) {
+        for (const m of rule.media ?? []) {
+          if (m.includes("prefers-color-scheme")) {
+            return true;
+          }
+        }
+      }
+    } catch {
+      // Exceptions thrown here for CORS security errors..
+    }
+  }
+  return false;
 }
 
 function init() {
@@ -207,7 +298,6 @@ function init() {
     onExtensionMessage,
   );
   document.addEventListener('keydown', onEvent, false);
-  afterDomLoaded(deepImageProcessing);
 
   animGifHandler = new MutationObserver(function(mutations, obs) {
     for(var i=0; i<mutations.length; ++i) {
@@ -256,5 +346,29 @@ function checkDisconnected() {
   }
   return false;
 }
+
+let colorToRGBA = (function() {
+  // Use a canvas to normalize colors for computing.
+  let canvas = document.createElement('canvas');
+  canvas.width = canvas.height = 1;
+  let ctx = canvas.getContext('2d', {willReadFrequently: true});
+
+  let cache = {};
+  function memoize(f) {
+    return (key) => {
+      if (!(key in cache)) {
+        cache[key] = f(key);
+      }
+      return cache[key];
+    }
+  }
+
+  return memoize(function(c) {
+    ctx.clearRect(0, 0, 1, 1);
+    ctx.fillStyle = c;
+    ctx.fillRect(0, 0, 1, 1);
+    return [...ctx.getImageData(0, 0, 1, 1).data];
+  });
+})();
 
 init();

@@ -105,6 +105,15 @@ async function onKillBackground(evt) {
   update();
 }
 
+async function onDynamic(evt) {
+  if (evt.target.checked) {
+    await addSiteModifier(selector.get_site(), 'dynamic');
+  } else {
+    await delSiteModifier(selector.get_site(), 'dynamic');
+  }
+  update();
+}
+
 async function onDimLevel(evt) {
   let dimLevel = "dim" + evt.target.value;
   $('dim_radio').value = dimLevel;
@@ -144,7 +153,6 @@ function onLinkClick() {
 }
 
 function onSettings() {
-  setSettingsViewed();
   chrome.tabs.create({active: true, url: "options.html"});
 }
 
@@ -153,6 +161,7 @@ async function init() {
   $('toggle_contrast').addEventListener('change', onLowContrast, false);
   $('force_textfield').addEventListener('change', onForceText, false);
   $('kill_bgfield').addEventListener('change', onKillBackground, false);
+  $('dynamic').addEventListener('change', onDynamic, false);
   $('dim_amount').addEventListener('input', onDimLevel, false);
   $('toggle').addEventListener('click', onToggle, false);
   $('make_default').addEventListener('click', onMakeDefault, false);
