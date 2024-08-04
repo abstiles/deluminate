@@ -4,29 +4,17 @@ import {
   syncStore,
   getEnabled,
   setEnabled,
-  getLowContrast,
-  setLowContrast,
-  getForceText,
-  setForceText,
-  getKillBackground,
-  setKillBackground,
-  getKeyAction,
-  setKeyAction,
-  getDefaultScheme,
-  setDefaultScheme,
-  getSiteScheme,
-  setSiteScheme,
   siteFromUrl,
-  getDefaultModifiers,
-  setDefaultModifiers,
-  getSiteModifiers,
+  getMatchingSite,
+  getSiteSettings,
+  setSiteSettings,
+  setSiteScheme,
   addSiteModifier,
   delSiteModifier,
   isDisallowedUrl,
-  getSettingsViewed,
-  setSettingsViewed,
 } from './common.js';
 
+const nullSelector = {get_site: () => null,}
 let selector;
 var site;
 var key1;
@@ -58,105 +46,74 @@ function update() {
     $('subcontrols').style.display = 'none';
   }
 
-  setRadio('keyaction', getKeyAction());
-  if (site) {
-    setRadio('scheme', getSiteScheme(site));
-    $('toggle_contrast').checked = (getSiteModifiers(site).indexOf('low-contrast') > -1);
-    $('force_textfield').checked = (getSiteModifiers(site).indexOf('force_text') > -1);
-    $('kill_bgfield').checked = (getSiteModifiers(site).indexOf('kill_background') > -1);
-    $('make_default').disabled = !(changedFromDefault());
-  } else {
-    setRadio('scheme', getDefaultScheme());
-    $('toggle_contrast').checked = getLowContrast();
-    $('force_textfield').checked = getForceText();
-    $('kill_bgfield').checked = getKillBackground();
+  const currentSettings = getSiteSettings(selector.get_site());
+  setRadio('scheme', currentSettings.filter);
+  $('toggle_contrast').checked = currentSettings.mods.has("low_contrast");
+  $('force_textfield').checked = currentSettings.mods.has("forceinput");
+  $('kill_bgfield').checked = currentSettings.mods.has("killbg");
+  if (selector.get_site()) {
+    $('make_default').disabled = !changedFromDefault();
   }
 }
 
 function changedFromDefault() {
-  var siteModList = getSiteModifiers(site);
-  var defaultModList = getDefaultModifiers();
-  return (getSiteScheme(site) != getDefaultScheme() ||
-          siteModList != defaultModList);
+  return !getSiteSettings().equals(getSiteSettings(selector.get_site()));
 }
 
-function onToggle() {
-  setEnabled(!getEnabled());
+async function onToggle() {
+  await setEnabled(!getEnabled());
   update();
 }
 
-function onRadioChange(name, value) {
+async function onRadioChange(name, value) {
   switch (name) {
-    case 'keyaction':
-      setKeyAction(value);
-      break;
-    case 'apply':
-      setApply(value);
-      break;
     case 'scheme':
-      if (site) {
-        setSiteScheme(site, value);
+      if (selector.get_site()) {
+        await setSiteScheme(selector.get_site(), value);
       } else {
-        setDefaultScheme(value);
+        await setDefaultScheme(value);
       }
       break;
   }
   update();
 }
 
-function onLowContrast(evt) {
-  if (site) {
-    if (evt.target.checked) {
-      addSiteModifier(site, 'low-contrast');
-    } else {
-      delSiteModifier(site, 'low-contrast');
-    }
+async function onLowContrast(evt) {
+  if (evt.target.checked) {
+    await addSiteModifier(selector.get_site(), 'low_contrast');
   } else {
-    setLowContrast(evt.target.checked);
+    await delSiteModifier(selector.get_site(), 'low_contrast');
   }
   update();
 }
 
-function onForceText(evt) {
-  if (site) {
-    if (evt.target.checked) {
-      addSiteModifier(site, 'force_text');
-    } else {
-      delSiteModifier(site, 'force_text');
-    }
+async function onForceText(evt) {
+  if (evt.target.checked) {
+    await addSiteModifier(selector.get_site(), 'forceinput');
   } else {
-    setForceText(evt.target.checked);
+    await delSiteModifier(selector.get_site(), 'forceinput');
   }
   update();
 }
 
-function onKillBackground(evt) {
-  if (site) {
-    if (evt.target.checked) {
-      addSiteModifier(site, 'kill_background');
-    } else {
-      delSiteModifier(site, 'kill_background');
-    }
+async function onKillBackground(evt) {
+  if (evt.target.checked) {
+    await addSiteModifier(selector.get_site(), 'killbg');
   } else {
-    setForceText(evt.target.checked);
+    await delSiteModifier(selector.get_site(), 'killbg');
   }
   update();
 }
 
-function onDimLevel(evt) {
-  let dimLevel = "noinvert-dim" + evt.target.value;
+async function onDimLevel(evt) {
+  let dimLevel = "dim" + evt.target.value;
   $('dim_radio').value = dimLevel;
-  if (site) {
-    setSiteScheme(site, dimLevel);
-  } else {
-    setDefaultScheme(dimLevel);
-  }
+  await setSiteScheme(selector.get_site(), dimLevel);
   update();
 }
 
-function onMakeDefault() {
-  setDefaultScheme(getSiteScheme(site));
-  setDefaultModifiers(getSiteModifiers(site));
+async function onMakeDefault() {
+  await setSiteSettings(null, getSiteSettings(selector.get_site()));
   update();
 }
 
@@ -192,8 +149,6 @@ function onSettings() {
 }
 
 async function init() {
-  addRadioListeners('keyaction');
-  addRadioListeners('apply');
   addRadioListeners('scheme');
   $('toggle_contrast').addEventListener('change', onLowContrast, false);
   $('force_textfield').addEventListener('change', onForceText, false);
@@ -215,7 +170,7 @@ async function init() {
         if (isDisallowedUrl(tab.url)) {
           $('scheme_title').innerText = 'Default color scheme:';
           $('make_default').style.display = 'none';
-          selector = null;
+          selector = nullSelector;
         } else {
           site = siteFromUrl(tab.url);
           $('scheme_title').innerHTML = 'Color scheme for ' +
@@ -223,19 +178,18 @@ async function init() {
               '<div class="kb">(Toggle: ' + key2 + ')</div>';
           selector = new UrlSelector(tab.url);
           selector.render_to($('selector'));
+          selector.select_site(getMatchingSite(tab.url));
           $('make_default').style.display = 'block';
           break;
         }
       }
     }
-    let currentScheme = getDefaultScheme(site);
-    if (site) {
-      currentScheme = getSiteScheme(site);
-    }
-    if (currentScheme.lastIndexOf('noinvert-dim', 0) === 0) {
+    const currentSettings = getSiteSettings(selector.get_site());
+    const currentScheme = currentSettings.filter;
+    if (currentScheme.includes('dim')) {
       let currentDimLevel = currentScheme.replace(/.*(\d+)$/, '$1');
       $('dim_amount').value = currentDimLevel;
-      $('dim_radio').value = 'noinvert-dim' + currentDimLevel;
+      $('dim_radio').value = 'dim' + currentDimLevel;
     }
     update();
   });

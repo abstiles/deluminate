@@ -5,7 +5,6 @@ import {
   getGlobalSettings,
   setGlobalSetting,
   resetSiteSchemes,
-  resetSiteModifiers,
 } from './common.js';
 
 function initSettings() {
@@ -15,10 +14,9 @@ function initSettings() {
   }
 }
 
-function onForget() {
-  resetSiteSchemes();
-  resetSiteModifiers();
-  loadSettingsDisplay();
+async function onForget() {
+  await resetSiteSchemes();
+  loadSettingsDisplay(await syncStore());
 }
 
 // Open all links in new tabs.
@@ -40,12 +38,7 @@ function onDetectAnim(evt) {
 }
 
 function loadSettingsDisplay(store) {
-  var settings = {
-    'version': 1,
-    'schemes': JSON.parse(store['siteschemes'] ?? '{}'),
-    'modifiers': JSON.parse(store['sitemodifiers'] || '{}')
-  }
-  $('settings').value = JSON.stringify(settings, null, 4);
+  $('settings').value = JSON.stringify(store, null, 4);
 }
 
 function onEditSave(store) {
@@ -76,8 +69,3 @@ async function init() {
 
 window.addEventListener('load', init, false);
 document.addEventListener('DOMContentLoaded', onLinkClick);
-
-/* Necessary node bootstrapping for testing. */
-if (typeof(global) !== 'undefined') {
-  global.onForget = onForget;
-}

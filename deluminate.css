@@ -14,7 +14,7 @@ html[hc^="noinvert"][hc*="kill_background"] body {
   background-color: #000 !important;
   color: #FFF !important;
 }
-html[hc^="delumine"] #deluminate_backdrop {
+#deluminate_backdrop {
   background: transparent !important;
 }
 

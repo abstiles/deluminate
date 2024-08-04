@@ -31,7 +31,7 @@ function expect_type(value, type) {
 function get(obj, name) {
   var value = obj[name];
   if (typeof value === 'undefined') {
-    throw new TypeError(name + ' is not a valid value');
+    throw new TypeError(`${name} is not a valid value in ${Object.keys(obj)}`);
   }
   return value;
 }
@@ -44,7 +44,11 @@ export function Site(url) {
     }
     return new Site(url);
   }
-  var url_object = new URL(url.includes("://") ? url : "http://" + url);
+
+  const url_object = (
+    url instanceof URL ? url
+    : new URL(url.includes("://") ? url : "http://" + url)
+  );
   var host_components = url_object.hostname.split('.');
   // convert "sub2.sub1.example.com" to "['example.com', 'sub1', 'sub2']"
   this.domain_hierarchy = [host_components.slice(-2).join('.')].concat(
@@ -83,6 +87,24 @@ export function Hierarchy() {
   var DATA = '/';
 
   this.tree = typeof tree !== 'undefined' ? tree : {};
+
+  // Search for the closest path in the hierarchy that matches the given chain.
+  this.getMatch = function(chain) {
+    const route = [];
+    let selection = this.tree;
+    let last_route = [];
+    for (var i = 0; i < chain.length; ++i) {
+      if (!(chain[i] in selection)) {
+        break;
+      }
+      route.push(chain[i]);
+      selection = selection[chain[i]];
+      if (typeof selection[DATA] !== 'undefined') {
+        last_route = [...route];
+      }
+    }
+    return last_route;
+  };
 
   // Get the closest object in the hierarchy that matches the given chain.
   this.get = function(chain) {
@@ -200,6 +222,20 @@ export function Settings() {
     site_domain.remove(site.page_hierarchy);
   };
 
+  this.match = function(site) {
+    // Coerce site to a proper Site object if it's not one already.
+    site = site instanceof Site ? site : Site(site);
+    const domain_path = this.storage.getMatch(site.domain_hierarchy);
+    var site_domain = this.storage.get(site.domain_hierarchy);
+    if (site_domain instanceof Hierarchy) {
+      return Site.build(
+        domain_path,
+        site_domain.getMatch(site.page_hierarchy),
+      );
+    }
+    return Site.build(domain_path);
+  }
+
   this.load = function(site) {
     // Coerce site to a proper Site object if it's not one already.
     site = site instanceof Site ? site : Site(site);
@@ -241,6 +277,7 @@ export function Settings() {
 // Read the serialized settings data
 Settings.import = function(settings_list) {
   var settings = new Settings();
+  settings_list ??= [];
   settings_list.forEach(function([site, filter, ...mods]) {
     settings.save(site, new SiteSettings(filter, mods));
   });
@@ -251,6 +288,7 @@ export const Filter = Object.freeze({
   smart: 'delumine-smart',
   noimg: 'delumine-noimg',
   all: 'delumine-all',
+  "low-contrast": 'noinvert-low-contrast',
   dim1: 'noinvert-dim1',
   dim2: 'noinvert-dim2',
   dim3: 'noinvert-dim3',
@@ -275,11 +313,21 @@ export function SiteSettings(filter, mods) {
   mods = typeof mods !== 'undefined' ? mods : [];
   // Just verify that the arguments represent actual things
   get(Filter, filter);
-  mods.forEach(function(mod) {
+  for (const mod of mods) {
     get(Modifier, mod);
-  });
+  }
   this.filter = filter;
-  this.mods = mods;
+  this.mods = new Set(mods);
+  this.equals = function(that) {
+    if (!(that instanceof SiteSettings)) {
+      return false;
+    }
+    return (
+      this.filter === that.filter &&
+      this.mods.size === that.mods.size &&
+      [...this.mods].every(mod => that.mods.has(mod))
+    );
+  }
 }
 
 // vim: et ts=2 sts=2 sw=2

@@ -1,15 +1,12 @@
+import {Filter, Modifier} from './utils.js';
 import {
   DEFAULT_SCHEME,
   refreshStore,
   syncStore,
   getEnabled,
   setEnabled,
-  getDefaultScheme,
-  getSiteScheme,
+  getSiteSettings,
   setSiteScheme,
-  siteFromUrl,
-  getSiteModifiers,
-  getDefaultModifiers,
   getGlobalSettings,
   isDisallowedUrl,
 } from './common.js';
@@ -88,10 +85,11 @@ function updateTabs() {
         if (isDisallowedUrl(url)) {
           continue;
         }
+        const siteSettings = getSiteSettings(url);
         const msg = {
           'enabled': getEnabled(),
-          'scheme': getSiteScheme(siteFromUrl(url)),
-          'modifiers': getSiteModifiers(siteFromUrl(url)),
+          'scheme': Filter[siteSettings.filter],
+          'modifiers': [...siteSettings.mods].map(mod => Modifier[mod]),
           'settings': getGlobalSettings()
         };
         chrome.tabs.sendMessage(tab.id, msg, {}, () => {
@@ -112,12 +110,12 @@ function toggleEnabled() {
 }
 
 function toggleSite(url) {
-  var site = siteFromUrl(url);
-  var scheme = getSiteScheme(site);
+  const defaultScheme = getSiteSettings();
+  let scheme = getSiteSettings(url).filter;
   if (scheme != "normal") {
     scheme = "normal";
-  } else if (getDefaultScheme() != "normal") {
-    scheme = getDefaultScheme();
+  } else if (defaultScheme != "normal") {
+    scheme = defaultScheme;
   } else {
     scheme = DEFAULT_SCHEME;
   }
@@ -145,16 +143,11 @@ function messageDispatcher(request, sender, sendResponse) {
   }
   if (request['init']) {
     var url = sender.tab ? sender.tab.url : request['url'];
-    var scheme = getDefaultScheme();
-    var modifiers = getDefaultModifiers();
-    if (url) {
-      scheme = getSiteScheme(siteFromUrl(url));
-      modifiers = getSiteModifiers(siteFromUrl(url));
-    }
+    const siteSettings = getSiteSettings(url);
     var msg = {
       'enabled': getEnabled(),
-      'scheme': scheme,
-      'modifiers': modifiers,
+      'scheme': Filter[siteSettings.filter],
+      'modifiers': [...siteSettings.mods].map(mod => Modifier[mod]),
       'settings': getGlobalSettings()
     };
     sendResponse(msg);
