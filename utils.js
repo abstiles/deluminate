@@ -39,9 +39,12 @@ function get(obj, name) {
 // Constructor for objects representing Site URLs.
 export function Site(url) {
   if (!(this instanceof Site)) {
+    if (!url) {
+      return Site.none;
+    }
     return new Site(url);
   }
-  var url_object = new URL(url);
+  var url_object = new URL(url.includes("://") ? url : "http://" + url);
   var host_components = url_object.hostname.split('.');
   // convert "sub2.sub1.example.com" to "['example.com', 'sub1', 'sub2']"
   this.domain_hierarchy = [host_components.slice(-2).join('.')].concat(
@@ -49,6 +52,9 @@ export function Site(url) {
   // convert "/path/to/resource.html" to "['path', 'to', 'resource.html']"
   this.page_hierarchy = url_object.pathname.split('/').filter(
       function(x) { return Boolean(x); });
+  this.toString = function() {
+    return url_object.hostname + url_object.pathname;
+  };
 }
 Site.build = function(domain_hierarchy, page_hierarchy, protocol) {
   page_hierarchy = typeof page_hierarchy !== 'undefined' ? page_hierarchy
@@ -62,6 +68,7 @@ Site.none = (function() {
   var none = Object.create(Site.prototype);
   none.domain_hierarchy = [];
   none.page_hierarchy = [];
+  none.toString = () => "";
   return none;
 })();
 
@@ -222,7 +229,9 @@ export function Settings() {
         domain_item.data.dump().map(function(page_item) {
           var site = domain_hierarchy.length  === 0 ? Site.none
             : Site.build(domain_hierarchy, page_item.address);
-          return { site: site, data: page_item.data };
+          //return { site: site.toString(), data: page_item.data.minimal() };
+          let {filter, mods} = page_item.data;
+          return [ site.toString(), filter, ...mods ];
         })
       );
     });
@@ -232,52 +241,44 @@ export function Settings() {
 // Read the serialized settings data
 Settings.import = function(settings_list) {
   var settings = new Settings();
-  settings_list.forEach(function(settings_item) {
-    settings.save(settings_item.site, settings_item.data);
+  settings_list.forEach(function([site, filter, ...mods]) {
+    settings.save(site, new SiteSettings(filter, mods));
   });
   return settings;
 }
 
 export const Filter = Object.freeze({
-  deluminate: 'invert() hue-rotate(180deg) brightness(105%) contrast(105%)',
-  reluminate: 'hue-rotate(180deg) brightness(95%) contrast(105%)',
-  noinvert: 'none'
+  smart: 'delumine-smart',
+  noimg: 'delumine-noimg',
+  all: 'delumine-all',
+  dim1: 'noinvert-dim1',
+  dim2: 'noinvert-dim2',
+  dim3: 'noinvert-dim3',
+  dim4: 'noinvert-dim4',
+  dim5: 'noinvert-dim5',
+  normal: ''
 });
 
 export const Modifier = Object.freeze({
-  dim10: { filter: 'brightness(90%)' },
-  dim20: { filter: 'brightness(80%)' },
-  dim30: { filter: 'brightness(70%)' },
-  dim40: { filter: 'brightness(60%)' },
-  dim50: { filter: 'brightness(50%)' },
-  low_contrast: { filter: 'contrast(85%)' },
-  hw_accel: { rules: [ '-webkit-transform: translateZ(0)' ] }
+  low_contrast: 'low-contrast',
+  killbg: 'kill_background',
+  forceinput: 'force_text',
 });
 
-export const CorrectionType = Object.freeze({
-  smart: 'jpg canvas video embed object other',
-  all: 'png gif jpg canvas video embed object other',
-  none: '',
-});
-
-export function SiteSettings(filter, correction_mode, mods) {
+export function SiteSettings(filter, mods) {
   if (!(this instanceof SiteSettings)) {
-    return new SiteSettings(filter, correction_mode, mods);
+    return new SiteSettings(filter, mods);
   }
   if (typeof filter === 'undefined') {
     throw new NotEnoughArgumentsError('filter object is required');
   }
-  correction_mode = typeof correction_mode !== 'undefined' ? correction_mode
-    : 'none';
   mods = typeof mods !== 'undefined' ? mods : [];
   // Just verify that the arguments represent actual things
   get(Filter, filter);
-  get(CorrectionType, correction_mode);
   mods.forEach(function(mod) {
     get(Modifier, mod);
   });
   this.filter = filter;
-  this.correction_mode = correction_mode;
   this.mods = mods;
 }
 

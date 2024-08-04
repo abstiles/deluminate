@@ -42,7 +42,7 @@ function onDetectAnim(evt) {
 function loadSettingsDisplay(store) {
   var settings = {
     'version': 1,
-    'schemes': JSON.parse(store['siteschemes']),
+    'schemes': JSON.parse(store['siteschemes'] ?? '{}'),
     'modifiers': JSON.parse(store['sitemodifiers'] || '{}')
   }
   $('settings').value = JSON.stringify(settings, null, 4);
