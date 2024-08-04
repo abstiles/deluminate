@@ -1,3 +1,4 @@
+(function() {
 var scheme_prefix;
 var backdrop;
 var animGifHandler;
@@ -372,3 +373,4 @@ let colorToRGBA = (function() {
 })();
 
 init();
+})();
