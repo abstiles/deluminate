@@ -1,3 +1,14 @@
+/* If the root background isn't set, it defaults to transparent, which acts as
+ * an uninvertable white. The :where pseudo-class has 0 specificity, so these
+ * rules will be overwritten by absolutely anything that sets the root
+ * background color. */
+:where(:root[hc^="delumine"]) {
+  background-color: white;
+}
+:where(:root[hc^="noinvert"]) {
+  background-color: black;
+}
+
 /* Invert the luminance iff any of the "delumine" styles are selected. */
 html[hc^="delumine"] {
   filter: invert(100%) hue-rotate(180deg);
