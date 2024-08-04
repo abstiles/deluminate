@@ -51,6 +51,7 @@ function update() {
   $('toggle_contrast').checked = currentSettings.mods.has("low_contrast");
   $('force_textfield').checked = currentSettings.mods.has("forceinput");
   $('kill_bgfield').checked = currentSettings.mods.has("killbg");
+  $('dynamic').checked = currentSettings.mods.has("dynamic");
   if (selector.get_site()) {
     $('make_default').disabled = !changedFromDefault();
   }
