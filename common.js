@@ -1,8 +1,9 @@
 import {Settings, SiteSettings} from "./utils.js";
 
 export const DEFAULT_SCHEME = "delumine-smart";
+const DEFAULT_FILTER = DEFAULT_SCHEME.split("-").slice(1).join("-");
 const storeCache = {};
-let settings = new Settings();
+let settings = new Settings(DEFAULT_FILTER);
 let storageFetched = false;
 
 let migrationTask;
@@ -29,8 +30,8 @@ async function migrateFromLocalStorage() {
     });
     if (result.hasOwnProperty('localStorage')) {
       Object.assign(storeCache, migrateV1toV2(result.localStorage));
-      settings = Settings.import(storeCache?.sites);
-      chrome.storage.local.set({migrationComplete: 2});
+      settings = Settings.import(storeCache?.sites, DEFAULT_FILTER);
+      //chrome.storage.local.set({migrationComplete: 2});
     }
   })();
   await migrationTask;
@@ -53,7 +54,6 @@ function parseSiteMods(sitemods) {
 function migrateV1toV2(v1) {
   const toBool = (str) => str !== "false" && Boolean(str);
   const v2 = {version: 2, enabled: toBool(v1?.enabled)};
-  const settings = new Settings();
   const defaultFilter = (v1?.scheme ?? DEFAULT_SCHEME)
     .split("-").slice(1).join("-") || "normal"
     ;
@@ -71,8 +71,7 @@ function migrateV1toV2(v1) {
   if (toBool(v1?.force_text)) {
     defaultMods.push("forceinput");
   }
-  const defaultSettings = new SiteSettings(defaultFilter, defaultMods);
-  settings.set_site_default(defaultSettings);
+  const settings = new Settings(defaultFilter, defaultMods);
 
   const siteModifiers = JSON.parse(v1?.sitemodifiers ?? "{}");
   const siteSchemes = JSON.parse(v1?.siteschemes ?? "{}");
@@ -104,7 +103,7 @@ export async function syncStore() {
 export async function refreshStore() {
   const items = await chrome.storage.sync.get();
   Object.assign(storeCache, items);
-  settings = Settings.import(storeCache?.sites);
+  settings = Settings.import(storeCache?.sites, DEFAULT_FILTER);
   storageFetched = true;
   return settings;
 }
@@ -127,7 +126,11 @@ export function setEnabled(enabled) {
 }
 
 export function getSiteSettings(site) {
-  return settings.load(site);
+  const siteSettings = settings.load(site);
+  if (!siteSettings) {
+    throw new Error(`Could not load settings for ${site}`);
+  }
+  return siteSettings;
 }
 
 export function setSiteSettings(site, siteSettings) {

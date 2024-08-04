@@ -16,7 +16,7 @@ function initSettings() {
 
 async function onForget() {
   await resetSiteSchemes();
-  loadSettingsDisplay(await syncStore());
+  loadSettingsDisplay((await syncStore()).export());
 }
 
 // Open all links in new tabs.

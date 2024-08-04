@@ -45,10 +45,16 @@ export function Site(url) {
     return new Site(url);
   }
 
-  const url_object = (
-    url instanceof URL ? url
-    : new URL(url.includes("://") ? url : "http://" + url)
-  );
+  function toURL(site) {
+    if (site instanceof URL) return site;
+    try {
+      return new URL(site.includes("://") ? site : "http://" + site);
+    } catch (err) {
+      throw new TypeError(`Error constructing URL from ${site}`);
+    }
+  }
+
+  const url_object = toURL(url)
   var host_components = url_object.hostname.split('.');
   // convert "sub2.sub1.example.com" to "['example.com', 'sub1', 'sub2']"
   this.domain_hierarchy = [host_components.slice(-2).join('.')].concat(
@@ -193,9 +199,9 @@ export function Hierarchy() {
 
 // Constructor for the global Settings object which stores site-specific
 // settings in a hierarchy.
-export function Settings() {
+export function Settings(defaultFilter, defaultMods) {
   if (!(this instanceof Settings)) {
-    return new Settings();
+    return new Settings(defaultFilter, defaultMods);
   }
 
   this.storage = new Hierarchy();
@@ -225,7 +231,9 @@ export function Settings() {
   this.match = function(site) {
     // Coerce site to a proper Site object if it's not one already.
     site = site instanceof Site ? site : Site(site);
-    const domain_path = this.storage.getMatch(site.domain_hierarchy);
+    const closest_path = this.storage.getMatch(site.domain_hierarchy);
+    const domain_path = closest_path.length > 0 ? closest_path : site.domain_hierarchy;
+    console.log(`domain_path: ${JSON.stringify(domain_path)}`);
     var site_domain = this.storage.get(site.domain_hierarchy);
     if (site_domain instanceof Hierarchy) {
       return Site.build(
@@ -241,7 +249,7 @@ export function Settings() {
     site = site instanceof Site ? site : Site(site);
     var site_domain = this.storage.get(site.domain_hierarchy);
     if (site_domain instanceof Hierarchy) {
-      return site_domain.get(site.page_hierarchy);
+      return site_domain.get(site.page_hierarchy) ?? this.site_default();
     }
     return site_domain;
   }
@@ -252,7 +260,7 @@ export function Settings() {
   }
   // Helper function for getting the root element
   this.site_default = function() {
-    this.load(Site.none);
+    return this.load(Site.none);
   }
 
   // Serialize the settings in a form that can be efficiently stored with
@@ -273,14 +281,24 @@ export function Settings() {
     });
     return list;
   }
+
+  if (typeof defaultFilter != 'undefined') {
+    this.set_site_default(new SiteSettings(defaultFilter, defaultMods ?? []))
+  }
 }
 // Read the serialized settings data
-Settings.import = function(settings_list) {
-  var settings = new Settings();
+Settings.import = function(settings_list, defaultFilter, defaultMods) {
+  var settings = new Settings(defaultFilter, defaultMods);
   settings_list ??= [];
   settings_list.forEach(function([site, filter, ...mods]) {
+    if (typeof site === 'undefined' || typeof filter === 'undefined') {
+      throw new Error(`Invalid settings list format.`);
+    }
     settings.save(site, new SiteSettings(filter, mods));
   });
+  if (!settings.site_default()) {
+    throw new Error(`Imported data did not include a default. ${JSON.stringify(settings)}`);
+  }
   return settings;
 }
 
@@ -301,6 +319,7 @@ export const Modifier = Object.freeze({
   low_contrast: 'low-contrast',
   killbg: 'kill_background',
   forceinput: 'force_text',
+  dynamic: 'dynamic',
 });
 
 export function SiteSettings(filter, mods) {
