@@ -312,7 +312,7 @@ export const Filter = Object.freeze({
   dim3: 'noinvert-dim3',
   dim4: 'noinvert-dim4',
   dim5: 'noinvert-dim5',
-  normal: ''
+  normal: 'normal'
 });
 
 export const Modifier = Object.freeze({
