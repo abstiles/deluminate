@@ -30,7 +30,7 @@ async function migrateFromLocalStorage() {
     if (result.hasOwnProperty('localStorage')) {
       Object.assign(storeCache, migrateV1toV2(result.localStorage));
       settings = Settings.import(storeCache?.sites);
-      // chrome.storage.local.set({migrationComplete: 2});
+      chrome.storage.local.set({migrationComplete: 2});
     }
   })();
   await migrationTask;

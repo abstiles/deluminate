@@ -4,7 +4,9 @@
       "type": "module"
    },
    "action": {
-      "default_icon": "deluminate-128.png",
+      "default_icon": {
+        "128": "deluminate-128.png"
+      },
       "default_popup": "popup.html",
       "default_title": "Deluminate (Shift+F11)"
    },
@@ -31,5 +33,5 @@
            "matches": [ "<all_urls>" ]
        }
    ],
-   "version": "0.7.7"
+   "version": "1.0.0"
 }
