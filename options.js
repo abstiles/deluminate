@@ -1,7 +1,6 @@
 import {
   $,
   syncStore,
-  storeSet,
   getGlobalSettings,
   setGlobalSetting,
   resetSiteSchemes,

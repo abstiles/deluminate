@@ -6,7 +6,7 @@ export function ErrorTypeFactory(name, f) {
       this.message = message;
     }
   }
-  var newError = function(message) {
+  var newError = function() {
     var error = Error.apply(this, arguments);
 
     error.name = this.name = name;
@@ -49,7 +49,7 @@ export function Site(url) {
     if (site instanceof URL) return site;
     try {
       return new URL(site.includes("://") ? site : "http://" + site);
-    } catch (err) {
+    } catch {
       throw new TypeError(`Error constructing URL from ${site}`);
     }
   }
@@ -92,7 +92,7 @@ export function Hierarchy() {
   // hierarchy, rather than a child name.
   var DATA = '/';
 
-  this.tree = typeof tree !== 'undefined' ? tree : {};
+  this.tree = {};
 
   // Search for the closest path in the hierarchy that matches the given chain.
   this.getMatch = function(chain) {
@@ -142,8 +142,8 @@ export function Hierarchy() {
 
   // Set a piece of data in the hierarchy
   this.set = function(chain, value) {
-    var selection = this.tree;
-    for (var i = 0; i < chain.length; ++i) {
+    let selection = this.tree;
+    for (let i = 0; i < chain.length; ++i) {
       if (typeof selection[chain[i]] !== 'object') {
         selection[chain[i]] = {};
       }
@@ -154,10 +154,8 @@ export function Hierarchy() {
 
   // Remove the object in the hierarchy matching the chain
   this.remove = function(chain) {
-    var i = 0;
-    var selection = this.tree;
-    for (var i = 0; i < chain.length && typeof selection !== 'undefined';
-        ++i) {
+    let selection = this.tree;
+    for (let i = 0; i < chain.length && typeof selection !== 'undefined'; ++i) {
       selection = selection[chain[i]];
     }
     if (typeof selection !== 'undefined') {

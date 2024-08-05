@@ -74,10 +74,6 @@ async function injectTabCSS(tab) {
 }
 
 function updateTabs() {
-  var msg = {
-    'enabled': getEnabled()
-  };
-
   function initTabs(windows) {
     for (const window of windows) {
       for (const tab of window.tabs) {
@@ -119,7 +115,7 @@ function toggleSite(url) {
   } else {
     scheme = DEFAULT_SCHEME;
   }
-  setSiteScheme(site, scheme);
+  setSiteScheme(url, scheme);
   updateTabs();
 }
 
@@ -167,7 +163,7 @@ function init() {
     }
   });
   /* Ensure tab CSS is re-inserted into replaced tabs. */
-  chrome.tabs.onReplaced.addListener(function (addedTabId, removedTabId) {
+  chrome.tabs.onReplaced.addListener(function (addedTabId) {
     chrome.tabs.get(addedTabId, function(tab) {
       console.log("Tab replaced, reinjecting:", tab.url);
       injectTab(tab);

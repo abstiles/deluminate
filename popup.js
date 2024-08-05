@@ -4,7 +4,6 @@ import {
   syncStore,
   getEnabled,
   setEnabled,
-  siteFromUrl,
   getMatchingSite,
   getSiteSettings,
   setSiteSettings,
@@ -16,7 +15,6 @@ import {
 
 const nullSelector = {get_site: () => null,}
 let selector;
-var site;
 var key1;
 var key2;
 
@@ -69,11 +67,7 @@ async function onToggle() {
 async function onRadioChange(name, value) {
   switch (name) {
     case 'scheme':
-      if (selector.get_site()) {
-        await setSiteScheme(selector.get_site(), value);
-      } else {
-        await setDefaultScheme(value);
-      }
+      await setSiteScheme(selector.get_site(), value);
       break;
   }
   update();
@@ -173,7 +167,6 @@ async function init() {
   await syncStore();
 
   chrome.windows.getLastFocused({'populate': true}, function(window) {
-    site = '';
     for (var i = 0; i < window.tabs.length; i++) {
       var tab = window.tabs[i];
       if (tab.active) {
@@ -182,7 +175,6 @@ async function init() {
           $('make_default').style.display = 'none';
           selector = nullSelector;
         } else {
-          site = siteFromUrl(tab.url);
           $('scheme_title').innerHTML = 'Color scheme for ' +
               '<div id="selector"></div>' +
               '<div class="kb">(Toggle: ' + key2 + ')</div>';
@@ -228,8 +220,3 @@ function onEvent(evt) {
 window.addEventListener('load', init, false);
 document.addEventListener('DOMContentLoaded', onLinkClick);
 document.addEventListener('keydown', onEvent, false);
-
-if (typeof(global) !== 'undefined') {
-    global.onMakeDefault = onMakeDefault;
-    global.changedFromDefault = changedFromDefault;
-}

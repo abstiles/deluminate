@@ -1,9 +1,9 @@
 {
   "name": "deluminate",
-  "version": "0.7.7",
+  "version": "1.0.0",
   "description": "Invert the luminance of a website to make it easier on the eyes.",
   "scripts": {
-    "lint": "jshint *.js",
+    "lint": "eslint *.js",
     "test": "jasmine",
     "deploy": "./deploy --release",
     "deploy-dev": "./deploy"
@@ -20,14 +20,17 @@
     "dark",
     "contrast"
   ],
-  "author": "Andrew Stiles",
+  "author": "Anjou Stiles",
   "license": "BSD-2-Clause",
   "bugs": {
     "url": "https://github.com/abstiles/deluminate/issues"
   },
   "homepage": "https://deluminate.github.io",
   "devDependencies": {
+    "@eslint/js": "^9.8.0",
     "chrome-webstore-upload-cli": "^1.1.1",
+    "eslint": "^9.8.0",
+    "globals": "^15.9.0",
     "jasmine": "^2.5.3",
     "jasmine-reporters": "^2.2.0",
     "jsdom": "^9.9.1",
@@ -35,7 +38,8 @@
     "mock-local-storage": "^1.0.2"
   },
   "jshintConfig": {
-    "esversion": 6,
+    "esversion": 13,
+    "browser": true,
     "loopfunc": true,
     "laxbreak": true,
     "laxcomma": true,
@@ -45,5 +49,11 @@
     "eqnull": true,
     "-W032": true,
     "-W041": true
+  },
+  "eslintConfig": {
+    "env": {
+      "browser": true,
+      "webextensions": true
+    }
   }
 }

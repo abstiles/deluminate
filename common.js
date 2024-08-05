@@ -4,7 +4,6 @@ export const DEFAULT_SCHEME = "delumine-smart";
 const DEFAULT_FILTER = DEFAULT_SCHEME.split("-").slice(1).join("-");
 const storeCache = {};
 let settings = new Settings(DEFAULT_FILTER);
-let storageFetched = false;
 
 let migrationTask;
 async function migrateFromLocalStorage() {
@@ -23,12 +22,14 @@ async function migrateFromLocalStorage() {
         reasons: ['LOCAL_STORAGE'],
         justification: 'migrating local storage to cloud sync storage',
       });
-    } catch {}
+    } catch {
+      // Already created. That's fine, just send the message.
+    }
     const result = await chrome.runtime.sendMessage({
       target: 'offscreen',
       action: 'migrate',
     });
-    if (result.hasOwnProperty('localStorage')) {
+    if ('localStorage' in result) {
       Object.assign(storeCache, migrateV1toV2(result.localStorage));
       settings = Settings.import(storeCache?.sites, DEFAULT_FILTER);
       //chrome.storage.local.set({migrationComplete: 2});
@@ -44,10 +45,10 @@ function parseSiteMods(sitemods) {
   // key: true pairs.
   try {
     return sitemods.split(" ");
-  } catch {}
+  } catch { /* Not a string. */ }
   try {
     return Object.keys(sitemods);
-  } catch {}
+  } catch { /* Not an object */ }
   return [];
 }
 
@@ -104,7 +105,6 @@ export async function refreshStore() {
   const items = await chrome.storage.sync.get();
   Object.assign(storeCache, items);
   settings = Settings.import(storeCache?.sites, DEFAULT_FILTER);
-  storageFetched = true;
   return settings;
 }
 
@@ -140,7 +140,6 @@ export function setSiteSettings(site, siteSettings) {
 }
 
 export async function resetSiteSchemes() {
-  var siteSchemes = {};
   await chrome.storage.sync.remove(
     Object.keys(await chrome.storage.sync.get())
   );

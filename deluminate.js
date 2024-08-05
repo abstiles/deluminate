@@ -3,20 +3,18 @@ var scheme_prefix;
 var backdrop;
 var animGifHandler;
 var newImageHandler;
-var deluminateFullyInitialized = false;
 
 function onExtensionMessage(request, sender, sendResponse) {
   if (chrome.runtime.lastError) {
     console.log(`Failed to communicate init request`);
   }
   if (request.target === 'offscreen') return;
-  deluminateFullyInitialized = true;
   if (request['manual_css']) {
     addCSSLink();
     return;
   }
   if (request.enabled && request.scheme != 'normal') {
-    hc = scheme_prefix + request.scheme + ' ' + request.modifiers.join(' ');
+    const hc = scheme_prefix + request.scheme + ' ' + request.modifiers.join(' ');
     document.documentElement.setAttribute('hc', hc);
     setupFullscreenWorkaround();
   } else {
@@ -119,7 +117,7 @@ function removeFullscreenWorkaround() {
 }
 
 function removeById(id) {
-  element = document.getElementById(id);
+  const element = document.getElementById(id);
   if (element !== null) {
     element.remove();
   }
@@ -300,7 +298,7 @@ function init() {
   );
   document.addEventListener('keydown', onEvent, false);
 
-  animGifHandler = new MutationObserver(function(mutations, obs) {
+  animGifHandler = new MutationObserver(function(mutations) {
     for(var i=0; i<mutations.length; ++i) {
       for(var j=0; j<mutations[i].addedNodes.length; ++j) {
         var newTag = mutations[i].addedNodes[j];
@@ -313,7 +311,7 @@ function init() {
     }
   });
 
-  newImageHandler = new MutationObserver(function(mutations, obs) {
+  newImageHandler = new MutationObserver(function(mutations) {
     if (checkDisconnected()) return;
     for(var i=0; i<mutations.length; ++i) {
       for(var j=0; j<mutations[i].addedNodes.length; ++j) {

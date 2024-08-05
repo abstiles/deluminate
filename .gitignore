@@ -2,6 +2,7 @@ build/
 *.zip
 
 node_modules/
+package-lock.json
 
 # Test output
 spec/**/*.xml

@@ -13,13 +13,13 @@ jobs:
           destination: junitresults
   deploy:
     docker:
-      - image: circleci/node:13.7
+      - image: cimg/node:13.7
     steps:
       - checkout
       - run: make deploy
   deploy-dev:
     docker:
-      - image: circleci/node:13.7
+      - image: cimg/node:13.7
     steps:
       - checkout
       - run: make deploy-dev
