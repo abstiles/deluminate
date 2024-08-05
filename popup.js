@@ -19,7 +19,7 @@ let key1;
 let key2;
 
 function setRadio(name, value) {
-  let radios = document.querySelectorAll('input[name="' + name + '"]');
+  const radios = document.querySelectorAll('input[name="' + name + '"]');
   // Convention: trailing digits on scheme represent subschemes. Strip them
   // before looking for the correct radio to enable.
   value = value.replace(/\d+$/, '');
@@ -110,7 +110,7 @@ async function onDynamic(evt) {
 }
 
 async function onDimLevel(evt) {
-  let dimLevel = "dim" + evt.target.value;
+  const dimLevel = "dim" + evt.target.value;
   $('dim_radio').value = dimLevel;
   await setSiteScheme(selector.get_site(), dimLevel);
   update();
@@ -122,7 +122,7 @@ async function onMakeDefault() {
 }
 
 function addRadioListeners(name) {
-  let radios = document.querySelectorAll('input[name="' + name + '"]');
+  const radios = document.querySelectorAll('input[name="' + name + '"]');
   for (let i = 0; i < radios.length; i++) {
     radios[i].addEventListener('change', function(evt) {
       onRadioChange(evt.target.name, evt.target.value);
@@ -135,11 +135,11 @@ function addRadioListeners(name) {
 
 // Open all links in new tabs.
 function onLinkClick() {
-  let links = document.getElementsByTagName("a");
+  const links = document.getElementsByTagName("a");
   for (let i = 0; i < links.length; i++) {
       (function () {
-          let ln = links[i];
-          let location = ln.href;
+          const ln = links[i];
+          const location = ln.href;
           ln.onclick = function () {
               chrome.tabs.create({active: true, url: location});
           };
@@ -168,7 +168,7 @@ async function init() {
 
   chrome.windows.getLastFocused({'populate': true}, function(window) {
     for (let i = 0; i < window.tabs.length; i++) {
-      let tab = window.tabs[i];
+      const tab = window.tabs[i];
       if (tab.active) {
         if (isDisallowedUrl(tab.url)) {
           $('scheme_title').innerText = 'Default color scheme:';
@@ -189,7 +189,7 @@ async function init() {
     const currentSettings = getSiteSettings(selector.get_site());
     const currentScheme = currentSettings.filter;
     if (currentScheme.includes('dim')) {
-      let currentDimLevel = currentScheme.replace(/.*(\d+)$/, '$1');
+      const currentDimLevel = currentScheme.replace(/.*(\d+)$/, '$1');
       $('dim_amount').value = currentDimLevel;
       $('dim_radio').value = 'dim' + currentDimLevel;
     }

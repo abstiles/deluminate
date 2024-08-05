@@ -157,7 +157,7 @@ export function getGlobalSettings() {
 }
 
 export function setGlobalSetting(key, value) {
-  let globalSettings = getGlobalSettings();
+  const globalSettings = getGlobalSettings();
   globalSettings[key] = value;
   return storeSet('settings', globalSettings);
 }

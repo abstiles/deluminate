@@ -69,12 +69,12 @@ function currentPageSettings() {
 
 function addCSSLink() {
   /* Add CSS in a way that still works on chrome URLs. */
-  let cssURL = chrome.runtime.getURL('deluminate.css');
-  let selector = 'link[href="' + cssURL + '"]'
+  const cssURL = chrome.runtime.getURL('deluminate.css');
+  const selector = 'link[href="' + cssURL + '"]'
   if (document.querySelector(selector) !== null) {
     return; // Don't re-add if it's already there.
   }
-  let link = document.createElement('link');
+  const link = document.createElement('link');
   link.href = cssURL;
   link.rel = 'stylesheet';
   link.media = 'screen';
@@ -152,7 +152,7 @@ function containsAny(haystack, needleList) {
 }
 
 function markCssImages(tag) {
-  let bgImage = window.getComputedStyle(tag)['background-image'];
+  const bgImage = window.getComputedStyle(tag)['background-image'];
   let imageType;
   if (containsAny(bgImage, ['data:image/png', '.png', '.PNG'])) {
     imageType = 'png';
@@ -240,7 +240,7 @@ function colorValence(color) {
 
 function usesLightTextColor() {
   const paras = document.querySelectorAll('p');
-  let charTypes = [0, 0, 0];
+  const charTypes = [0, 0, 0];
   let total = 0;
   for (const p of paras) {
     const color = getComputedStyle(p)?.color;
@@ -301,7 +301,7 @@ function init() {
   animGifHandler = new MutationObserver(function(mutations) {
     for(let i=0; i<mutations.length; ++i) {
       for(let j=0; j<mutations[i].addedNodes.length; ++j) {
-        let newTag = mutations[i].addedNodes[j];
+        const newTag = mutations[i].addedNodes[j];
         if (newTag.querySelectorAll) {
           Array.prototype.forEach.call(
             newTag.querySelectorAll('img[src*=".gif"], img[src*=".GIF"]'),
@@ -315,7 +315,7 @@ function init() {
     if (checkDisconnected()) return;
     for(let i=0; i<mutations.length; ++i) {
       for(let j=0; j<mutations[i].addedNodes.length; ++j) {
-        let newTag = mutations[i].addedNodes[j];
+        const newTag = mutations[i].addedNodes[j];
         if (newTag.querySelectorAll) {
           Array.prototype.forEach.call(
             newTag.querySelectorAll('*:not([style*="url"])'),
@@ -346,13 +346,13 @@ function checkDisconnected() {
   return false;
 }
 
-let colorToRGBA = (function() {
+const colorToRGBA = (function() {
   // Use a canvas to normalize colors for computing.
-  let canvas = document.createElement('canvas');
+  const canvas = document.createElement('canvas');
   canvas.width = canvas.height = 1;
-  let ctx = canvas.getContext('2d', {willReadFrequently: true});
+  const ctx = canvas.getContext('2d', {willReadFrequently: true});
 
-  let cache = {};
+  const cache = {};
   function memoize(f) {
     return (key) => {
       if (!(key in cache)) {

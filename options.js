@@ -7,7 +7,7 @@ import {
 } from './common.js';
 
 function initSettings() {
-  let globalSettings = getGlobalSettings();
+  const globalSettings = getGlobalSettings();
   if (globalSettings['detect_animation']) {
     $('detect_animation').value = globalSettings['detect_animation'];
   }
@@ -20,11 +20,11 @@ async function onForget() {
 
 // Open all links in new tabs.
 function onLinkClick() {
-  let links = document.getElementsByTagName("a");
+  const links = document.getElementsByTagName("a");
   for (let i = 0; i < links.length; i++) {
     (function () {
-      let ln = links[i];
-      let location = ln.href;
+      const ln = links[i];
+      const location = ln.href;
       ln.onclick = function () {
           chrome.tabs.create({active: true, url: location});
       };
@@ -42,8 +42,8 @@ function loadSettingsDisplay(store) {
 
 function onEditSave(store) {
   return () => {
-    let editSaveButton = document.getElementById('edit-save');
-    let settingsText = document.getElementById('settings');
+    const editSaveButton = document.getElementById('edit-save');
+    const settingsText = document.getElementById('settings');
 
     if (!settingsText.readOnly) {
       editSaveButton.textContent = 'Edit site customizations';

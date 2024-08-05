@@ -53,7 +53,7 @@ async function injectTabJS(tab) {
 
 async function injectTabCSS(tab) {
   console.log(`Injecting CSS into tab: ${tabSummary(tab)}`);
-  let url = tab.url;
+  const url = tab.url;
   try {
     return await chrome.scripting.insertCSS({
       target: {tabId: tab.id, allFrames: true},
@@ -138,9 +138,9 @@ function messageDispatcher(request, sender, sendResponse) {
     return true;
   }
   if (request['init']) {
-    let url = sender.tab ? sender.tab.url : request['url'];
+    const url = sender.tab ? sender.tab.url : request['url'];
     const siteSettings = getSiteSettings(url);
-    let msg = {
+    const msg = {
       'enabled': getEnabled(),
       'scheme': Filter[siteSettings.filter],
       'modifiers': [...siteSettings.mods].map(mod => Modifier[mod]),

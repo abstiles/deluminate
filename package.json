@@ -1,4 +1,5 @@
 {
+  "type": "module",
   "name": "deluminate",
   "version": "1.0.0",
   "description": "Invert the luminance of a website to make it easier on the eyes.",

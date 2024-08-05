@@ -11,6 +11,7 @@ export default [
     },
     rules: {
       "no-var": "warn",
+      "prefer-const": "warn",
     }
   },
   pluginJs.configs.recommended,

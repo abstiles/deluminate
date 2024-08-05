@@ -6,8 +6,8 @@ export function ErrorTypeFactory(name, f) {
       this.message = message;
     }
   }
-  let newError = function() {
-    let error = Error.apply(this, arguments);
+  const newError = function() {
+    const error = Error.apply(this, arguments);
 
     error.name = this.name = name;
     this.stack = error.stack;
@@ -29,7 +29,7 @@ function expect_type(value, type) {
 
 // A strict version of obj[name] that throws errors when the key isn't found
 function get(obj, name) {
-  let value = obj[name];
+  const value = obj[name];
   if (typeof value === 'undefined') {
     throw new TypeError(`${name} is not a valid value in ${Object.keys(obj)}`);
   }
@@ -55,7 +55,7 @@ export function Site(url) {
   }
 
   const url_object = toURL(url)
-  let host_components = url_object.hostname.split('.');
+  const host_components = url_object.hostname.split('.');
   // convert "sub2.sub1.example.com" to "['example.com', 'sub1', 'sub2']"
   this.domain_hierarchy = [host_components.slice(-2).join('.')].concat(
       host_components.slice(0, -2).reverse());
@@ -75,7 +75,7 @@ Site.build = function(domain_hierarchy, page_hierarchy, protocol) {
                   page_hierarchy.join('/'))
 }
 Site.none = (function() {
-  let none = Object.create(Site.prototype);
+  const none = Object.create(Site.prototype);
   none.domain_hierarchy = [];
   none.page_hierarchy = [];
   none.toString = () => "";
@@ -90,7 +90,7 @@ export function Hierarchy() {
   }
   // This is the special key interpreted as the data for a position in the
   // hierarchy, rather than a child name.
-  let DATA = '/';
+  const DATA = '/';
 
   this.tree = {};
 
@@ -165,7 +165,7 @@ export function Hierarchy() {
 
   // Read a list of addresses + data into this tree
   this.load = function(tree_dump) {
-    let that = this;
+    const that = this;
     tree_dump.forEach(function(entry) {
       that.set(entry.address, entry.data);
     });
@@ -179,7 +179,7 @@ export function Hierarchy() {
   // Walk a subtree, flattening its component subtrees into a single list
   const dump_tree = function(root, address) {
     address = typeof address !== 'undefined' ? address : [];
-    let list = []
+    const list = []
     // Add the subtrees
     Object.keys(root).forEach(function(key) {
       if (typeof root[key] === 'undefined') { return; }
@@ -219,7 +219,7 @@ export function Settings(defaultFilter, defaultMods) {
   this.remove = function(site) {
     // Coerce site to a proper Site object if it's not one already.
     site = site instanceof Site ? site : Site(site);
-    let site_domain = this.storage.get_exact(site.domain_hierarchy);
+    const site_domain = this.storage.get_exact(site.domain_hierarchy);
     if (!(site_domain instanceof Hierarchy)) {
       return;
     }
@@ -232,7 +232,7 @@ export function Settings(defaultFilter, defaultMods) {
     const closest_path = this.storage.getMatch(site.domain_hierarchy);
     const domain_path = closest_path.length > 0 ? closest_path : site.domain_hierarchy;
     console.log(`domain_path: ${JSON.stringify(domain_path)}`);
-    let site_domain = this.storage.get(site.domain_hierarchy);
+    const site_domain = this.storage.get(site.domain_hierarchy);
     if (site_domain instanceof Hierarchy) {
       return Site.build(
         domain_path,
@@ -245,7 +245,7 @@ export function Settings(defaultFilter, defaultMods) {
   this.load = function(site) {
     // Coerce site to a proper Site object if it's not one already.
     site = site instanceof Site ? site : Site(site);
-    let site_domain = this.storage.get(site.domain_hierarchy);
+    const site_domain = this.storage.get(site.domain_hierarchy);
     if (site_domain instanceof Hierarchy) {
       return site_domain.get(site.page_hierarchy) ?? this.site_default();
     }
@@ -264,15 +264,15 @@ export function Settings(defaultFilter, defaultMods) {
   // Serialize the settings in a form that can be efficiently stored with
   // chrome.storage
   this.export = function() {
-    let list = [];
+    const list = [];
     this.storage.dump().forEach(function(domain_item) {
-      let domain_hierarchy = domain_item.address;
+      const domain_hierarchy = domain_item.address;
       Array.prototype.push.apply(list,
         domain_item.data.dump().map(function(page_item) {
-          let site = domain_hierarchy.length  === 0 ? Site.none
+          const site = domain_hierarchy.length  === 0 ? Site.none
             : Site.build(domain_hierarchy, page_item.address);
           //return { site: site.toString(), data: page_item.data.minimal() };
-          let {filter, mods} = page_item.data;
+          const {filter, mods} = page_item.data;
           return [ site.toString(), filter, ...mods ];
         })
       );
@@ -286,7 +286,7 @@ export function Settings(defaultFilter, defaultMods) {
 }
 // Read the serialized settings data
 Settings.import = function(settings_list, defaultFilter, defaultMods) {
-  let settings = new Settings(defaultFilter, defaultMods);
+  const settings = new Settings(defaultFilter, defaultMods);
   settings_list ??= [];
   settings_list.forEach(function([site, filter, ...mods]) {
     if (typeof site === 'undefined' || typeof filter === 'undefined') {
