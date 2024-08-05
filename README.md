@@ -13,10 +13,10 @@ websites to make them easier on the eyes.
 
 **Warning:** because of the way this extension inverts the luminance of
 rendered pages, it may cause noticeable slowdowns for some users. If this
-happens, try pasting chrome://flags/ into your URL bar and click 'enable'
-on the "Override software rendering list" option. Otherwise, you may 
-prefer another extension that uses custom CSS to set the default background
-and text color of web pages.
+happens, try pasting chrome://flags/ into your URL bar and click 'enable' on
+the "Override software rendering list" option. Otherwise, you may prefer
+another extension that uses custom CSS to set the default background and text
+color of web pages.
 
 Details
 -------
@@ -72,6 +72,10 @@ Force certain text inputs to white text on black in an inversion mode.
 Force the main page background to black and remove any background images on the
 page.
 
+### Avoid Inverting Dark Sites ###
+
+Detects whether a web page seems like it's already using a dark mode and
+doesn't apply the inversion to those pages.
 
 Installation
 ------------
