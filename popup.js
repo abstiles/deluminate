@@ -15,15 +15,15 @@ import {
 
 const nullSelector = {get_site: () => null,}
 let selector;
-var key1;
-var key2;
+let key1;
+let key2;
 
 function setRadio(name, value) {
-  var radios = document.querySelectorAll('input[name="' + name + '"]');
+  let radios = document.querySelectorAll('input[name="' + name + '"]');
   // Convention: trailing digits on scheme represent subschemes. Strip them
   // before looking for the correct radio to enable.
   value = value.replace(/\d+$/, '');
-  for (var i = 0; i < radios.length; i++) {
+  for (let i = 0; i < radios.length; i++) {
     radios[i].checked = (radios[i].value.lastIndexOf(value, 0) === 0);
     radios[i].disabled = !getEnabled();
   }
@@ -122,8 +122,8 @@ async function onMakeDefault() {
 }
 
 function addRadioListeners(name) {
-  var radios = document.querySelectorAll('input[name="' + name + '"]');
-  for (var i = 0; i < radios.length; i++) {
+  let radios = document.querySelectorAll('input[name="' + name + '"]');
+  for (let i = 0; i < radios.length; i++) {
     radios[i].addEventListener('change', function(evt) {
       onRadioChange(evt.target.name, evt.target.value);
     }, false);
@@ -135,11 +135,11 @@ function addRadioListeners(name) {
 
 // Open all links in new tabs.
 function onLinkClick() {
-  var links = document.getElementsByTagName("a");
-  for (var i = 0; i < links.length; i++) {
+  let links = document.getElementsByTagName("a");
+  for (let i = 0; i < links.length; i++) {
       (function () {
-          var ln = links[i];
-          var location = ln.href;
+          let ln = links[i];
+          let location = ln.href;
           ln.onclick = function () {
               chrome.tabs.create({active: true, url: location});
           };
@@ -167,8 +167,8 @@ async function init() {
   await syncStore();
 
   chrome.windows.getLastFocused({'populate': true}, function(window) {
-    for (var i = 0; i < window.tabs.length; i++) {
-      var tab = window.tabs[i];
+    for (let i = 0; i < window.tabs.length; i++) {
+      let tab = window.tabs[i];
       if (tab.active) {
         if (isDisallowedUrl(tab.url)) {
           $('scheme_title').innerText = 'Default color scheme:';

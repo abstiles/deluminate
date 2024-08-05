@@ -2,11 +2,11 @@ import {Site} from './utils.js';
 
 export function UrlSelector(url_string) {
   // Needed to reference 'this' when concatenating arrays.
-  var self = this;
+  let self = this;
   if (!(this instanceof UrlSelector)) {
     return new UrlSelector(url_string);
   }
-  var site = new Site(url_string);
+  let site = new Site(url_string);
   this.subdomains = site.domain_hierarchy.slice(1).reverse();
   this.domain = site.domain_hierarchy[0];
   this.path_parts = site.page_hierarchy.slice(0);
@@ -14,7 +14,7 @@ export function UrlSelector(url_string) {
   Array.prototype.push.apply(this.pieces, this.subdomains.map(function(sub) {
     return self.url_component(sub);
   }));
-  var domain_piece = this.url_component(this.domain);
+  let domain_piece = this.url_component(this.domain);
   domain_piece.id = 'domain';
   domain_piece.classList.add('end');
   this.pieces.push(domain_piece);
@@ -58,12 +58,12 @@ UrlSelector.prototype.reset_default = function() {
 }
 UrlSelector.prototype.url_component = function(text, is_host) {
   // Needed to reference 'this' in the onclick callback
-  var self = this;
+  let self = this;
   is_host = typeof is_host !== 'undefined' ? is_host : true;
-  var new_element = document.createElement('span');
+  let new_element = document.createElement('span');
   new_element.textContent = text;
   new_element.onclick = (function(evt) {
-    var target = evt.target;
+    let target = evt.target;
     if (is_host) {
       self.clear_start();
       self.clear_path();
@@ -77,7 +77,7 @@ UrlSelector.prototype.url_component = function(text, is_host) {
   return new_element;
 }
 UrlSelector.prototype.select_host = function(name) {
-  var self = this;
+  let self = this;
   this.pieces.filter(is_host_element).forEach(function(elem) {
     if (elem.textContent.match(name)) {
       self.select_item(elem);
@@ -85,7 +85,7 @@ UrlSelector.prototype.select_host = function(name) {
   });
 }
 UrlSelector.prototype.select_path = function(name) {
-  var self = this;
+  let self = this;
   this.pieces.filter(is_path_element).forEach(function(elem) {
     if (elem.textContent.match(name)) {
       self.select_item(elem);
@@ -96,9 +96,9 @@ UrlSelector.prototype.select_item = function(elem) {
   elem.click();
 }
 UrlSelector.prototype.get_site = function() {
-  var selected = false;
-  var domains = [];
-  var paths = [];
+  let selected = false;
+  let domains = [];
+  let paths = [];
   this.pieces.forEach(function(piece) {
     if (piece.classList.contains('start')) {
       selected = true;
@@ -123,9 +123,9 @@ UrlSelector.prototype.select_site = function(site) {
     this.reset_default();
     return;
   }
-  var hosts = site.domain_hierarchy.slice(1);
-  var paths = site.page_hierarchy.slice(0);
-  var idx = 0;
+  let hosts = site.domain_hierarchy.slice(1);
+  let paths = site.page_hierarchy.slice(0);
+  let idx = 0;
   // Use the default full-domain selection if all domain components are the
   // same
   this.subdomains.slice(0).reverse().every(function(sub) {

@@ -7,7 +7,7 @@ import {
 } from './common.js';
 
 function initSettings() {
-  var globalSettings = getGlobalSettings();
+  let globalSettings = getGlobalSettings();
   if (globalSettings['detect_animation']) {
     $('detect_animation').value = globalSettings['detect_animation'];
   }
@@ -20,11 +20,11 @@ async function onForget() {
 
 // Open all links in new tabs.
 function onLinkClick() {
-  var links = document.getElementsByTagName("a");
-  for (var i = 0; i < links.length; i++) {
+  let links = document.getElementsByTagName("a");
+  for (let i = 0; i < links.length; i++) {
     (function () {
-      var ln = links[i];
-      var location = ln.href;
+      let ln = links[i];
+      let location = ln.href;
       ln.onclick = function () {
           chrome.tabs.create({active: true, url: location});
       };

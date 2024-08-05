@@ -1,8 +1,8 @@
 (function() {
-var scheme_prefix;
-var backdrop;
-var animGifHandler;
-var newImageHandler;
+let scheme_prefix;
+let backdrop;
+let animGifHandler;
+let newImageHandler;
 
 function onExtensionMessage(request, sender, sendResponse) {
   if (chrome.runtime.lastError) {
@@ -69,12 +69,12 @@ function currentPageSettings() {
 
 function addCSSLink() {
   /* Add CSS in a way that still works on chrome URLs. */
-  var cssURL = chrome.runtime.getURL('deluminate.css');
-  var selector = 'link[href="' + cssURL + '"]'
+  let cssURL = chrome.runtime.getURL('deluminate.css');
+  let selector = 'link[href="' + cssURL + '"]'
   if (document.querySelector(selector) !== null) {
     return; // Don't re-add if it's already there.
   }
-  var link = document.createElement('link');
+  let link = document.createElement('link');
   link.href = cssURL;
   link.rel = 'stylesheet';
   link.media = 'screen';
@@ -143,7 +143,7 @@ function onEvent(evt) {
 }
 
 function containsAny(haystack, needleList) {
-  for (var i = 0; i < needleList.length; ++i) {
+  for (let i = 0; i < needleList.length; ++i) {
     if (haystack.indexOf(needleList[i]) >= 0) {
       return true;
     }
@@ -152,8 +152,8 @@ function containsAny(haystack, needleList) {
 }
 
 function markCssImages(tag) {
-  var bgImage = window.getComputedStyle(tag)['background-image'];
-  var imageType;
+  let bgImage = window.getComputedStyle(tag)['background-image'];
+  let imageType;
   if (containsAny(bgImage, ['data:image/png', '.png', '.PNG'])) {
     imageType = 'png';
   } else if (containsAny(bgImage, ['.gif', '.GIF'])) {
@@ -299,9 +299,9 @@ function init() {
   document.addEventListener('keydown', onEvent, false);
 
   animGifHandler = new MutationObserver(function(mutations) {
-    for(var i=0; i<mutations.length; ++i) {
-      for(var j=0; j<mutations[i].addedNodes.length; ++j) {
-        var newTag = mutations[i].addedNodes[j];
+    for(let i=0; i<mutations.length; ++i) {
+      for(let j=0; j<mutations[i].addedNodes.length; ++j) {
+        let newTag = mutations[i].addedNodes[j];
         if (newTag.querySelectorAll) {
           Array.prototype.forEach.call(
             newTag.querySelectorAll('img[src*=".gif"], img[src*=".GIF"]'),
@@ -313,9 +313,9 @@ function init() {
 
   newImageHandler = new MutationObserver(function(mutations) {
     if (checkDisconnected()) return;
-    for(var i=0; i<mutations.length; ++i) {
-      for(var j=0; j<mutations[i].addedNodes.length; ++j) {
-        var newTag = mutations[i].addedNodes[j];
+    for(let i=0; i<mutations.length; ++i) {
+      for(let j=0; j<mutations[i].addedNodes.length; ++j) {
+        let newTag = mutations[i].addedNodes[j];
         if (newTag.querySelectorAll) {
           Array.prototype.forEach.call(
             newTag.querySelectorAll('*:not([style*="url"])'),

@@ -8,6 +8,9 @@ export default [
         ...globals.browser,
         ...globals.webextensions,
       }
+    },
+    rules: {
+      "no-var": "warn",
     }
   },
   pluginJs.configs.recommended,
