@@ -1,246 +1,201 @@
-var DEFAULT_SCHEME = "delumine-smart";
-var DEFAULT_MODS = [];
+import {Settings, SiteSettings} from "./utils.js";
 
-function $(id) {
+export const DEFAULT_SCHEME = "delumine-smart";
+const DEFAULT_FILTER = DEFAULT_SCHEME.split("-").slice(1).join("-");
+const storeCache = {};
+let settings = new Settings(DEFAULT_FILTER);
+let storageFetched = false;
+
+let migrationTask;
+async function migrateFromLocalStorage() {
+  const {migrationComplete} = await chrome.storage.local.get(['migrationComplete']);
+  if (migrationComplete >= 2) {
+    return;
+  }
+  if (migrationTask) {
+    await migrationTask;
+    return;
+  }
+  migrationTask = (async () => {
+    try {
+      await chrome.offscreen.createDocument({
+        url: 'migrate.html',
+        reasons: ['LOCAL_STORAGE'],
+        justification: 'migrating local storage to cloud sync storage',
+      });
+    } catch {}
+    const result = await chrome.runtime.sendMessage({
+      target: 'offscreen',
+      action: 'migrate',
+    });
+    if (result.hasOwnProperty('localStorage')) {
+      Object.assign(storeCache, migrateV1toV2(result.localStorage));
+      settings = Settings.import(storeCache?.sites, DEFAULT_FILTER);
+      //chrome.storage.local.set({migrationComplete: 2});
+    }
+  })();
+  await migrationTask;
+  migrationTask = null;
+}
+
+function parseSiteMods(sitemods) {
+  // Perplexingly, I seem to have implemented settingsV1 sitemodifiers in two
+  // different ways: either a whitespace-delimited string or an object with
+  // key: true pairs.
+  try {
+    return sitemods.split(" ");
+  } catch {}
+  try {
+    return Object.keys(sitemods);
+  } catch {}
+  return [];
+}
+
+function migrateV1toV2(v1) {
+  const toBool = (str) => str !== "false" && Boolean(str);
+  const v2 = {version: 2, enabled: toBool(v1?.enabled)};
+  const defaultFilter = (v1?.scheme ?? DEFAULT_SCHEME)
+    .split("-").slice(1).join("-") || "normal"
+    ;
+  const schemeToFilter = (scheme) =>
+    (scheme ?? `filter-${defaultFilter}`)
+    .split("-").slice(1).join("-") || "normal"
+    ;
+  const defaultMods = [];
+  if (toBool(v1?.low_contrast)) {
+    defaultMods.push("low_contrast");
+  }
+  if (toBool(v1?.kill_background)) {
+    defaultMods.push("killbg");
+  }
+  if (toBool(v1?.force_text)) {
+    defaultMods.push("forceinput");
+  }
+  const settings = new Settings(defaultFilter, defaultMods);
+
+  const siteModifiers = JSON.parse(v1?.sitemodifiers ?? "{}");
+  const siteSchemes = JSON.parse(v1?.siteschemes ?? "{}");
+  const domains = new Set([
+    ...Object.keys(siteModifiers),
+    ...Object.keys(siteSchemes),
+  ]);
+  for (const domain of domains) {
+    const siteSettings = new SiteSettings(
+      schemeToFilter(siteSchemes[domain]),
+      parseSiteMods(siteModifiers[domain]).map(mod => ({
+        "low-contrast": "low_contrast",
+        "kill_background": "killbg",
+        "force_text": "forceinput",
+      })[mod]),
+    );
+    settings.save(domain, siteSettings);
+  }
+  v2.sites = settings.export();
+  console.log(`Settings V2: ${JSON.stringify(v2)}`);
+  return v2;
+}
+
+export async function syncStore() {
+  await migrateFromLocalStorage();
+  return await refreshStore();
+}
+
+export async function refreshStore() {
+  const items = await chrome.storage.sync.get();
+  Object.assign(storeCache, items);
+  settings = Settings.import(storeCache?.sites, DEFAULT_FILTER);
+  storageFetched = true;
+  return settings;
+}
+
+export function storeSet(key, value) {
+  storeCache[key] = value;
+  return chrome.storage.sync.set({[key]: value});
+}
+
+export function $(id) {
   return document.getElementById(id);
 }
 
-function getStoredBool(key, default_val) {
-  default_val = typeof default_val !== 'undefined' ? default_val : 'false';
+export function getEnabled() {
+  return storeCache['enabled'];
+}
 
-  var result = localStorage[key];
-  if (result === 'true' || result === 'false') {
-    return (result === 'true');
+export function setEnabled(enabled) {
+  return storeSet('enabled', enabled);
+}
+
+export function getSiteSettings(site) {
+  const siteSettings = settings.load(site);
+  if (!siteSettings) {
+    throw new Error(`Could not load settings for ${site}`);
   }
-  localStorage[key] = default_val;
-  return (default_val.toString() === 'true');
+  return siteSettings;
 }
 
-function getEnabled() {
-  return getStoredBool('enabled', true);
+export function setSiteSettings(site, siteSettings) {
+  settings.save(site, siteSettings);
+  storeCache.sites = settings.export();
+  return storeSet("sites", storeCache.sites);
 }
 
-function setEnabled(enabled) {
-  localStorage['enabled'] = enabled;
-}
-
-function getLowContrast() {
-  return getStoredBool('low_contrast');
-}
-
-function setLowContrast(low_contrast) {
-  localStorage['low_contrast'] = low_contrast;
-}
-
-function getForceText() {
-  return getStoredBool('force_text');
-}
-
-function setForceText(force_text) {
-  localStorage['force_text'] = force_text;
-}
-
-function getKillBackground() {
-  return getStoredBool('kill_background');
-}
-
-function setKillBackground(kill_background) {
-  localStorage['kill_background'] = kill_background;
-}
-
-function getKeyAction() {
-  var keyAction = localStorage['keyaction'];
-  if (keyAction == 'global' || keyAction == 'site') {
-    return keyAction;
-  }
-  keyAction = 'global';
-  localStorage['keyaction'] = keyAction;
-  return keyAction;
-}
-
-function setKeyAction(keyAction) {
-  if (keyAction != 'global' && keyAction != 'site') {
-    keyAction = 'global';
-  }
-  localStorage['keyaction'] = keyAction;
-}
-
-function getDefaultScheme() {
-  var scheme = localStorage['scheme'];
-  if (scheme) {
-    return scheme;
-  }
-  scheme = DEFAULT_SCHEME;
-  localStorage['scheme'] = scheme;
-  return scheme;
-}
-
-function setDefaultScheme(scheme) {
-  if (!(scheme)) {
-    scheme = DEFAULT_SCHEME;
-  }
-  localStorage['scheme'] = scheme;
-}
-
-function getSiteScheme(site) {
-  var scheme = getDefaultScheme();
-  try {
-    var siteSchemes = JSON.parse(localStorage['siteschemes']);
-    scheme = siteSchemes[site];
-    if (!(scheme)) {
-      scheme = getDefaultScheme();
-    }
-  } catch (e) {
-    scheme = getDefaultScheme();
-  }
-  return scheme;
-}
-
-function setSiteScheme(site, scheme) {
-  if (!(scheme)) {
-    scheme = getDefaultScheme();
-  }
+export async function resetSiteSchemes() {
   var siteSchemes = {};
-  try {
-    siteSchemes = JSON.parse(localStorage['siteschemes']);
-    siteSchemes['www.example.com'] = getDefaultScheme();
-  } catch (e) {
-    siteSchemes = {};
+  await chrome.storage.sync.remove(
+    Object.keys(await chrome.storage.sync.get())
+  );
+  for (const key of Object.keys(storeCache)) {
+    delete storeCache[key];
   }
-  siteSchemes[site] = scheme;
-  localStorage['siteschemes'] = JSON.stringify(siteSchemes);
 }
 
-function resetSiteSchemes() {
-  var siteSchemes = {};
-  localStorage['siteschemes'] = JSON.stringify(siteSchemes);
+export function siteFromUrl(url) {
+  return new URL(url).hostname;
 }
 
-function siteFromUrl(url) {
-  var a = document.createElement('a');
-  a.href = url;
-  return a.hostname;
+export function getGlobalSettings() {
+  return storeCache['settings'] ?? {};
 }
 
-function getSiteModifiers(site) {
-  var modifiers = getDefaultModifiers();
-  try {
-    var siteModifiers = JSON.parse(localStorage['sitemodifiers'] || '{}');
-    if (site in siteModifiers) {
-      var modifierList = [];
-      for (var mod in siteModifiers[site]) {
-        modifierList.push(mod);
-      }
-      modifiers = modifierList.join(' ');
-    } else {
-      modifiers = getDefaultModifiers();
-    }
-  } catch (e) {
-    modifiers = getDefaultModifiers();
-  }
-  return modifiers;
-}
-
-function getDefaultModifiers() {
-  var modifiers = [];
-  if (getLowContrast()) {
-    modifiers.push('low-contrast');
-  }
-  if (getForceText()) {
-    modifiers.push('force_text');
-  }
-  if (getKillBackground()) {
-    modifiers.push('kill_background');
-  }
-  return modifiers.join(' ');
-}
-
-function getGlobalSettings() {
-  var globalSettings;
-  try {
-    globalSettings = JSON.parse(localStorage['settings']);
-  } catch(e) {
-    globalSettings = {};
-  }
-  return globalSettings;
-}
-
-function setGlobalSetting(key, value) {
+export function setGlobalSetting(key, value) {
   var globalSettings = getGlobalSettings();
   globalSettings[key] = value;
-  localStorage['settings'] = JSON.stringify(globalSettings);
+  return storeSet('settings', globalSettings);
 }
 
-function setDefaultModifiers(modifiers) {
-  var low_contrast = (modifiers.indexOf('low-contrast') > -1).toString();
-  var force_text = (modifiers.indexOf('force_text') > -1).toString();
-  var kill_background = (modifiers.indexOf('kill_background') > -1).toString();
-  localStorage['low_contrast'] = low_contrast;
-  localStorage['force_text'] = force_text;
-  localStorage['kill_background'] = kill_background;
+export function getMatchingSite(site) {
+  return settings.match(site);
 }
 
-function addSiteModifier(site, modifier) {
-  var siteModifiers = {};
-  try {
-    siteModifiers = JSON.parse(localStorage['sitemodifiers'] || '{}');
-    siteModifiers['www.example.com'] = getDefaultModifiers();
-  } catch (e) {
-    siteModifiers = {};
-  }
-  try {
-    siteModifiers[site][modifier] = true;
-  } catch (e) {
-    siteModifiers[site] = {};
-    // Get a list of non-empty modifiers
-    defaultModifiers = getDefaultModifiers().split(' ').filter(
-      function(x) { return x.length > 0; }
-    );
-    for (var i = 0; i < defaultModifiers.length; i++) {
-      siteModifiers[site][defaultModifiers[i]] = true;
-    }
-    siteModifiers[site][modifier] = true;
-  }
-  localStorage['sitemodifiers'] = JSON.stringify(siteModifiers);
+export function setSiteScheme(site, scheme) {
+  const siteSettings = settings.load(site);
+  return setSiteSettings(site, new SiteSettings(scheme, siteSettings.mods));
 }
 
-function delSiteModifier(site, modifier) {
-  var siteModifiers = {};
-  try {
-    siteModifiers = JSON.parse(localStorage['sitemodifiers'] || '{}');
-    siteModifiers['www.example.com'] = getDefaultModifiers();
-  } catch (e) {
-    siteModifiers = {};
-  }
-  try {
-    delete siteModifiers[site][modifier];
-  } catch (e) {
-    siteModifiers[site] = {};
-    // Get a list of non-empty modifiers
-    defaultModifiers = getDefaultModifiers().split(' ').filter(
-      function(x) { x }
-    );
-    for (var i = 0; i < defaultModifiers.length; i++) {
-      siteModifiers[site][defaultModifiers[i]] = true;
-    }
-    delete siteModifiers[site][modifier];
-  }
-  localStorage['sitemodifiers'] = JSON.stringify(siteModifiers);
+export function setDefaultModifiers(modifiers) {
+  const defaultSettings = settings.site_default();
+  return setSiteSettings("", new SiteSettings(defaultSettings.filter, modifiers));
 }
 
-function resetSiteModifiers() {
-  var siteModifiers = {};
-  localStorage['sitemodifiers'] = JSON.stringify(siteModifiers);
+export function addSiteModifier(site, modifier) {
+  const siteSettings = settings.load(site);
+  const mods = siteSettings.mods.union(new Set([modifier]));
+  const newSettings = new SiteSettings(siteSettings.filter, mods);
+  return setSiteSettings(site, newSettings);
 }
 
-function changedFromDefault() {
-  var siteModList = getSiteModifiers(site);
-  var defaultModList = getDefaultModifiers();
-  return (getSiteScheme(site) != getDefaultScheme() ||
-          siteModList != defaultModList);
+export function delSiteModifier(site, modifier) {
+  const siteSettings = settings.load(site);
+  const mods = siteSettings.mods.difference(new Set([modifier]));
+  const newSettings = new SiteSettings(siteSettings.filter, mods);
+  return setSiteSettings(site, newSettings);
 }
 
-function isDisallowedUrl(url) {
+export function changedFromDefault(site) {
+  return !settings.site_default.equals(settings.load(site));
+}
+
+export function isDisallowedUrl(url) {
   if (url.indexOf('about') == 0) {
     return true;
   } else if (url.indexOf('chrome') == 0) {
@@ -251,45 +206,4 @@ function isDisallowedUrl(url) {
       return true;
   }
   return false;
-}
-
-function getSettingsViewed() {
-  return getStoredBool('settings_viewed');
-}
-
-function setSettingsViewed() {
-  localStorage['settings_viewed'] = true;
-}
-
-/* Necessary node bootstrapping for testing. */
-if (typeof(global) !== 'undefined') {
-  global.getStoredBool = getStoredBool;
-  global.getEnabled = getEnabled;
-  global.setEnabled = setEnabled;
-  global.getLowContrast = getLowContrast;
-  global.setLowContrast = setLowContrast;
-  global.getForceText = getForceText;
-  global.setForceText = setForceText;
-  global.getKillBackground = getKillBackground;
-  global.setKillBackground = setKillBackground;
-  global.getDefaultScheme = getDefaultScheme;
-  global.setDefaultScheme = setDefaultScheme;
-  global.getDefaultModifiers = getDefaultModifiers;
-  global.setDefaultModifiers = setDefaultModifiers;
-  global.getGlobalSettings = getGlobalSettings;
-  global.setGlobalSetting = setGlobalSetting;
-  global.getSettingsViewed = getSettingsViewed;
-  global.setSettingsViewed = setSettingsViewed;
-  global.siteFromUrl = siteFromUrl;
-  global.getSiteScheme = getSiteScheme;
-  global.setSiteScheme = setSiteScheme;
-  global.resetSiteSchemes = resetSiteSchemes;
-  global.getSiteModifiers = getSiteModifiers;
-  global.addSiteModifier = addSiteModifier;
-  global.delSiteModifier = delSiteModifier;
-  global.resetSiteModifiers = resetSiteModifiers;
-  global.changedFromDefault = changedFromDefault;
-  global.isDisallowedUrl = isDisallowedUrl;
-  global.$ = $;
-  global.getKeyAction = getKeyAction;
 }

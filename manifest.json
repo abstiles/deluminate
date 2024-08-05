@@ -1,9 +1,12 @@
 {
    "background": {
-      "scripts": [ "common.js", "background.js" ]
+      "service_worker": "background.js",
+      "type": "module"
    },
-   "browser_action": {
-      "default_icon": "deluminate-128.png",
+   "action": {
+      "default_icon": {
+        "128": "deluminate-128.png"
+      },
       "default_popup": "popup.html",
       "default_title": "Deluminate (Shift+F11)"
    },
@@ -15,21 +18,20 @@
        "description": "Toggle inversion on a site"
      }
    },
-   "content_scripts": [ {
-      "all_frames": true,
-      "js": [ "deluminate.js" ],
-      "matches": [ "<all_urls>" ],
-      "match_about_blank": true,
-      "run_at": "document_start"
-   } ],
    "description": "Invert the luminance of a website to make it easier on the eyes.",
    "icons": {
       "128": "deluminate-128.png"
    },
    "name": "Deluminate",
-   "manifest_version": 2,
+   "manifest_version": 3,
    "options_page": "options.html",
-   "permissions": [ "<all_urls>", "tabs" ],
-   "web_accessible_resources": [ "deluminate.css" ],
-   "version": "0.7.7"
+   "permissions": [ "tabs", "offscreen", "storage", "scripting" ],
+   "host_permissions": [ "<all_urls>" ],
+   "web_accessible_resources": [
+       {
+           "resources": [ "deluminate.css" ],
+           "matches": [ "<all_urls>" ]
+       }
+   ],
+   "version": "1.0.0"
 }

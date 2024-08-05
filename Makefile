@@ -3,17 +3,21 @@
 SHELL := /bin/bash
 
 MANIFEST := \
-	animated_gif_checker.js \
 	background.js \
 	common.js \
 	deluminate-*.png \
 	deluminate.css \
 	deluminate.js \
 	manifest.json \
+	migrate.html \
+	migrate.js \
 	options.html \
 	options.js \
 	popup.html \
-	popup.js
+	popup.js \
+	url_selector.css \
+	url_selector.js \
+	utils.js
 
 BUILD_DIR := build
 

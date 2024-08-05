@@ -1,3 +1,21 @@
+import UrlSelector from './url_selector.js';
+import {
+  $,
+  syncStore,
+  getEnabled,
+  setEnabled,
+  siteFromUrl,
+  getMatchingSite,
+  getSiteSettings,
+  setSiteSettings,
+  setSiteScheme,
+  addSiteModifier,
+  delSiteModifier,
+  isDisallowedUrl,
+} from './common.js';
+
+const nullSelector = {get_site: () => null,}
+let selector;
 var site;
 var key1;
 var key2;
@@ -17,124 +35,95 @@ function update() {
   document.body.className = getEnabled() ? '' : 'disabled';
 
   if (getEnabled()) {
-    $('title').innerText = 'Deluminate is Enabled';
-    $('toggle').innerHTML = '<b>Disable</b> ' +
+    // $('title').innerText = 'Deluminate is Enabled';
+    $('toggle').innerHTML = 'Deluminate is Enabled ' +
                             '<span class="kb">(' + key1 + ')</span>';
     $('subcontrols').style.display = 'block';
   } else {
-    $('title').innerText = 'Deluminate is Disabled';
-    $('toggle').innerHTML = '<b>Enable</b> ' +
+    // $('title').innerText = 'Deluminate is Disabled';
+    $('toggle').innerHTML = 'Deluminate is Disabled ' +
                             '<span class="kb">(' + key1 + ')</span>';
     $('subcontrols').style.display = 'none';
   }
 
-  setRadio('keyaction', getKeyAction());
-  if (site) {
-    setRadio('scheme', getSiteScheme(site));
-    $('toggle_contrast').checked = (getSiteModifiers(site).indexOf('low-contrast') > -1);
-    $('force_textfield').checked = (getSiteModifiers(site).indexOf('force_text') > -1);
-    $('kill_bgfield').checked = (getSiteModifiers(site).indexOf('kill_background') > -1);
-    $('make_default').disabled = !(changedFromDefault());
-  } else {
-    setRadio('scheme', getDefaultScheme());
-    $('toggle_contrast').checked = getLowContrast();
-    $('force_textfield').checked = getForceText();
-    $('kill_bgfield').checked = getKillBackground();
+  const currentSettings = getSiteSettings(selector.get_site());
+  setRadio('scheme', currentSettings.filter);
+  $('toggle_contrast').checked = currentSettings.mods.has("low_contrast");
+  $('force_textfield').checked = currentSettings.mods.has("forceinput");
+  $('kill_bgfield').checked = currentSettings.mods.has("killbg");
+  $('dynamic').checked = currentSettings.mods.has("dynamic");
+  if (selector.get_site()) {
+    $('make_default').disabled = !changedFromDefault();
   }
-  if (getEnabled()) {
-    document.documentElement.setAttribute(
-        'hc',
-        site ? getSiteScheme(site) : getDefaultScheme());
-  } else {
-    document.documentElement.setAttribute('hc', 'normal');
-  }
-  chrome.extension.getBackgroundPage().updateTabs();
 }
 
 function changedFromDefault() {
-  var siteModList = getSiteModifiers(site);
-  var defaultModList = getDefaultModifiers();
-  return (getSiteScheme(site) != getDefaultScheme() ||
-          siteModList != defaultModList);
+  return !getSiteSettings().equals(getSiteSettings(selector.get_site()));
 }
 
-function onToggle() {
-  setEnabled(!getEnabled());
+async function onToggle() {
+  await setEnabled(!getEnabled());
   update();
 }
 
-function onRadioChange(name, value) {
+async function onRadioChange(name, value) {
   switch (name) {
-    case 'keyaction':
-      setKeyAction(value);
-      break;
-    case 'apply':
-      setApply(value);
-      break;
     case 'scheme':
-      if (site) {
-        setSiteScheme(site, value);
+      if (selector.get_site()) {
+        await setSiteScheme(selector.get_site(), value);
       } else {
-        setDefaultScheme(value);
+        await setDefaultScheme(value);
       }
       break;
   }
   update();
 }
 
-function onLowContrast(evt) {
-  if (site) {
-    if (evt.target.checked) {
-      addSiteModifier(site, 'low-contrast');
-    } else {
-      delSiteModifier(site, 'low-contrast');
-    }
+async function onLowContrast(evt) {
+  if (evt.target.checked) {
+    await addSiteModifier(selector.get_site(), 'low_contrast');
   } else {
-    setLowContrast(evt.target.checked);
+    await delSiteModifier(selector.get_site(), 'low_contrast');
   }
   update();
 }
 
-function onForceText(evt) {
-  if (site) {
-    if (evt.target.checked) {
-      addSiteModifier(site, 'force_text');
-    } else {
-      delSiteModifier(site, 'force_text');
-    }
+async function onForceText(evt) {
+  if (evt.target.checked) {
+    await addSiteModifier(selector.get_site(), 'forceinput');
   } else {
-    setForceText(evt.target.checked);
+    await delSiteModifier(selector.get_site(), 'forceinput');
   }
   update();
 }
 
-function onKillBackground(evt) {
-  if (site) {
-    if (evt.target.checked) {
-      addSiteModifier(site, 'kill_background');
-    } else {
-      delSiteModifier(site, 'kill_background');
-    }
+async function onKillBackground(evt) {
+  if (evt.target.checked) {
+    await addSiteModifier(selector.get_site(), 'killbg');
   } else {
-    setForceText(evt.target.checked);
+    await delSiteModifier(selector.get_site(), 'killbg');
   }
   update();
 }
 
-function onDimLevel(evt) {
-  dimLevel = "noinvert-dim" + evt.target.value;
+async function onDynamic(evt) {
+  if (evt.target.checked) {
+    await addSiteModifier(selector.get_site(), 'dynamic');
+  } else {
+    await delSiteModifier(selector.get_site(), 'dynamic');
+  }
+  update();
+}
+
+async function onDimLevel(evt) {
+  let dimLevel = "dim" + evt.target.value;
   $('dim_radio').value = dimLevel;
-  if (site) {
-    setSiteScheme(site, dimLevel);
-  } else {
-    setDefaultScheme(dimLevel);
-  }
+  await setSiteScheme(selector.get_site(), dimLevel);
   update();
 }
 
-function onMakeDefault() {
-  setDefaultScheme(getSiteScheme(site));
-  setDefaultModifiers(getSiteModifiers(site));
+async function onMakeDefault() {
+  await setSiteSettings(null, getSiteSettings(selector.get_site()));
   update();
 }
 
@@ -165,32 +154,23 @@ function onLinkClick() {
 }
 
 function onSettings() {
-  setSettingsViewed();
   chrome.tabs.create({active: true, url: "options.html"});
 }
 
-function init() {
-  addRadioListeners('keyaction');
-  addRadioListeners('apply');
+async function init() {
   addRadioListeners('scheme');
   $('toggle_contrast').addEventListener('change', onLowContrast, false);
   $('force_textfield').addEventListener('change', onForceText, false);
   $('kill_bgfield').addEventListener('change', onKillBackground, false);
+  $('dynamic').addEventListener('change', onDynamic, false);
   $('dim_amount').addEventListener('input', onDimLevel, false);
   $('toggle').addEventListener('click', onToggle, false);
   $('make_default').addEventListener('click', onMakeDefault, false);
   $('settings').addEventListener('click', onSettings, false);
-  if (navigator.appVersion.indexOf('Mac') != -1) {
-    key1 = '&#x2318;+Shift+F11';
-    key2 = '&#x2318;+Shift+F12';
-  } else {
-    key1 = 'Shift+F11';
-    key2 = 'Shift+F12';
-  }
+  key1 = 'Shift+F11';
+  key2 = 'Shift+F12';
 
-  if (!getSettingsViewed()) {
-    $('settings').className += " new";
-  }
+  await syncStore();
 
   chrome.windows.getLastFocused({'populate': true}, function(window) {
     site = '';
@@ -200,31 +180,54 @@ function init() {
         if (isDisallowedUrl(tab.url)) {
           $('scheme_title').innerText = 'Default color scheme:';
           $('make_default').style.display = 'none';
+          selector = nullSelector;
         } else {
           site = siteFromUrl(tab.url);
-          $('scheme_title').innerHTML = 'Color scheme for <b>' + site +
-              '</b>:<br><span class="kb">(' + key2 + ')</span>';
+          $('scheme_title').innerHTML = 'Color scheme for ' +
+              '<div id="selector"></div>' +
+              '<div class="kb">(Toggle: ' + key2 + ')</div>';
+          selector = new UrlSelector(tab.url);
+          selector.render_to($('selector'));
+          selector.select_site(getMatchingSite(tab.url));
           $('make_default').style.display = 'block';
           break;
         }
       }
     }
-    if (site) {
-      currentScheme = getSiteScheme(site);
-    } else {
-      currentScheme = getDefaultScheme(site);
-    }
-    if (currentScheme.lastIndexOf('noinvert-dim', 0) === 0) {
-      currentDimLevel = currentScheme.replace(/.*(\d+)$/, '$1');
+    const currentSettings = getSiteSettings(selector.get_site());
+    const currentScheme = currentSettings.filter;
+    if (currentScheme.includes('dim')) {
+      let currentDimLevel = currentScheme.replace(/.*(\d+)$/, '$1');
       $('dim_amount').value = currentDimLevel;
-      $('dim_radio').value = 'noinvert-dim' + currentDimLevel;
+      $('dim_radio').value = 'dim' + currentDimLevel;
     }
     update();
   });
 }
 
+function onEvent(evt) {
+  if (evt.keyCode == 122 /* F11 */ &&
+      evt.shiftKey) {
+    chrome.runtime.sendMessage({'toggle_global': true});
+    evt.stopPropagation();
+    evt.preventDefault();
+    update();
+    return false;
+  }
+  if (evt.keyCode == 123 /* F12 */ &&
+      evt.shiftKey) {
+    chrome.runtime.sendMessage({'toggle_site': true});
+    evt.stopPropagation();
+    evt.preventDefault();
+    update();
+    return false;
+  }
+  return true;
+}
+
 window.addEventListener('load', init, false);
 document.addEventListener('DOMContentLoaded', onLinkClick);
+document.addEventListener('keydown', onEvent, false);
 
 if (typeof(global) !== 'undefined') {
     global.onMakeDefault = onMakeDefault;
