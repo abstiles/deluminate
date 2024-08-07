@@ -11,6 +11,7 @@ import {
   addSiteModifier,
   delSiteModifier,
   isDisallowedUrl,
+  isFileUrl,
 } from './common.js';
 
 const nullSelector = {get_site: () => null,}
@@ -170,7 +171,7 @@ async function init() {
     for (let i = 0; i < window.tabs.length; i++) {
       const tab = window.tabs[i];
       if (tab.active) {
-        if (isDisallowedUrl(tab.url)) {
+        if (isDisallowedUrl(tab.url) || isFileUrl(tab.url)) {
           $('scheme_title').innerText = 'Default color scheme:';
           $('make_default').style.display = 'none';
           selector = nullSelector;

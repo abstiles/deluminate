@@ -194,6 +194,14 @@ export function changedFromDefault(site) {
   return !settings.site_default.equals(settings.load(site));
 }
 
+export function isFileUrl(url) {
+	try {
+		return (new URL(url)).origin === "file://";
+	} catch {
+		return false;
+	}
+}
+
 export function isDisallowedUrl(url) {
   if (url.indexOf('about') == 0) {
     return true;
