@@ -54,7 +54,7 @@ function parseSiteMods(sitemods) {
 
 function migrateV1toV2(v1) {
   const toBool = (str) => str !== "false" && Boolean(str);
-  const v2 = {version: 2, enabled: toBool(v1?.enabled)};
+  const v2 = {version: 2, enabled: toBool(v1?.enabled ?? true)};
   const defaultFilter = (v1?.scheme ?? DEFAULT_SCHEME)
     .split("-").slice(1).join("-") || "normal"
     ;
