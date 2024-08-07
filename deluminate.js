@@ -227,7 +227,7 @@ function log() {
 // Cheap and simple calculation to classify colors as light, dark or ambiguous.
 // Return -1 for dark, 0 for gray, 1 for light.
 function colorValence(color) {
-  const {r, g, b, a} = colorToRGBA(color);
+  const [r, g, b, a] = colorToRGBA(color);
   const total = r + g + b;
   // Alpha transparency widens the effective gray range from the middle third
   // (at 100% opaque) to the whole range (at 0%).
