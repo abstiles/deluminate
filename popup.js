@@ -34,12 +34,10 @@ function update() {
   document.body.className = getEnabled() ? '' : 'disabled';
 
   if (getEnabled()) {
-    // $('title').innerText = 'Deluminate is Enabled';
     $('toggle').innerHTML = 'Deluminate is Enabled ' +
                             '<span class="kb">(' + key1 + ')</span>';
     $('subcontrols').style.display = 'block';
   } else {
-    // $('title').innerText = 'Deluminate is Disabled';
     $('toggle').innerHTML = 'Deluminate is Disabled ' +
                             '<span class="kb">(' + key1 + ')</span>';
     $('subcontrols').style.display = 'none';
@@ -171,10 +169,13 @@ async function init() {
     for (let i = 0; i < window.tabs.length; i++) {
       const tab = window.tabs[i];
       if (tab.active) {
-        if (isDisallowedUrl(tab.url) || isFileUrl(tab.url)) {
+        if (isDisallowedUrl(tab.url)) {
           $('scheme_title').innerText = 'Default color scheme:';
           $('make_default').style.display = 'none';
           selector = nullSelector;
+        } else if (isFileUrl(tab.url)) {
+          $('scheme_title').innerText = 'File color scheme:';
+          selector = {get_site: () => tab.url};
         } else {
           $('scheme_title').innerHTML = 'Color scheme for ' +
               '<div id="selector"></div>' +

@@ -106,6 +106,7 @@ export async function refreshStore() {
   const items = await chrome.storage.sync.get();
   Object.assign(storeCache, items);
   settings = Settings.import(storeCache?.sites, DEFAULT_FILTER);
+  settings.import((await chrome.storage.local.get("sites"))["sites"] ?? []);
   return settings;
 }
 
@@ -137,6 +138,7 @@ export function getSiteSettings(site) {
 export function setSiteSettings(site, siteSettings) {
   settings.save(site, siteSettings);
   storeCache.sites = settings.export();
+  chrome.storage.local.set({sites: settings.exportLocal()});
   return storeSet("sites", storeCache.sites);
 }
 

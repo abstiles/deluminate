@@ -41,13 +41,17 @@ function tabSummary(tab) {
 async function injectTabJS(tab) {
   console.log(`Injecting JS into tab: ${tabSummary(tab)}`);
   try {
-  return await chrome.scripting.executeScript({
-    target: {tabId: tab.id, allFrames: true},
-    files: ["deluminate.js"],
-    injectImmediately: true,
-  });
-  } finally {
+    await chrome.scripting.executeScript({
+      target: {tabId: tab.id, allFrames: true},
+      files: ["deluminate.js"],
+      injectImmediately: true,
+    });
     console.log(`Done injecting JS into tab: ${tabSummary(tab)}`);
+  } catch (err) {
+    // Don't bother logging the expected error in this case.
+    if (tab.url.indexOf('chrome') != 0 && tab.url.indexOf('about') != 0) {
+      console.log('Error injecting JS into tab:', tab.url, err, tabSummary(tab));
+    }
   }
 }
 
@@ -55,10 +59,11 @@ async function injectTabCSS(tab) {
   console.log(`Injecting CSS into tab: ${tabSummary(tab)}`);
   const url = tab.url;
   try {
-    return await chrome.scripting.insertCSS({
+    await chrome.scripting.insertCSS({
       target: {tabId: tab.id, allFrames: true},
       files: ["deluminate.css"],
     });
+    console.log(`Done injecting CSS into tab: ${tabSummary(tab)}`);
   } catch (err) {
     // Don't bother logging the expected error in this case.
     if (url.indexOf('chrome') != 0 && url.indexOf('about') != 0) {
@@ -122,6 +127,7 @@ function toggleSite(url) {
 function messageDispatcher(request, sender, sendResponse) {
   if (request.target === 'offscreen') return;
   if (request['update_tabs']) {
+    console.log("Received update tabs message.");
     updateTabs();
   }
   if (request['toggle_global']) {
@@ -172,7 +178,7 @@ function init() {
 
 
   chrome.storage.onChanged.addListener((changes, area) => {
-    if (area === 'sync') {
+    if (area === 'sync' || area === 'local') {
       refreshStore().then(() => {
         updateTabs();
       });

@@ -62,15 +62,16 @@ export function Site(url) {
   // convert "/path/to/resource.html" to "['path', 'to', 'resource.html']"
   this.page_hierarchy = url_object.pathname.split('/').filter(
       function(x) { return Boolean(x); });
+  this.protocol = url_object.protocol
   this.toString = function() {
-    return url_object.hostname + url_object.pathname;
+    return (url_object.hostname ?? "") + url_object.pathname;
   };
 }
 Site.build = function(domain_hierarchy, page_hierarchy, protocol) {
   page_hierarchy = typeof page_hierarchy !== 'undefined' ? page_hierarchy
     : [];
-  protocol = typeof protocol !== 'undefined' ? protocol : 'http';
-  return new Site(protocol + '://' +
+  protocol = typeof protocol !== 'undefined' ? protocol : 'http:';
+  return new Site(protocol + '//' +
                   domain_hierarchy.slice(0).reverse().join('.') + '/' +
                   page_hierarchy.join('/'))
 }
@@ -203,11 +204,16 @@ export function Settings(defaultFilter, defaultMods) {
   }
 
   this.storage = new Hierarchy();
+  this.fileStorage = new Hierarchy();
 
   this.save = function(site, site_settings) {
     // Coerce site to a proper Site object if it's not one already.
     site = site instanceof Site ? site : Site(site);
     expect_type(site_settings, SiteSettings);
+    if (site.protocol === "file:") {
+      this.fileStorage.set(site.page_hierarchy, site_settings);
+      return;
+    }
     let site_domain = this.storage.get_exact(site.domain_hierarchy);
     if (!(site_domain instanceof Hierarchy)) {
       site_domain = new Hierarchy();
@@ -219,6 +225,10 @@ export function Settings(defaultFilter, defaultMods) {
   this.remove = function(site) {
     // Coerce site to a proper Site object if it's not one already.
     site = site instanceof Site ? site : Site(site);
+    if (site.protocol === "file:") {
+      this.fileStorage.remove(site.page_hierarchy);
+      return;
+    }
     const site_domain = this.storage.get_exact(site.domain_hierarchy);
     if (!(site_domain instanceof Hierarchy)) {
       return;
@@ -229,9 +239,15 @@ export function Settings(defaultFilter, defaultMods) {
   this.match = function(site) {
     // Coerce site to a proper Site object if it's not one already.
     site = site instanceof Site ? site : Site(site);
+    if (site.protocol === "file:") {
+      return Site.build(
+        site.domain_hierarchy,
+        this.fileStorage.getMatch(site.page_hierarchy),
+        "file:",
+      );
+    }
     const closest_path = this.storage.getMatch(site.domain_hierarchy);
     const domain_path = closest_path.length > 0 ? closest_path : site.domain_hierarchy;
-    console.log(`domain_path: ${JSON.stringify(domain_path)}`);
     const site_domain = this.storage.get(site.domain_hierarchy);
     if (site_domain instanceof Hierarchy) {
       return Site.build(
@@ -245,6 +261,10 @@ export function Settings(defaultFilter, defaultMods) {
   this.load = function(site) {
     // Coerce site to a proper Site object if it's not one already.
     site = site instanceof Site ? site : Site(site);
+    if (site.protocol === "file:") {
+      const settings = this.fileStorage.get(site.page_hierarchy) ?? this.site_default();
+      return settings;
+    }
     const site_domain = this.storage.get(site.domain_hierarchy);
     if (site_domain instanceof Hierarchy) {
       return site_domain.get(site.page_hierarchy) ?? this.site_default();
@@ -269,15 +289,36 @@ export function Settings(defaultFilter, defaultMods) {
       const domain_hierarchy = domain_item.address;
       Array.prototype.push.apply(list,
         domain_item.data.dump().map(function(page_item) {
-          const site = domain_hierarchy.length  === 0 ? Site.none
+          const site = domain_hierarchy.length === 0 ? Site.none
             : Site.build(domain_hierarchy, page_item.address);
-          //return { site: site.toString(), data: page_item.data.minimal() };
           const {filter, mods} = page_item.data;
           return [ site.toString(), filter, ...mods ];
         })
       );
     });
     return list;
+  }
+
+  // Serialize local settings in a form that can be efficiently stored with
+  // chrome.storage
+  this.exportLocal = function() {
+    const list = this.fileStorage.dump().map(function(page_item) {
+      const site = Site.build([], page_item.address, "file:");
+      const {filter, mods} = page_item.data;
+
+      return [ "file://" + site.toString(), filter, ...mods ];
+    })
+    return list;
+  }
+
+  this.import = function(settings_list) {
+    settings_list ??= [];
+    settings_list.forEach(([site, filter, ...mods]) => {
+      if (typeof site === 'undefined' || typeof filter === 'undefined') {
+        throw new Error(`Invalid settings list format.`);
+      }
+      this.save(site, new SiteSettings(filter, mods));
+    });
   }
 
   if (typeof defaultFilter != 'undefined') {
@@ -287,13 +328,7 @@ export function Settings(defaultFilter, defaultMods) {
 // Read the serialized settings data
 Settings.import = function(settings_list, defaultFilter, defaultMods) {
   const settings = new Settings(defaultFilter, defaultMods);
-  settings_list ??= [];
-  settings_list.forEach(function([site, filter, ...mods]) {
-    if (typeof site === 'undefined' || typeof filter === 'undefined') {
-      throw new Error(`Invalid settings list format.`);
-    }
-    settings.save(site, new SiteSettings(filter, mods));
-  });
+  settings.import(settings_list);
   if (!settings.site_default()) {
     throw new Error(`Imported data did not include a default. ${JSON.stringify(settings)}`);
   }
