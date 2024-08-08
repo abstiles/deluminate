@@ -72,6 +72,7 @@ function migrateV1toV2(v1) {
   if (toBool(v1?.force_text)) {
     defaultMods.push("forceinput");
   }
+  defaultMods.push("dynamic");
   const settings = new Settings(defaultFilter, defaultMods);
 
   const siteModifiers = JSON.parse(v1?.sitemodifiers ?? "{}");
