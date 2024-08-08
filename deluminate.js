@@ -200,9 +200,11 @@ function deepImageProcessing() {
 let detectAlreadyDarkComplete = false;
 function detectAlreadyDark() {
   if (detectAlreadyDarkComplete) return;
-  if (usesLightTextColor()) {
+  const textColor = classifyTextColor();
+  if (textColor === "light") {
+    // Light text means dark mode... probably.
     document.documentElement.setAttribute('looks-dark', '');
-  } else if (checksPreferredScheme()) {
+  } else if (textColor !== "dark" && checksPreferredScheme()) {
     document.documentElement.setAttribute('looks-dark', '');
   } else {
     document.documentElement.removeAttribute('looks-dark');
@@ -238,7 +240,7 @@ function colorValence(color) {
     ;
 }
 
-function usesLightTextColor() {
+function classifyTextColor() {
   const paras = document.querySelectorAll('p');
   const charTypes = [0, 0, 0];
   let total = 0;
@@ -253,7 +255,10 @@ function usesLightTextColor() {
   }
   // If light text is a supermajority of the text, we'll say this page uses
   // light text overall.
-  return charTypes[2] > charTypes[0] + charTypes[1];
+  return (charTypes[2] > charTypes[0] + charTypes[1]) ? "light"
+    : (charTypes[0] > charTypes[1] + charTypes[2]) ? "dark"
+    : null
+    ;
 }
 
 function checksPreferredScheme() {
