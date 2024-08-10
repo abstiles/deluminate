@@ -157,6 +157,12 @@ export function setSiteSettings(site, siteSettings) {
   return storeSet("sites", storeCache.sites);
 }
 
+export async function delSiteSettings(site) {
+  const {sites} = await chrome.storage.sync.get("sites");
+
+  return await storeSet("sites", sites.filter(siteRow => siteRow[0] !== site));
+}
+
 export async function resetSiteSchemes() {
   await chrome.storage.sync.remove(
     Object.keys(await chrome.storage.sync.get())

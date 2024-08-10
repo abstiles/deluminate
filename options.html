@@ -29,11 +29,29 @@ button {
 button#toggle {
   font-size: 12pt;
 }
+button.delete-button {
+  margin: 0;
+  padding: 0;
+  border: none;
+  cursor: pointer;
+  color: #d54848;
+  font-weight: bold;
+}
 #settings {
   width: 100%;
-  height: 50em;
+  max-height: calc(100vh - 20em);
+  display: grid;
+  row-gap: 5px;
+  column-gap: 1em;
+  grid-template-columns: 1em repeat(3, 1fr);
   overflow: scroll;
   -webkit-box-sizing: border-box;
+}
+#settings > div {
+  display: contents;
+}
+#settings-heading {
+  font-weight: bold;
 }
 label {
   white-space: nowrap;
@@ -58,11 +76,9 @@ label {
   </label>
 </fieldset>
 <h3>Saved Site Customizations</h3>
-<textarea readonly id="settings"></textarea>
+<div id="settings"></div>
 
 <button id="forget">Forget site customizations</button>
-
-<button id="edit-save">Edit site customizations</button>
 
 <hr>
 <a href="https://github.com/abstiles/deluminate/issues/new" id="issues">

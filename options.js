@@ -3,6 +3,7 @@ import {
   syncStore,
   getGlobalSettings,
   setGlobalSetting,
+  delSiteSettings,
   resetSiteSchemes,
 } from './common.js';
 
@@ -37,33 +38,59 @@ function onDetectAnim(evt) {
 }
 
 function loadSettingsDisplay(store) {
-  $('settings').value = JSON.stringify(store, null, 4);
-}
-
-function onEditSave(store) {
-  return () => {
-    const editSaveButton = document.getElementById('edit-save');
-    const settingsText = document.getElementById('settings');
-
-    if (!settingsText.readOnly) {
-      editSaveButton.textContent = 'Edit site customizations';
-      settingsText.readOnly = true;
-      store['siteschemes'] = JSON.stringify(JSON.parse(settingsText.value).schemes);
-      store['sitemodifiers'] = JSON.stringify(JSON.parse(settingsText.value).modifiers);
-    } else {
-      editSaveButton.textContent = 'Save site customizations';
-      settingsText.readOnly = false;
+  function makeTag(tag, ...contents) {
+    const element = document.createElement(tag);
+    for (const child of contents) {
+      console.log(`child: ${child} - ${typeof child}`);
+      try {
+        element.appendChild(
+          typeof child === "string" ? document.createTextNode(child)
+            : child
+        );
+      } catch {
+        console.log(`Bad contents of ${tag}: ${JSON.stringify(contents)}`);
+        console.log(`Bad child type: ${JSON.stringify(child)}`);
+      }
     }
-  };
+    return element;
+  }
+  function makeSiteDiv([url, filter, ...mods]) {
+    const deleteBtn = url ? makeTag("button", "X") : makeTag("span", "");
+    const row = makeTag('div',
+      deleteBtn,
+      makeTag('span', url || "DEFAULT"),
+      makeTag('span', filter),
+      makeTag('span', mods.join(', ')),
+    );
+    if (url) {
+      deleteBtn.className = "delete-button";
+      deleteBtn.onclick = () => {
+        row.parentElement.removeChild(row);
+        delSiteSettings(url);
+      }
+    }
+    return row;
+  }
+  const settingsDiv = $('settings');
+  const heading = makeTag("div",
+    makeTag("span", ""),
+    makeTag("span", "Website"),
+    makeTag("span", "Filter"),
+    makeTag("span", "Options"),
+  );
+  heading.id = "settings-heading";
+  settingsDiv.appendChild(heading);
+  for (const site of store) {
+    settingsDiv.appendChild(makeSiteDiv(site));
+  }
 }
 
 async function init() {
   const store = await syncStore();
   initSettings();
   $('forget').addEventListener('click', onForget, false);
-  $('edit-save').addEventListener('click', onEditSave(store), false);
   $('detect_animation').addEventListener('change', onDetectAnim, false);
-  loadSettingsDisplay(store);
+  loadSettingsDisplay(store.export());
 }
 
 window.addEventListener('load', init, false);
