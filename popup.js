@@ -139,8 +139,9 @@ function onLinkClick() {
       (function () {
           const ln = links[i];
           const location = ln.href;
-          ln.onclick = function () {
-              chrome.tabs.create({active: true, url: location});
+          ln.onclick = function (evt) {
+            chrome.tabs.create({active: true, url: evt.target.href});
+            evt.preventDefault();
           };
       })();
   }
@@ -174,7 +175,16 @@ async function init() {
           $('make_default').style.display = 'none';
           selector = nullSelector;
         } else if (isFileUrl(tab.url)) {
-          $('scheme_title').innerText = 'File color scheme:';
+          chrome.extension.isAllowedFileSchemeAccess().then(isAllowed => {
+            if (isAllowed) {
+              $('scheme_title').innerText = 'File color scheme:';
+            } else {
+              $('scheme_title').innerText = '';
+              $('extension-settings').href = `chrome://extensions/?id=${chrome.runtime.id}`;
+              $('local-files-error').removeAttribute('hidden');
+              $('settings-form').setAttribute('inert', '');
+            }
+          });
           selector = {get_site: () => tab.url};
         } else {
           $('scheme_title').innerHTML = 'Color scheme for ' +

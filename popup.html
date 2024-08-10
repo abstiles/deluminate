@@ -68,6 +68,9 @@ form {
   justify-content: space-evenly;
   row-gap: 5px;
 }
+form[inert] {
+  filter: invert(50%);
+}
 fieldset {
   flex: 1;
   border: 1px solid #EEE;
@@ -76,6 +79,13 @@ fieldset {
   text-align: center;
   padding-top: 1em;
   padding-bottom: 0.5em;
+}
+#local-files-error {
+  text-align: center;
+  padding-bottom: 0.5em;
+}
+#local-files-error[hidden] {
+  display: none;
 }
 input[type="radio"], input[type="checkbox"] {
   margin-left: 0;
@@ -112,7 +122,11 @@ input[type='range'] {
 
 <div id="subcontrols">
   <div id="scheme_title"></div>
-  <form>
+  <div id="local-files-error" hidden>
+    Cannot access local files unless you enable "Allow access to file URLs"
+    on the <a id="extension-settings" href="#">extension settings page</a>.
+  </div>
+  <form id="settings-form">
     <fieldset>
       <legend>Not Inverted</legend>
       <label>
