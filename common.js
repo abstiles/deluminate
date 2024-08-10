@@ -25,13 +25,28 @@ async function migrateFromLocalStorage() {
     } catch {
       // Already created. That's fine, just send the message.
     }
-    const result = await chrome.runtime.sendMessage({
-      target: 'offscreen',
-      action: 'migrate',
-    });
-    if ('localStorage' in result) {
-      Object.assign(storeCache, migrateV1toV2(result.localStorage));
-      settings = Settings.import(storeCache?.sites, DEFAULT_FILTER);
+    const [{value: remoteSettings}, {value: localStorage}] = await Promise
+      .allSettled([
+        chrome.storage.sync.get(),
+        chrome.runtime.sendMessage({target: 'offscreen', action: 'migrate'}),
+    ]);
+    if (remoteSettings) {
+      try {
+        Object.assign(storeCache, remoteSettings);
+        settings = Settings.import(storeCache?.sites, DEFAULT_FILTER);
+      } catch (err) {
+        console.log(`Error loading remote settings: ${JSON.stringify(err)}`);
+      }
+    }
+    if (localStorage) {
+      const {sites, ...otherSettings} = migrateV1toV2(localStorage);
+      // Allow local settings to override remote settings.
+      Object.assign(storeCache, otherSettings);
+      // Merge local site settings with any existing ones.
+      settings.import(sites);
+      storeCache.sites = settings.export();
+      // Publish the merged site settings.
+      await storeSet("sites", storeCache.sites);
       chrome.storage.local.set({migrationComplete: 2});
     }
   })();
@@ -48,7 +63,7 @@ function parseSiteMods(sitemods) {
   } catch { /* Not a string. */ }
   try {
     return Object.keys(sitemods);
-  } catch { /* Not an object */ }
+  } catch { /* Not an object. */ }
   return [];
 }
 
