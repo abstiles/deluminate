@@ -87,6 +87,11 @@ fieldset {
 #local-files-error[hidden] {
   display: none;
 }
+#inversion-options {
+  display: grid;
+  column-gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
 input[type="radio"], input[type="checkbox"] {
   margin-left: 0;
 }
@@ -158,7 +163,7 @@ input[type='range'] {
         Keep Images Normal
       </label>
     </fieldset>
-    <fieldset>
+    <fieldset id="inversion-options">
       <legend>Inversion Options</legend>
       <label>
         <input type="checkbox" id="toggle_contrast">
