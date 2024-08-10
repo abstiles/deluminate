@@ -41,7 +41,6 @@ button.delete-button {
   width: 100%;
   max-height: calc(100vh - 20em);
   display: grid;
-  row-gap: 5px;
   column-gap: 1em;
   grid-template-columns: 1em repeat(3, 1fr);
   overflow: scroll;
@@ -49,6 +48,9 @@ button.delete-button {
 }
 #settings > div {
   display: contents;
+}
+#settings span {
+  line-height: 24px; /* match height of svg */
 }
 #settings-heading {
   font-weight: bold;

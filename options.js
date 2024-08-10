@@ -55,7 +55,9 @@ function loadSettingsDisplay(store) {
     return element;
   }
   function makeSiteDiv([url, filter, ...mods]) {
-    const deleteBtn = url ? makeTag("button", "X") : makeTag("span", "");
+    const deleteIcon = makeTag("img");
+    deleteIcon.src = chrome.runtime.getURL("delete.svg");
+    const deleteBtn = url ? makeTag("button", deleteIcon) : makeTag("span", "");
     const row = makeTag('div',
       deleteBtn,
       makeTag('span', url || "DEFAULT"),

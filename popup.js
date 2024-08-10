@@ -161,6 +161,9 @@ async function init() {
   $('toggle').addEventListener('click', onToggle, false);
   $('make_default').addEventListener('click', onMakeDefault, false);
   $('settings').addEventListener('click', onSettings, false);
+  const settingsIcon = document.createElement('img');
+  settingsIcon.src = chrome.runtime.getURL('settings.svg');
+  $('settings').appendChild(settingsIcon)
   key1 = 'Shift+F11';
   key2 = 'Shift+F12';
 

@@ -17,7 +17,8 @@ MANIFEST := \
 	popup.js \
 	url_selector.css \
 	url_selector.js \
-	utils.js
+	utils.js \
+	*.svg
 
 BUILD_DIR := build
 

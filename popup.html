@@ -118,12 +118,24 @@ input[type='range'] {
   display: flex;
   column-gap: 10px;
 }
+#settings {
+  margin: 10px;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: auto;
+}
 </style>
 <script type="module" src="popup.js"></script>
 </head>
 <body><div>
 
 <button id="toggle"></button>
+<button id="settings"></button>
 
 <div id="subcontrols">
   <div id="scheme_title"></div>
@@ -186,7 +198,6 @@ input[type='range'] {
 
   <div class="button-collection">
     <button id="make_default">Set as default scheme</button>
-    <button id="settings">Deluminate Settings</button>
   </div>
 
 </div>
