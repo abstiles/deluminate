@@ -25,7 +25,7 @@ async function migrateFromLocalStorage() {
     } catch {
       // Already created. That's fine, just send the message.
     }
-    const [{value: remoteSettings}, {value: localStorage}] = await Promise
+    const [{value: remoteSettings}, {value: {localStorage}}] = await Promise
       .allSettled([
         chrome.storage.sync.get(),
         chrome.runtime.sendMessage({target: 'offscreen', action: 'migrate'}),
