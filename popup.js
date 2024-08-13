@@ -169,47 +169,43 @@ async function init() {
 
   await syncStore();
 
-  chrome.windows.getLastFocused({'populate': true}, function(window) {
-    for (let i = 0; i < window.tabs.length; i++) {
-      const tab = window.tabs[i];
-      if (tab.active) {
-        if (isDisallowedUrl(tab.url)) {
-          $('scheme_title').innerText = 'Default color scheme:';
-          $('make_default').style.display = 'none';
-          selector = nullSelector;
-        } else if (isFileUrl(tab.url)) {
-          chrome.extension.isAllowedFileSchemeAccess().then(isAllowed => {
-            if (isAllowed) {
-              $('scheme_title').innerText = 'File color scheme:';
-            } else {
-              $('scheme_title').innerText = '';
-              $('extension-settings').href = `chrome://extensions/?id=${chrome.runtime.id}`;
-              $('local-files-error').removeAttribute('hidden');
-              $('settings-form').setAttribute('inert', '');
-            }
-          });
-          selector = {get_site: () => tab.url};
-        } else {
-          $('scheme_title').innerHTML = 'Color scheme for ' +
-              '<div id="selector"></div>' +
-              '<div class="kb">(Toggle: ' + key2 + ')</div>';
-          selector = new UrlSelector(tab.url);
-          selector.render_to($('selector'));
-          selector.select_site(getMatchingSite(tab.url));
-          $('make_default').style.display = 'block';
-          break;
-        }
+  const window = await chrome.windows.getLastFocused({'populate': true});
+  for (const tab of window.tabs) {
+    if (!tab.active) continue;
+    if (isDisallowedUrl(tab.url)) {
+      $('scheme_title').innerText = 'Default color scheme:';
+      $('make_default').style.display = 'none';
+      selector = nullSelector;
+    } else if (isFileUrl(tab.url)) {
+      const isAllowed = await chrome.extension.isAllowedFileSchemeAccess();
+      if (isAllowed) {
+        $('scheme_title').innerText = 'File color scheme:';
+      } else {
+        $('scheme_title').innerText = '';
+        $('extension-settings').href = `chrome://extensions/?id=${chrome.runtime.id}`;
+        $('local-files-error').removeAttribute('hidden');
+        $('settings-form').setAttribute('inert', '');
       }
+      selector = {get_site: () => tab.url};
+    } else {
+      $('scheme_title').innerHTML = 'Color scheme for ' +
+          '<div id="selector"></div>' +
+          '<div class="kb">(Toggle: ' + key2 + ')</div>';
+      selector = new UrlSelector(tab.url);
+      selector.render_to($('selector'));
+      selector.select_site(getMatchingSite(tab.url));
+      $('make_default').style.display = 'block';
     }
-    const currentSettings = getSiteSettings(selector.get_site());
-    const currentScheme = currentSettings.filter;
-    if (currentScheme.includes('dim')) {
-      const currentDimLevel = currentScheme.replace(/.*(\d+)$/, '$1');
-      $('dim_amount').value = currentDimLevel;
-      $('dim_radio').value = 'dim' + currentDimLevel;
-    }
-    update();
-  });
+    break;
+  }
+  const currentSettings = getSiteSettings(selector.get_site());
+  const currentScheme = currentSettings.filter;
+  if (currentScheme.includes('dim')) {
+    const currentDimLevel = currentScheme.replace(/.*(\d+)$/, '$1');
+    $('dim_amount').value = currentDimLevel;
+    $('dim_radio').value = 'dim' + currentDimLevel;
+  }
+  update();
 }
 
 function onEvent(evt) {
