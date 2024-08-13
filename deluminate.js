@@ -241,7 +241,7 @@ function colorValence(color) {
 }
 
 function classifyTextColor() {
-  const paras = document.querySelectorAll('p');
+  const paras = document.querySelectorAll('p:not(footer *)');
   const charTypes = [0, 0, 0];
   let total = 0;
   for (const p of paras) {
