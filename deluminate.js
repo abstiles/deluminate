@@ -226,32 +226,62 @@ function log() {
   chrome.runtime.sendMessage({'log': msg});
 }
 
+const grayMargin = 64;
+const alphaFactor = (255 + grayMargin) / 255;
 // Cheap and simple calculation to classify colors as light, dark or ambiguous.
 // Return -1 for dark, 0 for gray, 1 for light.
 function colorValence(color) {
   const [r, g, b, a] = colorToRGBA(color);
-  const total = r + g + b;
+  // Simple YIQ luminance calculation, scaled to (255 * 3) for convenience.
+  const lum = ((r*229)+(g*449)+(b*87))/255;
   // Alpha transparency widens the effective gray range from the middle third
-  // (at 100% opaque) to the whole range (at 0%).
-  const grayMin = a, grayMax = (255 * 3) - a;
-  return total < grayMin ? -1
-    : total > grayMax ? 1
+  // (gray margin excluded) at 100% opaque to the whole range at 0% opaque.
+  const alphaRange = a * alphaFactor;
+  const grayMin = alphaRange, grayMax = (255 * 3) - alphaRange;
+  return lum < grayMin ? -1
+    : lum > grayMax ? 1
     : 0
     ;
 }
 
 function classifyTextColor() {
-  const paras = document.querySelectorAll('p:not(footer *)');
+  const paras = new Set(document.querySelectorAll('p:not(footer *)'));
+  // Text with line breaks is *probably* basic writing and not fancy labels.
+  for (const br of document.querySelectorAll('br:not(footer *)')) {
+    paras.add(br.parentElement);
+  }
   const charTypes = [0, 0, 0];
   let total = 0;
   for (const p of paras) {
-    const color = getComputedStyle(p)?.color;
-    if (!color) continue;
+    const {color, display, visibility} = getComputedStyle(p);
+    if (!color || display === "none" || visibility !== "visible") continue;
     const text = p.textContent;
     charTypes[colorValence(color) + 1] += text.length;
-    total += length;
+    total += text.length;
     // Arbitrarily chosen good-enough threshold.
     if (total > 4096) break;
+  }
+
+  // If the previous selectors didn't find much of the page's text, use a
+  // treeWalker.
+  if (total <= 4096
+      && total < (document.documentElement.textContent.length * 0.1)
+  ) {
+    const treeWalker = document.createTreeWalker(
+      document.querySelector("body"),
+      NodeFilter.SHOW_TEXT,
+    );
+
+    while (treeWalker.nextNode()) {
+      const text = treeWalker.currentNode;
+      const elem = text.parentElement;
+      const {color, display, visibility} = getComputedStyle(elem);
+      if (!color || display === "none" || visibility !== "visible") continue;
+      charTypes[colorValence(color) + 1] += text.length;
+      total += text.length;
+      // Arbitrarily chosen good-enough threshold.
+      if (total > 4096) break;
+    }
   }
   // If light text is a supermajority of the text, we'll say this page uses
   // light text overall.
