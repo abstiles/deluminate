@@ -3,22 +3,39 @@ let scheme_prefix;
 let backdrop;
 let animGifHandler;
 let newImageHandler;
+let rootWatcher;
+const rootAttribute = "hc";
 
 function onExtensionMessage(request, sender, sendResponse) {
   if (chrome.runtime.lastError) {
     console.log(`Failed to communicate init request`);
   }
   if (request.target === 'offscreen') return;
+  if (request.pingTab) return;
   if (request['manual_css']) {
     addCSSLink();
     return;
   }
   if (request.enabled && request.scheme != 'normal') {
     const hc = scheme_prefix + request.scheme + ' ' + request.modifiers.join(' ');
-    document.documentElement.setAttribute('hc', hc);
+    document.documentElement.setAttribute(rootAttribute, hc);
+    if (rootWatcher) {
+      rootWatcher.disconnect();
+    }
+    rootWatcher = new MutationObserver((mutationList) => {
+      for (const mutation of mutationList) {
+        if (mutation.type === "attributes" && mutation.attributeName === rootAttribute) {
+          const newValue = document.documentElement.getAttribute(rootAttribute);
+          if (newValue === null) {
+            document.documentElement.setAttribute(rootAttribute, hc);
+          }
+        }
+      }
+    });
+    rootWatcher.observe(document.documentElement, {attributes: true});
     setupFullscreenWorkaround();
   } else {
-    document.documentElement.removeAttribute('hc');
+    document.documentElement.removeAttribute(rootAttribute);
     removeFullscreenWorkaround();
   }
   // Enable advanced image recognition on invert modes except "invert all
@@ -45,12 +62,14 @@ function onExtensionMessage(request, sender, sendResponse) {
   }
   if (request.enabled && request.settings.detect_animation === 'enabled' &&
       request.scheme == 'delumine-smart') {
-    Array.prototype.forEach.call(
-      document.querySelectorAll('img[src*=".gif"], img[src*=".GIF"]'),
-      detectAnimatedGif);
-    animGifHandler.observe(document.documentElement, {
-      childList: true,
-      subtree: true
+    afterDomLoaded(() => {
+      Array.prototype.forEach.call(
+        document.querySelectorAll('img[src*=".gif"], img[src*=".GIF"]'),
+        detectAnimatedGif);
+      animGifHandler.observe(document.documentElement, {
+        childList: true,
+        subtree: true
+      });
     });
   } else {
     animGifHandler.disconnect();
@@ -62,7 +81,7 @@ function onExtensionMessage(request, sender, sendResponse) {
 
 function currentPageSettings() {
   return new Set(
-    (document.documentElement.getAttribute("hc") ?? "")
+    (document.documentElement.getAttribute(rootAttribute) ?? "")
       .split(" ").slice(1)
   );
 }

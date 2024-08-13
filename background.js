@@ -164,8 +164,14 @@ function init() {
 
   chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     if (changeInfo.url || changeInfo.status === "loading") {
-      console.log(`Tab updated, reinjecting ${tab.url}: ${JSON.stringify(changeInfo)}`);
-      injectTab(tab);
+      chrome.tabs.sendMessage(tabId, {ping: true}, {}, () => {
+        // If it bombs out, unable to receive a message, then the JS needs to
+        // be reinjected.
+        if (chrome.runtime.lastError) {
+          console.log(`Tab updated, reinjecting ${tab.url}: ${JSON.stringify(changeInfo)}`);
+          injectTab(tab);
+        }
+      });
     }
   });
   /* Ensure tab CSS is re-inserted into replaced tabs. */
