@@ -273,11 +273,14 @@ function classifyTextColor() {
   for (const br of document.querySelectorAll('br:not(footer *)')) {
     paras.add(br.parentElement);
   }
+  const windowHeight = window.innerHeight;
   const charTypes = [0, 0, 0];
   let total = 0;
   for (const p of paras) {
     const {color, display, visibility} = getComputedStyle(p);
     if (!color || display === "none" || visibility !== "visible") continue;
+    const {width = 0, height = 0, top = 0} = p.getBoundingClientRect();
+    if (width * height <= 0 || top > windowHeight) continue;
     const text = p.textContent;
     charTypes[colorValence(color) + 1] += text.length;
     total += text.length;
@@ -300,6 +303,8 @@ function classifyTextColor() {
       const elem = text.parentElement;
       const {color, display, visibility} = getComputedStyle(elem);
       if (!color || display === "none" || visibility !== "visible") continue;
+      const {width = 0, height = 0, top = 0} = elem.getBoundingClientRect();
+      if (width * height <= 0 || top > windowHeight) continue;
       charTypes[colorValence(color) + 1] += text.length;
       total += text.length;
       // Arbitrarily chosen good-enough threshold.
