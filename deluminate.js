@@ -59,6 +59,10 @@ function onExtensionMessage(request, sender, sendResponse) {
       detectAlreadyDark();
       backdrop.style.display = "none";
     });
+  } else if (request.enabled) {
+    afterDomLoaded(() => {
+      backdrop.style.display = "none";
+    });
   }
   if (request.enabled && request.settings.detect_animation === 'enabled' &&
       request.scheme == 'delumine-smart') {
