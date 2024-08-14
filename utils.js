@@ -55,7 +55,7 @@ export function Site(url) {
   }
 
   const url_object = toURL(url)
-  const host_components = url_object.hostname.split('.');
+  const host_components = url_object.host.split('.');
   // convert "sub2.sub1.example.com" to "['example.com', 'sub1', 'sub2']"
   this.domain_hierarchy = [host_components.slice(-2).join('.')].concat(
       host_components.slice(0, -2).reverse());
@@ -64,7 +64,7 @@ export function Site(url) {
       function(x) { return Boolean(x); });
   this.protocol = url_object.protocol
   this.toString = function() {
-    return (url_object.hostname ?? "") + url_object.pathname;
+    return (url_object.host ?? "") + url_object.pathname;
   };
 }
 Site.build = function(domain_hierarchy, page_hierarchy, protocol) {
