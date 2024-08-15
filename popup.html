@@ -178,20 +178,24 @@ input[type='range'] {
     <fieldset id="inversion-options">
       <legend>Inversion Options</legend>
       <label>
-        <input type="checkbox" id="toggle_contrast">
+        <input type="checkbox" id="low_contrast">
         Enable Low Contrast
       </label>
       <label>
-        <input type="checkbox" id="force_textfield">
+        <input type="checkbox" id="forceinput">
         Aggressively Invert Text Input
       </label>
       <label>
-        <input type="checkbox" id="kill_bgfield">
+        <input type="checkbox" id="killbg">
         Kill Backgrounds
       </label>
       <label>
         <input type="checkbox" id="dynamic">
         Avoid Inverting Dark Sites
+      </label>
+      <label>
+        <input type="checkbox" id="ignorebg">
+        Leave CSS Backgrounds Inverted
       </label>
     </fieldset>
   </form>

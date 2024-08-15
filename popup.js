@@ -45,10 +45,10 @@ function update() {
 
   const currentSettings = getSiteSettings(selector.get_site());
   setRadio('scheme', currentSettings.filter);
-  $('toggle_contrast').checked = currentSettings.mods.has("low_contrast");
-  $('force_textfield').checked = currentSettings.mods.has("forceinput");
-  $('kill_bgfield').checked = currentSettings.mods.has("killbg");
-  $('dynamic').checked = currentSettings.mods.has("dynamic");
+  const optChecks = document.querySelectorAll('#inversion-options input');
+  for (const input of optChecks) {
+    input.checked = currentSettings.mods.has(input.id);
+  }
   if (selector.get_site()) {
     $('make_default').disabled = !changedFromDefault();
   }
@@ -72,38 +72,11 @@ async function onRadioChange(name, value) {
   update();
 }
 
-async function onLowContrast(evt) {
+async function onOptionToggle(evt) {
   if (evt.target.checked) {
-    await addSiteModifier(selector.get_site(), 'low_contrast');
+    await addSiteModifier(selector.get_site(), evt.target.id);
   } else {
-    await delSiteModifier(selector.get_site(), 'low_contrast');
-  }
-  update();
-}
-
-async function onForceText(evt) {
-  if (evt.target.checked) {
-    await addSiteModifier(selector.get_site(), 'forceinput');
-  } else {
-    await delSiteModifier(selector.get_site(), 'forceinput');
-  }
-  update();
-}
-
-async function onKillBackground(evt) {
-  if (evt.target.checked) {
-    await addSiteModifier(selector.get_site(), 'killbg');
-  } else {
-    await delSiteModifier(selector.get_site(), 'killbg');
-  }
-  update();
-}
-
-async function onDynamic(evt) {
-  if (evt.target.checked) {
-    await addSiteModifier(selector.get_site(), 'dynamic');
-  } else {
-    await delSiteModifier(selector.get_site(), 'dynamic');
+    await delSiteModifier(selector.get_site(), evt.target.id);
   }
   update();
 }
@@ -153,10 +126,10 @@ function onSettings() {
 
 async function init() {
   addRadioListeners('scheme');
-  $('toggle_contrast').addEventListener('change', onLowContrast, false);
-  $('force_textfield').addEventListener('change', onForceText, false);
-  $('kill_bgfield').addEventListener('change', onKillBackground, false);
-  $('dynamic').addEventListener('change', onDynamic, false);
+  const optChecks = document.querySelectorAll('#inversion-options input');
+  for (const input of optChecks) {
+    input.addEventListener('change', onOptionToggle, false);
+  }
   $('dim_amount').addEventListener('input', onDimLevel, false);
   $('toggle').addEventListener('click', onToggle, false);
   $('make_default').addEventListener('click', onMakeDefault, false);

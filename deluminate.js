@@ -42,14 +42,24 @@ function onExtensionMessage(request, sender, sendResponse) {
   // images" mode.
   if (request.enabled
       && request.scheme.indexOf("delumine") >= 0
-      && request.scheme.indexOf("delumine-all") < 0) {
-    afterDomLoaded(deepImageProcessing);
+      && request.scheme.indexOf("delumine-all") < 0
+      && request.modifiers.indexOf("ignorebg") < 0
+  ) {
+    afterDomLoaded(restartDeepImageProcessing);
     newImageHandler.observe(document.documentElement, {
       childList: true,
       subtree: true
     });
   } else {
     newImageHandler.disconnect();
+  }
+  if (request.modifiers.indexOf("ignorebg") >= 0) {
+    newImageHandler.disconnect();
+    afterDomLoaded(() => {
+      for (const elem of document.querySelectorAll('[deluminate_imageType]')) {
+        elem.removeAttribute('deluminate_imageType');
+      }
+    });
   }
   if (request.enabled
       && request.scheme.indexOf("delumine") >= 0
@@ -218,6 +228,11 @@ function deepImageProcessing() {
     document.querySelectorAll('body *:not([style*="url"])'),
     markCssImages);
   deepImageProcessingComplete = true;
+}
+
+function restartDeepImageProcessing() {
+  deepImageProcessingComplete = false;
+  deepImageProcessing();
 }
 
 let detectAlreadyDarkComplete = false;

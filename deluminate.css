@@ -5,7 +5,10 @@
 :where(:root[hc^="delumine"]) {
   background-color: white;
 }
-:where(:root[hc^="noinvert"]) {
+:where(:root[hc^="noinvert"]:not([hc*="kill_background"])) {
+  background-color: white;
+}
+:where(:root[hc^="noinvert"][hc*="kill_background"]) {
   background-color: black;
 }
 

@@ -353,6 +353,7 @@ export const Modifier = Object.freeze({
   killbg: 'kill_background',
   forceinput: 'force_text',
   dynamic: 'dynamic',
+  ignorebg: 'ignorebg',
 });
 
 export function SiteSettings(filter, mods) {
