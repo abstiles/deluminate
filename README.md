@@ -23,10 +23,9 @@ Details
 
 Invert the brightness of the web without changing the colors! Useful as a night
 mode to darken most bright web sites (like Google), or just for making the web
-soothing black instead of glaring white. Similar to the "High Contrast"
-extension by Google, but tries not to ruin images by blowing out the contrast or
-changing the colors. It also offers a low-contrast mode and three strategies
-for dealing with images, configurable on a per-domain basis!
+soothing black instead of glaring white. Tries not to ruin images by blowing
+out the contrast or changing the colors. It also offers a low-contrast mode and
+three strategies for dealing with images, configurable on a per-site basis!
 
 ### Invert Everything ###
 In this mode, the luminance is inverted on everything, including all images.
@@ -38,7 +37,7 @@ PNGs for photos).
 
 ### Smart Invert Images ###
 The default--this mode tries to intelligently choose whether images should be
-inverted or not based on the following criteria:
+inverted or not based on criteria like the following:
 
  * Avoid inverting videos.
  * Since PNGs and GIFs are often used as stylistic elements and logos, they are
