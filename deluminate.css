@@ -126,7 +126,7 @@ video) iframe {
 html[hc*="delumine-smart"]:not([hc*="dynamic"][looks-dark]) body :-webkit-any(
 	/* Leave PNG and GIF format images inverted, since they usually are
 	 * identifiable even when inverted. */
-	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]):not([src^="data:image"]):not([src^="blob:"]),
+	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]):not([src^="data:image"]):not([src^="blob:"]):not([aria-hidden="true"][alt]:not([alt=""])),
 	[itemprop="photo"],
 	[itemprop="image"],
 	[role="img"],
@@ -145,13 +145,13 @@ html[hc*="delumine-smart"]:not([hc*="dynamic"][looks-dark]) body :-webkit-any(
 	canvas:not([src^="data:image/png;base64"]),
 	embed:not([type$="pdf"]),
 	object,
-	video):not([aria-hidden="true"]) {
+	video) {
   filter: hue-rotate(180deg) invert(100%);
 }
 /* Avoid performing the uninversion process on anything that is a descendant of
  * something uninverted. */
 html[hc*="delumine-smart"]:not([hc*="dynamic"][looks-dark]) body :-webkit-any(
-	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]):not([src^="data:image"]):not([src^="blob:"]),
+	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]):not([src^="data:image"]):not([src^="blob:"]):not([aria-hidden="true"][alt]:not([alt=""])),
 	[itemprop="photo"],
 	[itemprop="image"],
 	[role="img"],
@@ -168,8 +168,8 @@ html[hc*="delumine-smart"]:not([hc*="dynamic"][looks-dark]) body :-webkit-any(
 	canvas:not([src^="data:image/png;base64"]),
 	embed:not([type$="pdf"]),
 	object,
-	video):not([aria-hidden="true"]) :-webkit-any(
-	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]):not([src^="data:image"]):not([src^="blob:"]),
+	video) :-webkit-any(
+	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]):not([src^="data:image"]):not([src^="blob:"]):not([aria-hidden="true"][alt]:not([alt=""])),
 	[itemprop="photo"],
 	[itemprop="image"],
 	[role="img"],
@@ -186,12 +186,12 @@ html[hc*="delumine-smart"]:not([hc*="dynamic"][looks-dark]) body :-webkit-any(
 	canvas:not([src^="data:image/png;base64"]),
 	embed:not([type$="pdf"]),
 	object,
-	video):not([aria-hidden="true"]) {
+	video) {
   filter: none;
 }
 /* Reinvert iframes inside tags with background-images specified. */
 html[hc*="delumine-smart"]:not([hc*="dynamic"][looks-dark]) body :-webkit-any(
-	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]):not([src^="data:image"]):not([src^="blob:"]),
+	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]):not([src^="data:image"]):not([src^="blob:"]):not([aria-hidden="true"][alt]:not([alt=""])),
 	[itemprop="photo"],
 	[itemprop="image"],
 	[role="img"],
@@ -208,7 +208,7 @@ html[hc*="delumine-smart"]:not([hc*="dynamic"][looks-dark]) body :-webkit-any(
 	canvas:not([src^="data:image/png;base64"]),
 	embed:not([type$="pdf"]),
 	object,
-	video):not([aria-hidden="true"]) iframe {
+	video) iframe {
   filter: hue-rotate(180deg) invert(100%);
 }
 
