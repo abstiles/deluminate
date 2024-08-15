@@ -23,6 +23,7 @@ function onExtensionMessage(request, sender, sendResponse) {
     const hc = scheme_prefix + request.scheme + ' ' + request.modifiers.join(' ');
     document.documentElement.setAttribute(rootAttribute, hc);
     rootWatcher = new MutationObserver((mutationList) => {
+      if (checkDisconnected()) return;
       for (const mutation of mutationList) {
         if (mutation.type === "attributes" && mutation.attributeName === rootAttribute) {
           const newValue = document.documentElement.getAttribute(rootAttribute);
@@ -377,6 +378,7 @@ function init() {
   document.addEventListener('keydown', onEvent, false);
 
   animGifHandler = new MutationObserver(function(mutations) {
+    if (checkDisconnected()) return;
     for(let i=0; i<mutations.length; ++i) {
       for(let j=0; j<mutations[i].addedNodes.length; ++j) {
         const newTag = mutations[i].addedNodes[j];
@@ -407,11 +409,11 @@ function init() {
 }
 
 function unloadAll() {
-  if (animGifHandler?.disconnect) {
-    animGifHandler.disconnect();
-  }
-  if (newImageHandler?.disconnect) {
-    newImageHandler.disconnect();
+  const watchers = [animGifHandler, newImageHandler, rootWatcher];
+  for (const watcher of watchers) {
+    if (watcher?.disconnect) {
+      watcher.disconnect();
+    }
   }
   document.removeEventListener('keydown', onEvent, false);
 }
