@@ -16,12 +16,12 @@ function onExtensionMessage(request, sender, sendResponse) {
     addCSSLink();
     return;
   }
+  if (rootWatcher) {
+    rootWatcher.disconnect();
+  }
   if (request.enabled && request.scheme != 'normal') {
     const hc = scheme_prefix + request.scheme + ' ' + request.modifiers.join(' ');
     document.documentElement.setAttribute(rootAttribute, hc);
-    if (rootWatcher) {
-      rootWatcher.disconnect();
-    }
     rootWatcher = new MutationObserver((mutationList) => {
       for (const mutation of mutationList) {
         if (mutation.type === "attributes" && mutation.attributeName === rootAttribute) {

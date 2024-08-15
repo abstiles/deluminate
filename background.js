@@ -164,7 +164,7 @@ function init() {
 
   chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     if (changeInfo.url || changeInfo.status === "loading") {
-      chrome.tabs.sendMessage(tabId, {ping: true}, {}, () => {
+      chrome.tabs.sendMessage(tabId, {pingTab: true}, {}, () => {
         // If it bombs out, unable to receive a message, then the JS needs to
         // be reinjected.
         if (chrome.runtime.lastError) {
