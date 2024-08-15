@@ -195,6 +195,12 @@ function markCssImages(tag) {
   } else if (containsAny(bgImage,
       ['data:image/jpeg', '.jpg', '.JPG', '.jpeg', '.JPEG'])) {
     imageType = 'jpg';
+  } else if (containsAny(bgImage,
+      ['data:image/svg', '.svg', '.SVG'])) {
+    imageType = 'svg';
+  } else if (containsAny(bgImage,
+      ['data:image/webp', '.webp'])) {
+    imageType = 'webp';
   } else if (containsAny(bgImage, ['url', 'data:image'])) {
     imageType = 'unknown';
   }

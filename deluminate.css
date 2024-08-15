@@ -129,7 +129,7 @@ video) iframe {
 html[hc*="delumine-smart"]:not([hc*="dynamic"][looks-dark]) body :-webkit-any(
 	/* Leave PNG and GIF format images inverted, since they usually are
 	 * identifiable even when inverted. */
-	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]):not([src^="data:image"]):not([src^="blob:"]):not([aria-hidden="true"][alt]:not([alt=""])),
+	img:not([src$=".png"]):not([src$=".gif"]):not([src$=".PNG"]):not([src$=".GIF"]):not([src$=".svg"]):not([src$=".SVG"]):not([src^="data:image"]):not([src^="blob:"]):not([aria-hidden="true"][alt]:not([alt=""])),
 	[itemprop="photo"],
 	[itemprop="image"],
 	[role="img"],
@@ -137,6 +137,7 @@ html[hc*="delumine-smart"]:not([hc*="dynamic"][looks-dark]) body :-webkit-any(
 	[data-canonical-src],
 	[src^="data:image/jpeg"],
 	[deluminate_imageType="jpg"],
+	[deluminate_imageType="webp"],
 	[deluminate_imageType="animated gif"],
 	[style*=".jpg"],
 	[style*=".JPG"],
@@ -145,7 +146,6 @@ html[hc*="delumine-smart"]:not([hc*="dynamic"][looks-dark]) body :-webkit-any(
 	[style*=".webp"],
 	[style*=".WEBP"],
 	/* It's usually not desireable to invert these tags. */
-	canvas:not([src^="data:image/png;base64"]),
 	embed:not([type$="pdf"]),
 	object,
 	video) {
@@ -162,13 +162,13 @@ html[hc*="delumine-smart"]:not([hc*="dynamic"][looks-dark]) body :-webkit-any(
 	[data-canonical-src],
 	[src^="data:image/jpeg"],
 	[deluminate_imageType="jpg"],
+	[deluminate_imageType="webp"],
 	[style*=".jpg"],
 	[style*=".JPG"],
 	[style*=".jpeg"],
 	[style*=".JPEG"],
 	[style*=".webp"],
 	[style*=".WEBP"],
-	canvas:not([src^="data:image/png;base64"]),
 	embed:not([type$="pdf"]),
 	object,
 	video) :-webkit-any(
@@ -180,13 +180,13 @@ html[hc*="delumine-smart"]:not([hc*="dynamic"][looks-dark]) body :-webkit-any(
 	[data-canonical-src],
 	[src^="data:image/jpeg"],
 	[deluminate_imageType="jpg"],
+	[deluminate_imageType="webp"],
 	[style*=".jpg"],
 	[style*=".JPG"],
 	[style*=".jpeg"],
 	[style*=".JPEG"],
 	[style*=".webp"],
 	[style*=".WEBP"],
-	canvas:not([src^="data:image/png;base64"]),
 	embed:not([type$="pdf"]),
 	object,
 	video) {
@@ -202,13 +202,13 @@ html[hc*="delumine-smart"]:not([hc*="dynamic"][looks-dark]) body :-webkit-any(
 	[data-canonical-src],
 	[src^="data:image/jpeg"],
 	[deluminate_imageType="jpg"],
+	[deluminate_imageType="webp"],
 	[style*=".jpg"],
 	[style*=".JPG"],
 	[style*=".jpeg"],
 	[style*=".JPEG"],
 	[style*=".webp"],
 	[style*=".WEBP"],
-	canvas:not([src^="data:image/png;base64"]),
 	embed:not([type$="pdf"]),
 	object,
 	video) iframe {
@@ -228,10 +228,13 @@ html[hc*="delumine"][hc*="force_text"] input[type="text"] {
 html[hc*="delumine-smart"][hc*="force_text"] input[type="text"]:-webkit-any(
 	[src^="data:image/jpeg"],
 	[deluminate_imageType="jpg"],
+	[deluminate_imageType="webp"],
 	[style*=".jpg"],
 	[style*=".JPG"],
 	[style*=".jpeg"],
-	[style*=".JPEG"]) {
+	[style*=".JPEG"],
+	[style*=".webp"],
+	[style*=".WEBP"]) {
   background-image: none !important;
   background-color: black !important;
   color: white !important;
