@@ -1,6 +1,7 @@
 import UrlSelector from './url_selector.js';
 import {
   $,
+  _,
   syncStore,
   getEnabled,
   setEnabled,
@@ -16,8 +17,8 @@ import {
 
 const nullSelector = {get_site: () => null,}
 let selector;
-let key1;
-let key2;
+const key1 = 'Shift+F11';
+const key2 = 'Shift+F12';
 
 function setRadio(name, value) {
   const radios = document.querySelectorAll('input[name="' + name + '"]');
@@ -34,12 +35,16 @@ function update() {
   document.body.className = getEnabled() ? '' : 'disabled';
 
   if (getEnabled()) {
-    $('toggle').innerHTML = 'Deluminate is Enabled ' +
-                            '<span class="kb">(' + key1 + ')</span>';
+    $('toggle').replaceChildren(
+      _('Deluminate is Enabled '),
+      _({class: "kb"}, `(${key1})`),
+    );
     $('subcontrols').style.display = 'block';
   } else {
-    $('toggle').innerHTML = 'Deluminate is Disabled ' +
-                            '<span class="kb">(' + key1 + ')</span>';
+    $('toggle').replaceChildren(
+      _('Deluminate is Disabled '),
+      _({class: "kb"}, `(${key1})`),
+    );
     $('subcontrols').style.display = 'none';
   }
 
@@ -137,8 +142,6 @@ async function init() {
   const settingsIcon = document.createElement('img');
   settingsIcon.src = chrome.runtime.getURL('settings.svg');
   $('settings').appendChild(settingsIcon)
-  key1 = 'Shift+F11';
-  key2 = 'Shift+F12';
 
   await syncStore();
 
@@ -161,9 +164,11 @@ async function init() {
       }
       selector = {get_site: () => tab.url};
     } else {
-      $('scheme_title').innerHTML = 'Color scheme for ' +
-          '<div id="selector"></div>' +
-          '<div class="kb">(Toggle: ' + key2 + ')</div>';
+      $('scheme_title').replaceChildren(
+        _('Color scheme for '),
+        _({tag: "div", id: "selector"}),
+        _({tag: "div", class: "kb"}, `(Toggle: ${key2})`),
+      );
       selector = new UrlSelector(tab.url);
       selector.render_to($('selector'));
       selector.select_site(getMatchingSite(tab.url));

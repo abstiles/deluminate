@@ -1,6 +1,6 @@
 {
    "background": {
-      "service_worker": "background.js",
+      "scripts": ["background.js"],
       "type": "module"
    },
    "action": {
@@ -25,7 +25,7 @@
    "name": "Deluminate",
    "manifest_version": 3,
    "options_page": "options.html",
-   "permissions": [ "tabs", "offscreen", "storage", "scripting" ],
+   "permissions": [ "tabs", "storage", "scripting" ],
    "host_permissions": [ "<all_urls>" ],
    "web_accessible_resources": [
        {
@@ -33,5 +33,11 @@
            "matches": [ "<all_urls>" ]
        }
    ],
+   "browser_specific_settings": {
+     "gecko": {
+       "id": "firefox@deluminate.com",
+       "strict_min_version": "127.0"
+     }
+   },
    "version": "1.0.0"
 }

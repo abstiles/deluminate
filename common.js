@@ -113,7 +113,7 @@ function migrateV1toV2(v1) {
 }
 
 export async function syncStore() {
-  await migrateFromLocalStorage();
+  // await migrateFromLocalStorage();
   return await refreshStore();
 }
 
@@ -237,4 +237,31 @@ export function isDisallowedUrl(url) {
       return true;
   }
   return false;
+}
+
+export function _(opts, ...children) {
+  if (typeof opts === "string") {
+    return document.createTextNode([opts, ...children].join(""));
+  }
+
+  const {tag = "span", class: className, id} = opts;
+  const element = document.createElement(tag);
+  if (className) {
+    element.className = className;
+  }
+  if (id) {
+    element.id = id;
+  }
+
+  for (const child of children) {
+    try {
+      element.appendChild(
+        typeof child === "string" ? document.createTextNode(child)
+          : child
+      );
+    } catch {
+      console.log(`Bad child type: ${JSON.stringify(child)}`);
+    }
+  }
+  return element;
 }
