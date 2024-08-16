@@ -228,6 +228,43 @@ function detectAnimatedGif(tag) {
     });
 }
 
+function getPixels2d(canvas) {
+  const context = canvas.getContext('2d');
+  if (!context) return null;
+  return ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+}
+
+async function getPixelsWebGL(canvas) {
+  const context = canvas.getContext("webgl2") || canvas.getContext("webgl");
+  if (!context) return null;
+  const pixels = new Uint8ClampedArray(context.drawingBufferWidth * context.drawingBufferHeight * 4);
+  await new Promise(resolve => requestAnimationFrame(resolve));
+  context.readPixels(0, 0, context.drawingBufferWidth,
+    context.drawingBufferHeight, context.RGBA, context.UNSIGNED_BYTE,
+    pixels,
+  );
+  return pixels;
+}
+
+async function classifyCanvasColor(canvas) {
+  const pixels = canvas.getContext("2d") ? getPixels2d(canvas)
+    : canvas.getContext('webgl2') ? await getPixelsWebGL(canvas)
+    : canvas.getContext('webgl') ? await getPixelsWebGL(canvas)
+    : null
+    ;
+  if (!pixels) return null;
+
+  const pixelTypes = [0, 0, 0];
+  for (let i = 0; i < pixels.length - 3; i += 4) {
+    const pixelType = colorValenceRaw(pixels[i], pixels[i+1], pixels[i+2], pixels[i+3]);
+    pixelTypes[pixelType + 1]++;
+  }
+  return (pixelTypes[2] > pixelTypes[0] + pixelTypes[1]) ? "light"
+    : (pixelTypes[0] > pixelTypes[1] + pixelTypes[2]) ? "dark"
+    : null
+    ;
+}
+
 let deepImageProcessingComplete = false;
 function deepImageProcessing() {
   if (deepImageProcessingComplete) return;
@@ -276,7 +313,10 @@ const alphaFactor = (255 + grayMargin) / 255;
 // Cheap and simple calculation to classify colors as light, dark or ambiguous.
 // Return -1 for dark, 0 for gray, 1 for light.
 function colorValence(color) {
-  const [r, g, b, a] = colorToRGBA(color);
+  return colorValenceRaw(...colorToRGBA(color));
+}
+
+function colorValenceRaw(r, g, b, a) {
   // Simple YIQ luminance calculation, scaled to (255 * 3) for convenience.
   const lum = ((r*229)+(g*449)+(b*87))/255;
   // Alpha transparency widens the effective gray range from the middle third
