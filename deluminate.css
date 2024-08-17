@@ -22,14 +22,14 @@ html[hc^="delumine"] {
 html[hc^="delumine"][hc*="dynamic"][looks-dark] {
   filter: none;
 }
-html[hc^="delumine"][hc*="kill_background"],
-html[hc^="delumine"][hc*="kill_background"] body {
+html[hc^="delumine"][hc*="kill_background"]:not([hc*="dynamic"][looks-dark]),
+html[hc^="delumine"][hc*="kill_background"]:not([hc*="dynamic"][looks-dark]) body {
   background-image: none !important;
   background-color: #FFF !important;
   color: #000 !important;
 }
-html[hc^="delumine"][hc*="kill_background"]:not([looks-dark]),
-html[hc^="delumine"][hc*="kill_background"]:not([looks-dark]) body,
+html[hc^="delumine"][hc*="kill_background"][hc*="dynamic"][looks-dark],
+html[hc^="delumine"][hc*="kill_background"][hc*="dynamic"][looks-dark] body,
 html[hc^="noinvert"][hc*="kill_background"],
 html[hc^="noinvert"][hc*="kill_background"] body {
   background-image: none !important;
