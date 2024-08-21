@@ -103,7 +103,7 @@ function migrateV1toV2(v1) {
         "low-contrast": "low_contrast",
         "kill_background": "killbg",
         "force_text": "forceinput",
-      })[mod]),
+      })[mod]).filter(Boolean),
     );
     settings.save(domain, siteSettings);
   }
@@ -135,7 +135,7 @@ export function $(id) {
 }
 
 export function getEnabled() {
-  return storeCache['enabled'];
+  return storeCache?.enabled ?? true;
 }
 
 export function setEnabled(enabled) {

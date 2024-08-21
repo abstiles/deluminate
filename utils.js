@@ -317,7 +317,11 @@ export function Settings(defaultFilter, defaultMods) {
       if (typeof site === 'undefined' || typeof filter === 'undefined') {
         throw new Error(`Invalid settings list format.`);
       }
-      this.save(site, new SiteSettings(filter, mods));
+      try {
+        this.save(site, new SiteSettings(filter, mods));
+      } catch (err) {
+        console.log(err);
+      }
     });
   }
 
