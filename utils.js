@@ -367,7 +367,7 @@ export function SiteSettings(filter, mods) {
   if (typeof filter === 'undefined') {
     throw new NotEnoughArgumentsError('filter object is required');
   }
-  mods = typeof mods !== 'undefined' ? mods : [];
+  mods = typeof mods !== 'undefined' ? [...mods] : [];
   // Just verify that the arguments represent actual things
   get(Filter, filter);
   for (const mod of mods) {

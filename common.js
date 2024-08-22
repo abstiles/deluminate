@@ -1,5 +1,9 @@
 import {Settings, SiteSettings} from "./utils.js";
 
+export const api = typeof chrome !== "undefined" ? chrome
+  : typeof browser !== "undefined" ? browser
+  : {};
+
 export const DEFAULT_SCHEME = "delumine-smart";
 const DEFAULT_FILTER = DEFAULT_SCHEME.split("-").slice(1).join("-");
 const storeCache = {};
@@ -7,7 +11,7 @@ let settings = new Settings(DEFAULT_FILTER);
 
 let migrationTask;
 async function migrateFromLocalStorage() {
-  const {migrationComplete} = await chrome.storage.local.get(['migrationComplete']);
+  const {migrationComplete} = await api.storage.local.get(['migrationComplete']);
   if (migrationComplete >= 2) {
     return;
   }
@@ -27,7 +31,7 @@ async function migrateFromLocalStorage() {
     }
     const [{value: remoteSettings}, {value: {localStorage}}] = await Promise
       .allSettled([
-        chrome.storage.sync.get(),
+        api.storage.sync.get(),
         chrome.runtime.sendMessage({target: 'offscreen', action: 'migrate'}),
     ]);
     if (remoteSettings) {
@@ -47,7 +51,7 @@ async function migrateFromLocalStorage() {
       storeCache.sites = settings.export();
       // Publish the merged site settings.
       await storeSet("sites", storeCache.sites);
-      chrome.storage.local.set({migrationComplete: 2});
+      api.storage.local.set({migrationComplete: 2});
     }
   })();
   await migrationTask;
@@ -67,8 +71,9 @@ function parseSiteMods(sitemods) {
   return [];
 }
 
+const toBool = (str) => str !== "false" && Boolean(str);
+
 function migrateV1toV2(v1) {
-  const toBool = (str) => str !== "false" && Boolean(str);
   const v2 = {version: 2, enabled: toBool(v1?.enabled ?? true)};
   const defaultFilter = (v1?.scheme ?? DEFAULT_SCHEME)
     .split("-").slice(1).join("-") || "normal"
@@ -118,16 +123,16 @@ export async function syncStore() {
 }
 
 export async function refreshStore() {
-  const items = await chrome.storage.sync.get();
+  const items = await api.storage.sync.get();
   Object.assign(storeCache, items);
   settings = Settings.import(storeCache?.sites, DEFAULT_FILTER);
-  settings.import((await chrome.storage.local.get("sites"))["sites"] ?? []);
+  settings.import((await api.storage.local.get("sites"))["sites"] ?? []);
   return settings;
 }
 
 export function storeSet(key, value) {
   storeCache[key] = value;
-  return chrome.storage.sync.set({[key]: value});
+  return api.storage.sync.set({[key]: value});
 }
 
 export function $(id) {
@@ -139,7 +144,7 @@ export function getEnabled() {
 }
 
 export function setEnabled(enabled) {
-  return storeSet('enabled', enabled);
+  return storeSet('enabled', toBool(enabled));
 }
 
 export function getSiteSettings(site) {
@@ -153,23 +158,24 @@ export function getSiteSettings(site) {
 export function setSiteSettings(site, siteSettings) {
   settings.save(site, siteSettings);
   storeCache.sites = settings.export();
-  chrome.storage.local.set({sites: settings.exportLocal()});
+  api.storage.local.set({sites: settings.exportLocal()});
   return storeSet("sites", storeCache.sites);
 }
 
 export async function delSiteSettings(site) {
-  const {sites} = await chrome.storage.sync.get("sites");
+  const {sites} = await api.storage.sync.get("sites");
 
   return await storeSet("sites", sites.filter(siteRow => siteRow[0] !== site));
 }
 
 export async function resetSiteSchemes() {
-  await chrome.storage.sync.remove(
-    Object.keys(await chrome.storage.sync.get())
+  await api.storage.sync.remove(
+    Object.keys(await api.storage.sync.get())
   );
   for (const key of Object.keys(storeCache)) {
     delete storeCache[key];
   }
+  settings = new Settings(DEFAULT_FILTER);
 }
 
 export function siteFromUrl(url) {
@@ -215,7 +221,7 @@ export function delSiteModifier(site, modifier) {
 }
 
 export function changedFromDefault(site) {
-  return !settings.site_default.equals(settings.load(site));
+  return !settings.site_default().equals(settings.load(site));
 }
 
 export function isFileUrl(url) {

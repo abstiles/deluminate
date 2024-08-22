@@ -1,33 +1,65 @@
-require('../common.js');
+import {
+	api,
+	getEnabled,
+	setEnabled,
+	isDisallowedUrl,
+	getSiteSettings,
+	setSiteScheme,
+	setDefaultModifiers,
+	addSiteModifier,
+	delSiteModifier,
+	resetSiteSchemes,
+	changedFromDefault,
+	siteFromUrl,
+} from "../common.js";
+import {
+	Filter,
+	Modifier,
+} from "../utils.js";
 
-const jsdom = require('jsdom')
+import {expect} from "expect";
+import {JSDOM} from "jsdom";
 
-describe("A stored bool getter", function() {
-  beforeEach(function() {
-    localStorage.setItem('presentTrue', true);
-    localStorage.setItem('presentFalse', false);
-    localStorage.setItem('presentNonBool', 'string, not a bool');
-  });
+class FakeStorage {
+	constructor() {
+		this.store = {};
+	}
+	async set(key, value) {
+		this.store[key] = value;
+	}
+	async get(keys) {
+		if (typeof keys === "undefined") {
+			return this.store;
+		} else if (typeof keys === "string") {
+			keys = [keys];
+		}
+		const result = {};
+		for (const key of keys) {
+			result[key] = this.store[key];
+		}
+		return result;
+	}
+	remove(keys) {
+		if (typeof keys === "undefined") {
+			return;
+		}
+		if (typeof keys === "string") {
+			keys = [keys];
+		}
+		for (const key of keys) {
+			delete this.store[key];
+		}
+	}
+	clear() {
+		this.store = {};
+	}
+}
 
-  it("gets a boolean when present", function() {
-    expect(getStoredBool('presentTrue')).toBe(true);
-    expect(getStoredBool('presentFalse')).toBe(false);
-  });
-
-  it("gets false by default when not present", function() {
-    expect(getStoredBool('notPresent')).toBe(false);
-  });
-
-  it("gets a specified default bool when not present", function() {
-    expect(getStoredBool('notPresent', true)).toBe(true);
-  });
-
-  it("treats non-boolean values as not present", function() {
-    expect(getStoredBool('presentNonBool', true)).toBe(true);
-  });
-});
+api.storage = {local: new FakeStorage(), sync: new FakeStorage()}
 
 describe("Global settings functions", function() {
+  beforeEach("Reset settings", resetSiteSchemes);
+
   it("shows the extension is enabled by default", function() {
     expect(getEnabled()).toBe(true);
   });
@@ -42,125 +74,45 @@ describe("Global settings functions", function() {
     // Arg must be a string because mock cannot override key access notation.
     setEnabled('false')
     expect(getEnabled()).toBe(false);
-    // Arg must be a string because mock cannot override key access notation.
     setEnabled('true')
     expect(getEnabled()).toBe(true);
   });
 
-  it("disables low contrast by default", function() {
-    expect(getLowContrast()).toBe(false);
+  it("disables all mods by default", function() {
+    expect([...getSiteSettings().mods]).toHaveLength(0);
   });
 
-  it("can enable low contrast", function() {
-    // Arg must be a string because mock cannot override key access notation.
-    setLowContrast('true');
-    expect(getLowContrast()).toBe(true);
-  });
-
-  it("can disable low contrast", function() {
-    // Arg must be a string because mock cannot override key access notation.
-    setLowContrast('false');
-    expect(getLowContrast()).toBe(false);
-  });
-
-  it("disables force text inversion by default", function() {
-    expect(getForceText()).toBe(false);
+  it("can set default modifiers", function() {
+    setDefaultModifiers(['low_contrast']);
+    expect([...getSiteSettings().mods]).toContain("low_contrast");
   });
 
   it("can enable force text inversion", function() {
-    // Arg must be a string because mock cannot override key access notation.
-    setForceText('true');
-    expect(getForceText()).toBe(true);
-  });
-
-  it("can disable force text inversion", function() {
-    // Arg must be a string because mock cannot override key access notation.
-    setForceText('false');
-    expect(getForceText()).toBe(false);
-  });
-
-  it("disables killing backgrounds by default", function() {
-    expect(getKillBackground()).toBe(false);
+    setDefaultModifiers(['forceinput']);
+    expect([...getSiteSettings().mods]).toContain("forceinput");
   });
 
   it("can enable killing backgrounds", function() {
-    // Arg must be a string because mock cannot override key access notation.
-    setKillBackground('true');
-    expect(getKillBackground()).toBe(true);
-  });
-
-  it("can disable killing backgrounds", function() {
-    // Arg must be a string because mock cannot override key access notation.
-    setKillBackground('false');
-    expect(getKillBackground()).toBe(false);
+    setDefaultModifiers(['killbg']);
+    expect([...getSiteSettings().mods]).toContain("killbg");
   });
 
   it("uses smart inversion by default", function() {
-    expect(getDefaultScheme()).toBe('delumine-smart');
+    expect(getSiteSettings().filter).toBe('smart');
   });
 
   it("can modify the default scheme", function() {
-    setDefaultScheme('new-scheme');
-    expect(getDefaultScheme()).toBe('new-scheme');
+    setSiteScheme(null, 'all');
+    expect(getSiteSettings().filter).toBe('all');
   });
 
-  it("can reset the default scheme to its default", function() {
-    setDefaultScheme();
-    expect(getDefaultScheme()).toBe('delumine-smart');
-  });
-
-  it("can assemble the default modifiers", function() {
-    // Arg must be a string because mock cannot override key access notation.
-    setLowContrast('true');
-    setKillBackground('true');
-    setForceText('true');
-    var modifierString = getDefaultModifiers();
-    expect(modifierString).toContain('low-contrast');
-    expect(modifierString).toContain('force_text');
-    expect(modifierString).toContain('kill_background');
-  });
-
-  it("can disassemble and save a set of default modifiers", function() {
-    var newModifiers = 'low-contrast force_text kill_background';
-    setDefaultModifiers(newModifiers);
-    var modifierString = getDefaultModifiers();
-    expect(modifierString).toContain('low-contrast');
-    expect(modifierString).toContain('force_text');
-    expect(modifierString).toContain('kill_background');
-
-    setDefaultModifiers('not-a-real-modifier');
-    modifierString = getDefaultModifiers();
-    expect(modifierString).not.toContain('low-contrast');
-    expect(modifierString).not.toContain('force_text');
-    expect(modifierString).not.toContain('kill_background');
-  });
-
-  it("has no global settings by default", function() {
-    expect(getGlobalSettings()).toEqual({});
-  });
-
-  it("can set arbitrary global settings", function() {
-    setGlobalSetting('someSetting', 42);
-    expect(getGlobalSettings().someSetting).toEqual(42);
-    setGlobalSetting('someSetting', true);
-    expect(getGlobalSettings().someSetting).toBe(true);
-  });
-
-  it("initially marks the settings page as not viewed", function() {
-    expect(getSettingsViewed()).toBe(false);
-  });
-
-  it("can mark the settings page as viewed", function() {
-    setSettingsViewed();
-    // Must convert to string because mock cannot override key access notation.
-    localStorage.settings_viewed = localStorage.settings_viewed.toString();
-    expect(getSettingsViewed()).toBe(true);
-  });
 });
 
 describe("Site manipulation functions", function() {
+  beforeEach("Reset settings", resetSiteSchemes);
+
   beforeEach(() => {
-    global.document = jsdom.jsdom();
+    global.document = new JSDOM();
   });
 
   it("can extract a hostname from a full URL", function() {
@@ -169,49 +121,54 @@ describe("Site manipulation functions", function() {
   });
 
   it("will get the default scheme for a site by default", function() {
-    var expectedScheme = getDefaultScheme();
-    expect(getSiteScheme("subdomain.example.com")).toEqual(expectedScheme);
+    const expectedSettings = getSiteSettings();
+    expect(getSiteSettings("subdomain.example.com")).toEqual(expectedSettings);
   });
 
   it("can override the default scheme for a site", function() {
-    var expectedScheme = "test-scheme";
+    var expectedScheme = "dim3";
     setSiteScheme("subdomain.example.com", expectedScheme);
-    expect(getSiteScheme("subdomain.example.com")).toEqual(expectedScheme);
+    expect(getSiteSettings("subdomain.example.com").filter).toEqual(expectedScheme);
   });
 
-  it("can reset all site scheme overrides", function() {
-    var expectedScheme = getDefaultScheme();
-    setSiteScheme("subdomain.example.com", "test-scheme");
-    resetSiteSchemes();
-    expect(getSiteScheme("subdomain.example.com")).toEqual(expectedScheme);
+  it("can reset all site scheme overrides", async function() {
+    var expectedScheme = getSiteSettings().filter;
+    setSiteScheme("subdomain.example.com", "dim3");
+    await resetSiteSchemes();
+    expect(getSiteSettings("subdomain.example.com").filter).toEqual(expectedScheme);
   });
 
   it("gets no site modifiers for a site by default", function() {
-    var expectedModifiers = getDefaultModifiers();
-    expect(getSiteModifiers("example.com")).toEqual(expectedModifiers);
+    var expectedModifiers = getSiteSettings().mods;
+    expect(getSiteSettings("example.com").mods).toEqual(expectedModifiers);
   });
 
   it("can add site modifiers", function() {
-    var expectedModifiers = 'mod1 mod2'
-    addSiteModifier("example.com", 'mod1');
-    addSiteModifier("example.com", 'mod2');
-    expect(getSiteModifiers("example.com")).toEqual(expectedModifiers);
+    addSiteModifier("example.com", 'low_contrast');
+    addSiteModifier("example.com", 'killbg');
+    const mods = [...getSiteSettings("example.com").mods];
+    expect(mods).toContain("low_contrast");
+    expect(mods).toContain("killbg");
   });
 
   it("can remove site modifiers", function() {
-    var expectedModifiers = 'mod1 mod3'
-    addSiteModifier("example.com", 'mod1');
-    addSiteModifier("example.com", 'mod2');
-    addSiteModifier("example.com", 'mod3');
-    delSiteModifier("example.com", 'mod2');
-    expect(getSiteModifiers("example.com")).toEqual(expectedModifiers);
+    var expectedModifiers = 'low_contrast dynamic'
+    addSiteModifier("example.com", 'low_contrast');
+    addSiteModifier("example.com", 'killbg');
+    addSiteModifier("example.com", 'dynamic');
+    delSiteModifier("example.com", 'killbg');
+    const mods = [...getSiteSettings("example.com").mods];
+    expect(mods).toContain("low_contrast");
+    expect(mods).toContain("dynamic");
+    expect(mods).not.toContain("killbg");
   });
 
-  it("can clear all site modifiers", function() {
-    addSiteModifier("example.com", 'mod1');
-    addSiteModifier("example.com", 'mod2');
-    resetSiteModifiers();
-    expect(getSiteModifiers("example.com")).toEqual('');
+  it("can clear all site modifiers", async function() {
+    addSiteModifier("example.com", 'low_contrast');
+    addSiteModifier("example.com", 'killbg');
+    await resetSiteSchemes();
+    const mods = [...getSiteSettings("example.com").mods];
+    expect(mods).toHaveLength(0);
   });
 
   it("reports site settings unchanged by default", function() {
@@ -221,28 +178,21 @@ describe("Site manipulation functions", function() {
   });
 
   it("reports site settings changed when a scheme is changed", function() {
-    setSiteScheme("example.com", "test-scheme");
-    // changedFromDefault expects this variable to be set by popup.js.
-    global.site = "example.com";
-    expect(changedFromDefault()).toBe(true);
+    setSiteScheme("example.com", "all");
+    expect(changedFromDefault("example.com")).toBe(true);
   });
 
   it("reports site settings changed when a modifier is changed", function() {
-    addSiteModifier("example.com", 'mod1');
-    // changedFromDefault expects this variable to be set by popup.js.
-    global.site = "example.com";
-    expect(changedFromDefault()).toBe(true);
+    addSiteModifier("example.com", 'low_contrast');
+    expect(changedFromDefault("example.com")).toBe(true);
   });
 
-  it("reports site settings unchanged after resetting them", function() {
-    setSiteScheme("example.com", "test-scheme");
-    addSiteModifier("example.com", 'mod1');
-    // changedFromDefault expects this variable to be set by popup.js.
-    global.site = "example.com";
-    expect(changedFromDefault()).toBe(true);
-    resetSiteSchemes();
-    resetSiteModifiers();
-    expect(changedFromDefault()).toBe(false);
+  it("reports site settings unchanged after resetting them", async function() {
+    await setSiteScheme("example.com", "dim3");
+    await addSiteModifier("example.com", 'low_contrast');
+    expect(changedFromDefault("example.com")).toBe(true);
+    await resetSiteSchemes();
+    expect(changedFromDefault("example.com")).toBe(false);
   });
 });
 

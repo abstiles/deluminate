@@ -228,10 +228,11 @@ function detectAnimatedGif(tag) {
     });
 }
 
+/*
 function getPixels2d(canvas) {
   const context = canvas.getContext('2d');
   if (!context) return null;
-  return ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+  return context.getImageData(0, 0, canvas.width, canvas.height).data;
 }
 
 async function getPixelsWebGL(canvas) {
@@ -264,6 +265,7 @@ async function classifyCanvasColor(canvas) {
     : null
     ;
 }
+/**/
 
 let deepImageProcessingComplete = false;
 function deepImageProcessing() {

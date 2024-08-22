@@ -5,7 +5,7 @@
   "description": "Invert the luminance of a website to make it easier on the eyes.",
   "scripts": {
     "lint": "eslint *.js",
-    "test": "jasmine",
+    "test": "mocha spec/common.spec.js",
     "deploy": "./deploy --release",
     "deploy-dev": "./deploy"
   },
@@ -31,11 +31,10 @@
     "@eslint/js": "^9.8.0",
     "chrome-webstore-upload-cli": "^1.1.1",
     "eslint": "^9.8.0",
+    "expect": "^29.7.0",
     "globals": "^15.9.0",
-    "jasmine": "^2.5.3",
-    "jasmine-reporters": "^2.2.0",
-    "jsdom": "^9.9.1",
-    "jshint": "^2.9.4",
+    "jsdom": "^24.1.1",
+    "mocha": "^10.7.3",
     "mock-local-storage": "^1.0.2"
   },
   "jshintConfig": {
