@@ -11,32 +11,8 @@ jobs:
       - store_test_results:
           path: spec/junitresults
           destination: junitresults
-  deploy:
-    docker:
-      - image: cimg/node:22.7
-    steps:
-      - checkout
-      - run: make deploy
-  deploy-dev:
-    docker:
-      - image: cimg/node:22.7
-    steps:
-      - checkout
-      - run: make deploy-dev
 workflows:
   version: 2
   test-and-deploy:
     jobs:
       - test
-      - deploy:
-          requires:
-            - test
-          filters:
-            branches:
-              only: master
-      - deploy-dev:
-          requires:
-            - test
-          filters:
-            branches:
-              only: dev
