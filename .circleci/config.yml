@@ -2,7 +2,7 @@ version: 2
 jobs:
   test:
     docker:
-      - image: cimg/node:13.7
+      - image: cimg/node:22.7
     steps:
       - checkout
       - run: npm install
@@ -13,13 +13,13 @@ jobs:
           destination: junitresults
   deploy:
     docker:
-      - image: cimg/node:13.7
+      - image: cimg/node:22.7
     steps:
       - checkout
       - run: make deploy
   deploy-dev:
     docker:
-      - image: cimg/node:13.7
+      - image: cimg/node:22.7
     steps:
       - checkout
       - run: make deploy-dev
