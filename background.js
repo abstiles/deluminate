@@ -11,6 +11,8 @@ import {
   isDisallowedUrl,
 } from './common.js';
 
+let initializationCompletePromise;
+
 async function injectContentScripts() {
   const injectTasks = [];
   const windows = await chrome.windows.getAll({'populate': true});
@@ -125,68 +127,118 @@ function toggleSite(url) {
 }
 
 function messageDispatcher(request, sender, sendResponse) {
-  if (request.target === 'offscreen') return;
-  if (request['update_tabs']) {
-    console.log("Received update tabs message.");
-    updateTabs();
+  // Offscreen document messages are handled differently or are fire-and-forget for this dispatcher.
+  if (request.target === 'offscreen') {
+    // If a response is needed for offscreen messages, it should be handled before this point
+    // or the message should indicate if it expects a response.
+    return false; // Assuming no async response needed from this dispatcher for offscreen.
   }
-  if (request['toggle_global']) {
-    toggleEnabled();
-  }
-  if (request['toggle_site']) {
-    toggleSite(sender.tab ? sender.tab.url : 'www.example.com');
-  }
-  if (request['log']) {
-    console.log("Log:", tabSummary(sender.tab), request.log);
-  }
+
   if (request['detect_gif']) {
     isAnimatedGif(request.src).then(sendResponse)
     return true;
   }
-  if (request['init']) {
-    const url = sender.tab ? sender.tab.url : request['url'];
-    const siteSettings = getSiteSettings(url);
-    const msg = {
-      'enabled': getEnabled(),
-      'scheme': Filter[siteSettings.filter],
-      'modifiers': [...siteSettings.mods].map(mod => Modifier[mod]),
-      'settings': getGlobalSettings()
-    };
-    sendResponse(msg);
-  } else {
-    sendResponse();
-  }
+
+  // For other messages, ensure initialization is complete.
+  (async () => {
+    try {
+      // Wait for initial settings load for most operations.
+      if (initializationCompletePromise && 
+          (request['update_tabs'] || request['toggle_global'] || request['toggle_site'] || request['init'])) {
+        await initializationCompletePromise;
+      }
+
+      if (request['update_tabs']) {
+        console.log("Received update tabs message.");
+        updateTabs();
+        sendResponse({status: "tabs_updated"});
+      } else if (request['toggle_global']) {
+        toggleEnabled();
+        sendResponse({status: "global_toggled"});
+      } else if (request['toggle_site']) {
+        toggleSite(sender.tab ? sender.tab.url : 'www.example.com');
+        sendResponse({status: "site_toggled"});
+      } else if (request['log']) {
+        console.log("Log:", tabSummary(sender.tab), request.log);
+        sendResponse({status: "logged"});
+      } else if (request['init']) {
+        const url = sender.tab ? sender.tab.url : request['url'];
+        const siteSettings = getSiteSettings(url);
+        const msg = {
+          'enabled': getEnabled(),
+          'scheme': Filter[siteSettings.filter],
+          'modifiers': [...siteSettings.mods].map(mod => Modifier[mod]),
+          'settings': getGlobalSettings()
+        };
+        sendResponse(msg);
+      } else {
+        // Default response for unhandled messages or messages that don't need a specific reply
+        sendResponse({});
+      }
+    } catch (error) {
+      console.error("Error processing message:", request, error);
+      sendResponse({error: error.message || "Failed to process message after initialization check"});
+    }
+  })();
+
+  return true; // Crucial: indicates that sendResponse will be (or might be) called asynchronously.
 }
 
 function init() {
   console.log("Initializing service worker.");
+
+  initializationCompletePromise = (async () => {
+    try {
+      console.log("Fetching settings.");
+      await syncStore();
+      console.log("Injecting content scripts.");
+      await injectContentScripts();
+      console.log("Deluminate is ready.");
+    } catch (error) {
+      console.error("Error during initial setup:", error);
+      // This error will propagate to awaiters of initializationCompletePromise
+      throw error; 
+    }
+  })();
+
   chrome.runtime.onMessage.addListener(messageDispatcher);
 
   chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     if (changeInfo.url || changeInfo.status === "loading") {
+      // Ping the tab to see if content script is alive
       chrome.tabs.sendMessage(tabId, {pingTab: true}, {}, () => {
-        // If it bombs out, unable to receive a message, then the JS needs to
-        // be reinjected.
         if (chrome.runtime.lastError) {
+          // No listener, or other error means content script might not be there.
           console.log(`Tab updated, reinjecting ${tab.url}: ${JSON.stringify(changeInfo)}`);
-          injectTab(tab);
+          // Ensure initialization is complete before injecting,
+          // as injection might lead to immediate 'init' message from content script.
+          initializationCompletePromise.then(() => injectTab(tab)).catch(err => {
+            console.error("Failed to inject tab after initialization on tab update:", err);
+          });
         }
       });
     }
   });
-  /* Ensure tab CSS is re-inserted into replaced tabs. */
+
   chrome.tabs.onReplaced.addListener(function (addedTabId) {
     chrome.tabs.get(addedTabId, function(tab) {
       console.log("Tab replaced, reinjecting:", tab.url);
-      injectTab(tab);
+      initializationCompletePromise.then(() => injectTab(tab)).catch(err => {
+            console.error("Failed to inject tab after initialization on tab replace:", err);
+      });
     });
   });
 
-
   chrome.storage.onChanged.addListener((changes, area) => {
     if (area === 'sync' || area === 'local') {
-      refreshStore().then(() => {
-        updateTabs();
+      // Ensure initialization is complete before refreshing store and updating tabs,
+      // though refreshStore itself should be safe.
+      initializationCompletePromise.then(() => {
+        refreshStore().then(() => {
+          updateTabs();
+        });
+      }).catch(err => {
+        console.error("Failed to process storage change due to initialization error:", err);
       });
     }
   });
@@ -194,47 +246,51 @@ function init() {
   if (navigator.appVersion.indexOf("Mac") != -1) {
     chrome.action.setTitle({'title': 'Deluminate (Shift+F11)'});
   }
-  chrome.commands.onCommand.addListener(function(command) {
-    switch(command) {
-      case 'command_toggle_global':
-        toggleEnabled();
-        break;
-      case 'command_toggle_site':
-        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-          console.log('site toggled: ' + tabs[0].url);
-          toggleSite(tabs[0].url);
-        });
-        break;
-    }
-  });
 
-  let asyncInitializing = true;
-  (async () => {
-    try {
-      console.log("Fetching settings.");
-      await syncStore();
-      console.log("Injecting content scripts.");
-      await injectContentScripts();
-      console.log("Deluminate is ready.");
-    } finally {
-      asyncInitializing = false;
-    }
-  })();
+  chrome.commands.onCommand.addListener(function(command) {
+    // Commands should also ideally wait for initialization if they rely on settings.
+    initializationCompletePromise.then(() => {
+      switch(command) {
+        case 'command_toggle_global':
+          toggleEnabled();
+          break;
+        case 'command_toggle_site':
+          chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+            if (tabs.length > 0) {
+              console.log('site toggled: ' + tabs[0].url);
+              toggleSite(tabs[0].url);
+            }
+          });
+          break;
+      }
+    }).catch(err => {
+      console.error("Failed to execute command due to initialization error:", err);
+    });
+  });
 
   chrome.runtime.onInstalled.addListener(async ({reason}) => {
     console.log(`Install event - reason: ${reason}`);
-    // It is unclear to me whether there are cases in which the browser runs the
-    // top-level code (i.e., init) or fires the onInstalled event without doing
-    // the other. This listener might be wholly redundant if we're doing all the
-    // same things in init. Either way, don't run this code if init is running.
-    if (asyncInitializing) {
-      console.log("Already initializing, skipping onInstall steps.");
-      return;
+    try {
+      // Wait for the main initialization to complete.
+      // init() runs on every service worker start, including after install/update.
+      await initializationCompletePromise;
+      console.log("Main initialization complete. onInstalled can proceed with install/update specific tasks.");
+      
+      // Example: Set/update a version in local storage
+      const currentVersion = chrome.runtime.getManifest().version;
+      if (reason === 'install') {
+        console.log("Deluminate installed. Version:", currentVersion);
+        await chrome.storage.local.set({ installedVersion: currentVersion });
+      } else if (reason === 'update') {
+        const { installedVersion: previousVersion } = await chrome.storage.local.get('installedVersion');
+        console.log(`Deluminate updated from ${previousVersion || 'unknown'} to ${currentVersion}`);
+        await chrome.storage.local.set({ installedVersion: currentVersion });
+        // Perform any other update-specific tasks here.
+      }
+
+    } catch (error) {
+      console.error("Error during onInstalled (after main initialization attempt):", error);
     }
-    await syncStore();
-    console.log("Updated settings cache.");
-    await injectContentScripts();
-    console.log("Reloaded all tabs.");
   });
 }
 
