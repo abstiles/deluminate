@@ -47,7 +47,12 @@ async function migrateFromLocalStorage() {
       storeCache.sites = settings.export();
       // Publish the merged site settings.
       await storeSet("sites", storeCache.sites);
-      chrome.storage.local.set({migrationComplete: 2});
+      try {
+            chrome.storage.local.set({migrationComplete: 2});
+      }
+      catch (error) {
+            console.warn(error);
+      }
     }
   })();
   await migrationTask;
@@ -153,7 +158,12 @@ export function getSiteSettings(site) {
 export function setSiteSettings(site, siteSettings) {
   settings.save(site, siteSettings);
   storeCache.sites = settings.export();
-  chrome.storage.local.set({sites: settings.exportLocal()});
+  try {
+    chrome.storage.local.set({sites: settings.exportLocal()});
+  }
+  catch(error) {
+    console.warn(eeor)
+  }
   return storeSet("sites", storeCache.sites);
 }
 
